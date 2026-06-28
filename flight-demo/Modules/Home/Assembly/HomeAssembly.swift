@@ -15,13 +15,16 @@ final class HomeAssembly: AssemblyProtocol {
         let reducer = HomeReducer()
         let store = HomeStore(reducer: reducer)
         let service = HomeService()
+        let locationManager = LocationManager()
         let presenter = HomePresenter(
             store: store,
-            service: service
+            service: service,
+            locationManager: locationManager
         )
         let viewController = HomeViewController(
             presenter: presenter
         )
+        presenter.view = viewController
         return viewController
     }
 }

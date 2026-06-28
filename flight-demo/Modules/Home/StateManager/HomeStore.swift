@@ -9,6 +9,7 @@ import Foundation
 
 protocol HomeStoreProtocol {
     var didDispatchEffect: ((HomeEffect) -> Void)? { get set }
+    var didUpdateState: ((HomeState) -> Void)? { get set }
 
     func dispatch(event: HomeEvent)
 }
@@ -22,9 +23,16 @@ final class HomeStore {
 
     // MARK: - Properties
 
-    private var state: HomeState = .initial
+    private var state: HomeState = .initial {
+        didSet {
+            if oldValue != state {
+                didUpdateState?(state)
+            }
+        }
+    }
 
     var didDispatchEffect: ((HomeEffect) -> Void)?
+    var didUpdateState: ((HomeState) -> Void)?
 
     // MARK: - Initialization
 

@@ -19,6 +19,8 @@ final class HomeReducer: HomeReducerProtocol {
         switch event {
         case let .ui(uiEvent):
             return reduceUiEvent(uiEvent, state: &state)
+        case let .data(dataEvent):
+            return reduceDataEvent(dataEvent, state: &state)
         }
     }
 
@@ -28,6 +30,21 @@ final class HomeReducer: HomeReducerProtocol {
         switch event {
         case .onViewDidLoad:
             return [.data(.loadData)]
+        case .onMapFullyRendered:
+            if state.mapState.currentLocation == nil {
+                return [.ui(.moveMapToUserLocation)]
+            } else {
+                return []
+            }
         }
+    }
+
+    private func reduceDataEvent(_ event: HomeEvent.DataEvent, state: inout HomeState) -> [HomeEffect] {
+        switch event {
+        case let .onGetUserLocation(userLocation):
+            state.mapState.currentLocation = userLocation
+        }
+
+        return []
     }
 }
