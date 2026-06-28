@@ -11,7 +11,7 @@ final class HomeFlowCoordinator: FlowCoordinatorProtocol {
 
     // MARK: - Dependencies
 
-    private let assembly: AssemblyProtocol
+    private let assembly: HomeAssemblyProtocol
 
     // MARK: - Properties
 
@@ -20,7 +20,7 @@ final class HomeFlowCoordinator: FlowCoordinatorProtocol {
     // MARK: - Initialization
 
     init(
-        assembly: AssemblyProtocol,
+        assembly: HomeAssemblyProtocol,
         navigationController: UINavigationController
     ) {
         self.assembly = assembly

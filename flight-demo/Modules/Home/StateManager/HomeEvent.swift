@@ -15,10 +15,10 @@ enum HomeEvent {
 extension HomeEvent {
     enum UIEvent {
         case onViewDidLoad
-        case onMapFullyRendered
+        case onMapDidLoad
     }
 
     enum DataEvent {
-        case onGetUserLocation(CLLocationCoordinate2D)
+        case onGetLocation(Coordinate)
     }
 }

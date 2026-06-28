@@ -25,9 +25,9 @@ final class HomeStore {
 
     private var state: HomeState = .initial {
         didSet {
-            if oldValue != state {
-                didUpdateState?(state)
-            }
+            guard oldValue != state else { return }
+
+            didUpdateState?(state)
         }
     }
 

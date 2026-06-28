@@ -14,7 +14,7 @@ enum HomeEffect {
 
 extension HomeEffect {
     enum UIEffect {
-        case moveMapToUserLocation
+        case moveMapToDefaultRegion
     }
 
     enum DataEffect {

@@ -20,11 +20,8 @@ extension HomeState {
 }
 
 extension HomeState {
-    struct MapState {
-        var isUserLocationSetted: Bool {
-            currentLocation != nil
-        }
-        var currentLocation: CLLocationCoordinate2D?
+    struct MapState: Equatable {
+        var currentLocation: Coordinate?
     }
 }
 
@@ -33,11 +30,5 @@ extension HomeState.MapState {
         HomeState.MapState(
             currentLocation: nil
         )
-    }
-}
-
-extension HomeState.MapState: Equatable {
-    static func == (lhs: HomeState.MapState, rhs: HomeState.MapState) -> Bool {
-        lhs.isUserLocationSetted == rhs.isUserLocationSetted
     }
 }

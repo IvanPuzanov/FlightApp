@@ -7,7 +7,11 @@
 
 import UIKit
 
-final class HomeAssembly: AssemblyProtocol {
+protocol HomeAssemblyProtocol: AnyObject {
+    func assemble() -> UIViewController
+}
+
+final class HomeAssembly: HomeAssemblyProtocol {
 
     // MARK: - Public
 
@@ -21,10 +25,14 @@ final class HomeAssembly: AssemblyProtocol {
             service: service,
             locationManager: locationManager
         )
-        let viewController = HomeViewController(
-            presenter: presenter
+        let bottomSheetViewController = HomeBottomSheetViewController(presenter: presenter)
+        let mapViewController = HomeMapViewController(
+            presenter: presenter,
+            bottomSheetViewController: bottomSheetViewController
         )
-        presenter.view = viewController
-        return viewController
+        presenter.mapView = mapViewController
+        presenter.bottomSheetView = bottomSheetViewController
+
+        return mapViewController
     }
 }

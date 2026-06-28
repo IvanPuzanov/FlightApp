@@ -7,12 +7,17 @@
 
 import MapKit
 
+private enum Constants {
+    static let defaultCoordinate = Coordinate(latitude: 48.8566, longitude: 2.3522)
+}
+
 enum LocationManagerError: Error {
     case permissionDenied
 }
 
 protocol LocationManagerProtocol: AnyObject {
-    func getUserCurrentLocation() throws -> CLLocationCoordinate2D
+    func getDefaultLocation() -> Coordinate
+    func getUserCurrentLocation() throws -> Coordinate
 }
 
 final class LocationManager: LocationManagerProtocol {
@@ -23,7 +28,11 @@ final class LocationManager: LocationManagerProtocol {
 
     // MARK: - Public
 
-    func getUserCurrentLocation() throws -> CLLocationCoordinate2D {
+    func getDefaultLocation() -> Coordinate {
+        return Constants.defaultCoordinate
+    }
+
+    func getUserCurrentLocation() throws -> Coordinate {
         let status = manager.authorizationStatus
 
         switch status {
@@ -37,6 +46,6 @@ final class LocationManager: LocationManagerProtocol {
             break
         }
 
-        return CLLocationCoordinate2D(latitude: 55.7520, longitude: 37.6175)
+        return Coordinate(latitude: 55.7520, longitude: 37.6175)
     }
 }

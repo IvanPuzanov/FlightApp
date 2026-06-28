@@ -1,5 +1,5 @@
 //
-//  HomeViewController.swift
+//  HomeMapViewController.swift
 //  flight-demo
 //
 //  Created by Ivan Puzanov on 28.06.2026.
@@ -8,11 +8,11 @@
 import MapKit
 import UIKit
 
-protocol HomeViewControllerProtocol: AnyObject {
+protocol HomeMapViewControllerProtocol: AnyObject {
     func apply(state: HomeState.MapState)
 }
 
-final class HomeViewController: UIViewController {
+final class HomeMapViewController: UIViewController {
 
     // MARK: - Dependecies
 
@@ -21,11 +21,16 @@ final class HomeViewController: UIViewController {
     // MARK: - UI
 
     private let mapView = MKMapView()
+    private let bottomSheetViewController: HomeBottomSheetViewController
 
     // MARK: - Initialization
 
-    init(presenter: HomePresenterProtocol) {
+    init(
+        presenter: HomePresenterProtocol,
+        bottomSheetViewController: HomeBottomSheetViewController
+    ) {
         self.presenter = presenter
+        self.bottomSheetViewController = bottomSheetViewController
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -50,6 +55,7 @@ final class HomeViewController: UIViewController {
 
         setupMapView()
         setupMapStyle()
+        setupBottomSheet()
     }
 
     private func setupMapView() {
@@ -75,30 +81,43 @@ final class HomeViewController: UIViewController {
         mapView.preferredConfiguration = configuration
         mapView.overrideUserInterfaceStyle = .dark
     }
+
+    private func setupBottomSheet() {
+        addChild(bottomSheetViewController)
+        view.addSubview(bottomSheetViewController.view)
+        bottomSheetViewController.didMove(toParent: self)
+        bottomSheetViewController.view.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            bottomSheetViewController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            bottomSheetViewController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            bottomSheetViewController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+    }
 }
 
 // MARK: - MKMapViewDelegate
 
-extension HomeViewController: MKMapViewDelegate {
+extension HomeMapViewController: MKMapViewDelegate {
 
-    func mapViewDidFinishRenderingMap(_ mapView: MKMapView, fullyRendered: Bool) {
-        presenter.dispatch(.onMapFullyRendered)
+    func mapViewDidFinishLoadingMap(_ mapView: MKMapView) {
+        presenter.dispatch(.onMapDidLoad)
     }
 }
 
 // MARK: - HomeViewControllerProtocol
 
-extension HomeViewController: HomeViewControllerProtocol {
+extension HomeMapViewController: HomeMapViewControllerProtocol {
 
     func apply(state: HomeState.MapState) {
         moveToUserRegionIfNeeded(location: state.currentLocation)
     }
 
-    private func moveToUserRegionIfNeeded(location: CLLocationCoordinate2D?) {
+    private func moveToUserRegionIfNeeded(location: Coordinate?) {
         guard let location else { return }
 
         let region = MKCoordinateRegion(
-            center: location,
+            center: location.toCLLocationCoordinate2D,
             span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
         )
         mapView.setRegion(region, animated: true)

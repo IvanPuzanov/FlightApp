@@ -15,7 +15,8 @@ final class HomePresenter {
 
     // MARK: - Dependencies
 
-    weak var view: HomeViewControllerProtocol?
+    weak var mapView: HomeMapViewControllerProtocol?
+    weak var bottomSheetView: HomeBottomSheetViewControllerProtocol?
 
     private var store: HomeStoreProtocol
     private let service: HomeServiceProtocol
@@ -43,14 +44,14 @@ final class HomePresenter {
 
             switch effect {
             case let .data(dataEffect):
-                self.handleDataEffect(dataEffect)
-            case .ui(let uiEffect):
-                self.handleUiEffect(uiEffect)
+                handleDataEffect(dataEffect)
+            case let .ui(uiEffect):
+                handleUiEffect(uiEffect)
             }
         }
 
         store.didUpdateState = { [weak self] state in
-            self?.view?.apply(state: state.mapState)
+            self?.mapView?.apply(state: state.mapState)
         }
     }
 
@@ -63,13 +64,9 @@ final class HomePresenter {
 
     private func handleUiEffect(_ effect: HomeEffect.UIEffect) {
         switch effect {
-        case .moveMapToUserLocation:
-            do {
-                let location = try locationManager.getUserCurrentLocation()
-                store.dispatch(event: .data(.onGetUserLocation(location)))
-            } catch {
-                break
-            }
+        case .moveMapToDefaultRegion:
+            let location = locationManager.getDefaultLocation()
+            store.dispatch(event: .data(.onGetLocation(location)))
         }
     }
 }
