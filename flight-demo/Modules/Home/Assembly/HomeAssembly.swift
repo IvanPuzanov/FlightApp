@@ -12,7 +12,13 @@ final class HomeAssembly: AssemblyProtocol {
     // MARK: - Public
 
     func assemble() -> UIViewController {
-        let presenter = HomePresenter()
+        let reducer = HomeReducer()
+        let store = HomeStore(reducer: reducer)
+        let service = HomeService()
+        let presenter = HomePresenter(
+            store: store,
+            service: service
+        )
         let viewController = HomeViewController(
             presenter: presenter
         )

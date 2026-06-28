@@ -8,5 +8,11 @@
 import Foundation
 
 enum HomeEvent {
-    case onViewDidLoad
+    case ui(UIEvent)
+}
+
+extension HomeEvent {
+    enum UIEvent {
+        case onViewDidLoad
+    }
 }
