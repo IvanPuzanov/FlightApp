@@ -17,10 +17,13 @@ final class HomeMapViewController: UIViewController {
     // MARK: - Dependecies
 
     private let presenter: HomePresenterProtocol
+    var isSearch = true
 
     // MARK: - UI
 
     private let mapView = MKMapView()
+    private let gradientView = GradientView()
+    private let headerView = HomeHeaderView()
     private let bottomSheetViewController: HomeBottomSheetViewController
 
     // MARK: - Initialization
@@ -50,12 +53,15 @@ final class HomeMapViewController: UIViewController {
     // MARK: - Private
 
     private func setupUI() {
-        view.addSubviews(mapView)
+        view.addSubviews(mapView, gradientView, bottomSheetViewController.view, headerView)
         view.backgroundColor = .systemBackground
+        navigationController?.setNavigationBarHidden(true, animated: false)
 
         setupMapView()
         setupMapStyle()
+        setupGradientView()
         setupBottomSheet()
+        setupHeaderView()
     }
 
     private func setupMapView() {
@@ -79,12 +85,21 @@ final class HomeMapViewController: UIViewController {
         configuration.showsTraffic = false
 
         mapView.preferredConfiguration = configuration
-        mapView.overrideUserInterfaceStyle = .dark
+    }
+
+    private func setupGradientView() {
+        gradientView.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            gradientView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            gradientView.topAnchor.constraint(equalTo: view.topAnchor),
+            gradientView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            gradientView.heightAnchor.constraint(equalToConstant: 180)
+        ])
     }
 
     private func setupBottomSheet() {
         addChild(bottomSheetViewController)
-        view.addSubview(bottomSheetViewController.view)
         bottomSheetViewController.didMove(toParent: self)
         bottomSheetViewController.view.translatesAutoresizingMaskIntoConstraints = false
         
@@ -92,6 +107,31 @@ final class HomeMapViewController: UIViewController {
             bottomSheetViewController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             bottomSheetViewController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             bottomSheetViewController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+    }
+
+    private func setupHeaderView() {
+        headerView
+            .withBackgroundColor(.systemBackground)
+            .withCornerRadius(30)
+            .withShadow()
+        headerView.translatesAutoresizingMaskIntoConstraints = false
+        headerView.configure(
+            with: HomeHeaderViewConfiguration(
+                mode: .search(
+                    HomeHeaderViewConfiguration.SearchModel(
+                        leadingIcon: UIImage(systemName: "magnifyingglass") ?? UIImage(),
+                        placeholderText: "Search flight or aircraft",
+                        trailingIcon: UIImage(systemName: "slider.horizontal.3") ?? UIImage()
+                    )
+                )
+            )
+        )
+
+        NSLayoutConstraint.activate([
+            headerView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            headerView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            headerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 12)
         ])
     }
 }
@@ -118,7 +158,7 @@ extension HomeMapViewController: HomeMapViewControllerProtocol {
 
         let region = MKCoordinateRegion(
             center: location.toCLLocationCoordinate2D,
-            span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+            span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)
         )
         mapView.setRegion(region, animated: true)
     }

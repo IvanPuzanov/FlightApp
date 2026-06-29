@@ -29,6 +29,10 @@ final class HomeReducer: HomeReducerProtocol {
     private func reduceUiEvent(_ event: HomeEvent.UIEvent, state: inout HomeState) -> [HomeEffect] {
         switch event {
         case .onViewDidLoad:
+            state.bottomSheetState.detents = [
+                .compact(120),
+                .medium(380)
+            ]
             return [.data(.loadData)]
         case .onMapDidLoad:
             return state.mapState.currentLocation == nil

@@ -52,6 +52,7 @@ final class HomePresenter {
 
         store.didUpdateState = { [weak self] state in
             self?.mapView?.apply(state: state.mapState)
+            self?.bottomSheetView?.apply(state: state.bottomSheetState)
         }
     }
 
