@@ -25,8 +25,11 @@ final class HomeAssembly: HomeAssemblyProtocol {
             service: service,
             locationManager: locationManager
         )
-        let configurationFactory = HomeMapConfigurationFactory()
-        let bottomSheetViewController = HomeBottomSheetViewController(presenter: presenter)
+        let configurationFactory = HomeConfigurationFactory()
+        let bottomSheetViewController = HomeBottomSheetViewController(
+            presenter: presenter,
+            configurationFactory: configurationFactory
+        )
         let mapViewController = HomeMapViewController(
             presenter: presenter,
             configurationFactory: configurationFactory,

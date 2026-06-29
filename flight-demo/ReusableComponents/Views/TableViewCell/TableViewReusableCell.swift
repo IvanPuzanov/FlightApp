@@ -1,0 +1,56 @@
+//
+//  TableViewReusableCell.swift
+//  flight-demo
+//
+//  Created by Ivan Puzanov on 29.06.2026.
+//
+
+import SnapKit
+import UIKit
+
+final class TableViewReusableCell<View: UIView & ConfigurableView>: UITableViewCell {
+
+    // MARK: - Identifier
+
+    static var reuseIdentifier: String {
+        return String(describing: View.self)
+    }
+
+    // MARK: - UI
+
+    private var view = View()
+
+    // MARK: - Lifecycle
+
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+
+        setupUI()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }
+
+    // MARK: - Private
+
+    private func setupUI() {
+        contentView.addSubview(view)
+        backgroundColor = .clear
+        selectionStyle = .none
+
+        view.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+    }
+}
+
+// MARK: - ConfigurableView
+
+extension TableViewReusableCell: ConfigurableView {
+
+    func configure(with configuration: TableViewReusableCellConfiguration<View>) {
+        view.configure(with: configuration.viewConfiguration)
+    }
+}
+

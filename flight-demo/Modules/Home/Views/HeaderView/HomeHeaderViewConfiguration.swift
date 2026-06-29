@@ -7,24 +7,24 @@
 
 import UIKit
 
-struct HomeHeaderViewConfiguration {
+struct HomeHeaderViewConfiguration: Equatable {
     let mode: Mode
 }
 
 extension HomeHeaderViewConfiguration {
-    enum Mode {
+    enum Mode: Equatable {
         case flightInfo(FlightDetailsModel)
         case search(SearchModel)
     }
 
-    struct FlightDetailsModel {
+    struct FlightDetailsModel: Equatable {
         let leadingIcon: UIImage
         let titleLabelText: String
         let subtitleLabelText: String
         let trailingIcon: UIImage
     }
 
-    struct SearchModel {
+    struct SearchModel: Equatable {
         let leadingIcon: UIImage
         let text: String?
         let placeholderText: String

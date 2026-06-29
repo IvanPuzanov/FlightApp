@@ -5,6 +5,7 @@
 //  Created by Ivan Puzanov on 28.06.2026.
 //
 
+import SnapKit
 import UIKit
 
 protocol HomeBottomSheetViewControllerProtocol: AnyObject {
@@ -13,29 +14,50 @@ protocol HomeBottomSheetViewControllerProtocol: AnyObject {
 
 final class HomeBottomSheetViewController: UIViewController {
 
+    // MARK: - Typealiases
+
+    typealias Snapshot = NSDiffableDataSourceSnapshot<Int, String>
+    typealias DataSource = UITableViewDiffableDataSource<Int, String>
+
     // MARK: - Dependencies
 
     private let presenter: HomePresenterProtocol
+    private let configurationFactory: HomeBottomSheetConfigurationFactoryProtocol
 
     // MARK: - UI
 
-    private lazy var panGestureRecognizer = UIPanGestureRecognizer(
-        target: self,
-        action: #selector(handlePanGesture)
-    )
-    private var heightConstraint = NSLayoutConstraint()
+    private let grabberView = UIView()
+    private let segmentedControl = SegmentedControl()
+    private let tableView = UITableView()
+    private lazy var panGestureRecognizer = UIPanGestureRecognizer()
 
     // MARK: - Properties
 
     private var detents: [HomeState.BottomSheetState.Detent] = []
     private var currentHeight: CGFloat {
-        heightConstraint.constant
+        heightConstraint?.layoutConstraints.first?.constant ?? 0
+    }
+    private var heightConstraint: Constraint?
+
+    private var cellTypes: [String: HomeBottomSheetCellType] = [:]
+    private lazy var dataSource = DataSource(tableView: tableView) { tableView, _, identifier in
+        guard let cellType = self.cellTypes[identifier] else { return nil }
+
+        switch cellType {
+        case let .flightDetails(cellConfiguration):
+            let cell = tableView.dequeueReusableCell(with: cellConfiguration)
+            return cell
+        }
     }
 
     // MARK: - Initialization
 
-    init(presenter: HomePresenterProtocol) {
+    init(
+        presenter: HomePresenterProtocol,
+        configurationFactory: HomeBottomSheetConfigurationFactoryProtocol
+    ) {
         self.presenter = presenter
+        self.configurationFactory = configurationFactory
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -54,8 +76,13 @@ final class HomeBottomSheetViewController: UIViewController {
     // MARK: - Private
 
     private func setupUI() {
+        view.addSubviews(grabberView, segmentedControl, tableView)
+
         setupAppearance()
         setupGestureRecognizer()
+        setupGrabberView()
+        setupSegmnetedControl()
+        setupTableView()
     }
 
     private func setupAppearance() {
@@ -63,13 +90,47 @@ final class HomeBottomSheetViewController: UIViewController {
             .withCornerRadius(44, corners: [.topLeft, .topRight])
             .withShadow(offsetY: -10)
 
-        heightConstraint = view.heightAnchor.constraint(equalToConstant: 120)
-        NSLayoutConstraint.activate([heightConstraint].compactMap { $0 })
+        view.snp.makeConstraints {
+            heightConstraint = $0.height.equalTo(120).constraint
+        }
     }
 
     private func setupGestureRecognizer() {
         view.addGestureRecognizer(panGestureRecognizer)
         panGestureRecognizer.delegate = self
+        panGestureRecognizer.addTarget(self, action: #selector(handlePanGesture))
+    }
+
+    private func setupGrabberView() {
+        grabberView
+            .withBackgroundColor(.separator)
+            .withCornerRadius(3)
+
+        grabberView.snp.makeConstraints {
+            $0.width.equalTo(50)
+            $0.height.equalTo(6)
+            $0.top.equalToSuperview().inset(12)
+            $0.centerX.equalToSuperview()
+        }
+    }
+
+    private func setupSegmnetedControl() {
+        let configuration = configurationFactory.makeSegmentedControlConfiguration()
+        segmentedControl.configure(with: configuration)
+
+        segmentedControl.snp.makeConstraints {
+            $0.top.equalTo(grabberView.snp.bottom).offset(16)
+            $0.leading.trailing.equalToSuperview().inset(20)
+        }
+    }
+
+    private func setupTableView() {
+        tableView.separatorStyle = .none
+
+        tableView.snp.makeConstraints {
+            $0.top.equalTo(segmentedControl.snp.bottom).offset(10)
+            $0.leading.trailing.bottom.equalToSuperview()
+        }
     }
 
     @objc
@@ -92,7 +153,7 @@ final class HomeBottomSheetViewController: UIViewController {
 
     private func applyHeight(_ height: CGFloat, animated: Bool = false) {
         UIView.animate(withDuration: animated ? 0.3 : 0) {
-            self.heightConstraint.constant = height
+            self.heightConstraint?.update(offset: height)
             self.view.superview?.layoutIfNeeded()
         }
     }
@@ -117,10 +178,34 @@ final class HomeBottomSheetViewController: UIViewController {
 extension HomeBottomSheetViewController: HomeBottomSheetViewControllerProtocol {
 
     func apply(state: HomeState.BottomSheetState) {
-        detents = state.detents
+        configureWithDetents(state.detents)
+        renderTableView(with: state)
+    }
+
+    private func configureWithDetents(_ detents: [HomeState.BottomSheetState.Detent]) {
+        self.detents = detents
         for case let .compact(height) in detents {
             applyHeight(height)
         }
+    }
+
+    private func renderTableView(with state: HomeState.BottomSheetState) {
+        let newCellTypes = [
+            configurationFactory.makeFlightDetailsCellType()
+        ]
+
+        let dictionary = Dictionary(
+            uniqueKeysWithValues: zip(
+                newCellTypes.map { $0.id },
+                newCellTypes
+            )
+        )
+        cellTypes = dictionary
+
+        var snapshot = Snapshot()
+        snapshot.appendSections([0])
+        snapshot.appendItems(newCellTypes.map { $0.id }, toSection: 0)
+        dataSource.apply(snapshot)
     }
 }
 

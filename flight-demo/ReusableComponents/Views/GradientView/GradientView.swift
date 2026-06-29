@@ -9,8 +9,8 @@ import UIKit
 
 private enum Constants {
     static let gradientColors: [UIColor] = [
-        .elevation1.withAlphaComponent(0.8),
-        .elevation1.withAlphaComponent(0)
+        .Background.elevation1.withAlphaComponent(0.8),
+        .Background.elevation1.withAlphaComponent(0)
     ]
 }
 

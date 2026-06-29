@@ -8,7 +8,7 @@
 import Foundation
 
 protocol ConfigurableView {
-    associatedtype ViewConfiguration
+    associatedtype ViewConfiguration: Equatable
 
     func configure(with configuration: ViewConfiguration)
 }
