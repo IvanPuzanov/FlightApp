@@ -15,6 +15,12 @@ struct HomeState: Equatable {
 extension HomeState {
     struct MapState: Equatable {
         var currentLocation: Coordinate?
+        var headerState: HeaderState
+    }
+
+    enum HeaderState: Equatable {
+        case flightInfo(number: String, description: String)
+        case search(text: String?)
     }
 
     struct BottomSheetState: Equatable {
@@ -42,7 +48,8 @@ extension HomeState {
 extension HomeState.MapState {
     static var initial: HomeState.MapState {
         HomeState.MapState(
-            currentLocation: nil
+            currentLocation: nil,
+            headerState: .search(text: nil)
         )
     }
 }

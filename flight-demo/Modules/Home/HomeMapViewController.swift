@@ -6,6 +6,7 @@
 //
 
 import MapKit
+import SnapKit
 import UIKit
 
 protocol HomeMapViewControllerProtocol: AnyObject {
@@ -17,7 +18,7 @@ final class HomeMapViewController: UIViewController {
     // MARK: - Dependecies
 
     private let presenter: HomePresenterProtocol
-    var isSearch = true
+    private let configurationFactory: HomeMapConfigurationFactoryProtocol
 
     // MARK: - UI
 
@@ -30,9 +31,11 @@ final class HomeMapViewController: UIViewController {
 
     init(
         presenter: HomePresenterProtocol,
+        configurationFactory: HomeMapConfigurationFactoryProtocol,
         bottomSheetViewController: HomeBottomSheetViewController
     ) {
         self.presenter = presenter
+        self.configurationFactory = configurationFactory
         self.bottomSheetViewController = bottomSheetViewController
         super.init(nibName: nil, bundle: nil)
     }
@@ -66,15 +69,11 @@ final class HomeMapViewController: UIViewController {
 
     private func setupMapView() {
         mapView.delegate = self
-        mapView.translatesAutoresizingMaskIntoConstraints = false
         mapView.showsUserLocation = true
 
-        NSLayoutConstraint.activate([
-            mapView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            mapView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            mapView.topAnchor.constraint(equalTo: view.topAnchor),
-            mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
+        mapView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
     }
 
     private func setupMapStyle() {
@@ -88,26 +87,19 @@ final class HomeMapViewController: UIViewController {
     }
 
     private func setupGradientView() {
-        gradientView.translatesAutoresizingMaskIntoConstraints = false
-
-        NSLayoutConstraint.activate([
-            gradientView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            gradientView.topAnchor.constraint(equalTo: view.topAnchor),
-            gradientView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            gradientView.heightAnchor.constraint(equalToConstant: 180)
-        ])
+        gradientView.snp.makeConstraints {
+            $0.height.equalTo(180)
+            $0.leading.trailing.top.equalToSuperview()
+        }
     }
 
     private func setupBottomSheet() {
         addChild(bottomSheetViewController)
         bottomSheetViewController.didMove(toParent: self)
-        bottomSheetViewController.view.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            bottomSheetViewController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            bottomSheetViewController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            bottomSheetViewController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
+
+        bottomSheetViewController.view.snp.makeConstraints {
+            $0.leading.trailing.bottom.equalToSuperview()
+        }
     }
 
     private func setupHeaderView() {
@@ -115,24 +107,11 @@ final class HomeMapViewController: UIViewController {
             .withBackgroundColor(.systemBackground)
             .withCornerRadius(30)
             .withShadow()
-        headerView.translatesAutoresizingMaskIntoConstraints = false
-        headerView.configure(
-            with: HomeHeaderViewConfiguration(
-                mode: .search(
-                    HomeHeaderViewConfiguration.SearchModel(
-                        leadingIcon: UIImage(systemName: "magnifyingglass") ?? UIImage(),
-                        placeholderText: "Search flight or aircraft",
-                        trailingIcon: UIImage(systemName: "slider.horizontal.3") ?? UIImage()
-                    )
-                )
-            )
-        )
 
-        NSLayoutConstraint.activate([
-            headerView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            headerView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            headerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 12)
-        ])
+        headerView.snp.makeConstraints {
+            $0.top.equalTo(view.safeAreaLayoutGuide).inset(12)
+            $0.leading.trailing.equalToSuperview().inset(16)
+        }
     }
 }
 
@@ -150,7 +129,13 @@ extension HomeMapViewController: MKMapViewDelegate {
 extension HomeMapViewController: HomeMapViewControllerProtocol {
 
     func apply(state: HomeState.MapState) {
+        configureHeaderView(from: state.headerState)
         moveToUserRegionIfNeeded(location: state.currentLocation)
+    }
+
+    private func configureHeaderView(from state: HomeState.HeaderState) {
+        let configuration = configurationFactory.makeHeaderViewConfiguration(from: state)
+        headerView.configure(with: configuration)
     }
 
     private func moveToUserRegionIfNeeded(location: Coordinate?) {

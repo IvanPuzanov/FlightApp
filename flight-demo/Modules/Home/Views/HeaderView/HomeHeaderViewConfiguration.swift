@@ -13,7 +13,7 @@ struct HomeHeaderViewConfiguration {
 
 extension HomeHeaderViewConfiguration {
     enum Mode {
-        case flightDetails(FlightDetailsModel)
+        case flightInfo(FlightDetailsModel)
         case search(SearchModel)
     }
 
@@ -26,6 +26,7 @@ extension HomeHeaderViewConfiguration {
 
     struct SearchModel {
         let leadingIcon: UIImage
+        let text: String?
         let placeholderText: String
         let trailingIcon: UIImage
     }

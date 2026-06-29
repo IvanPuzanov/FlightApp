@@ -109,7 +109,7 @@ extension HomeHeaderView: ConfigurableView {
     func configure(with configuration: HomeHeaderViewConfiguration) {
         UIView.animate(withDuration: 0.3) {
             switch configuration.mode {
-            case let .flightDetails(model):
+            case let .flightInfo(model):
                 self.configureFlightDetails(from: model)
             case let .search(model):
                 self.configureSearch(from: model)
@@ -121,7 +121,7 @@ extension HomeHeaderView: ConfigurableView {
 
     private func updateVisibility(for mode: HomeHeaderViewConfiguration.Mode) {
         switch mode {
-        case .flightDetails:
+        case .flightInfo:
             titleLabel.alpha = 1
             titleLabel.isHidden = false
 
@@ -152,6 +152,7 @@ extension HomeHeaderView: ConfigurableView {
     private func configureSearch(from model: HomeHeaderViewConfiguration.SearchModel) {
         leadingImageView.image = model.leadingIcon
         trailingImageView.image = model.trailingIcon
+        searchTextField.text = model.text
         searchTextField.placeholder = model.placeholderText
     }
 }
