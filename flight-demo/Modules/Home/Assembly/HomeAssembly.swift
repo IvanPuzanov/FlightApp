@@ -20,16 +20,19 @@ final class HomeAssembly: HomeAssemblyProtocol {
         let store = HomeStore(reducer: reducer)
         let service = HomeService()
         let locationManager = LocationManager()
-        let configurationFactory = HomeConfigurationFactory()
-
         let presenter = HomePresenter(
             store: store,
             service: service,
             locationManager: locationManager
         )
-        let headerView = HomeHeaderView(configurationFactory: configurationFactory)
+        let homeHeaderConfigurationFactroy = HomeHeaderConfigurationFactory()
+        let headerView = HomeHeaderView(configurationFactory: homeHeaderConfigurationFactroy)
         let mapViewController = HomeMapViewController(presenter: presenter)
-        let flightListView = HomeFlightListView(presenter: presenter)
+        let flightListConfigurationFactory = HomeFlightListConfigurationFactory()
+        let flightListView = HomeFlightListView(
+            presenter: presenter,
+            configurationFactory: flightListConfigurationFactory
+        )
         let flightListBottomSheet = BottomSheetViewController(contentView: flightListView)
         let viewController = HomeViewController(
             presenter: presenter,

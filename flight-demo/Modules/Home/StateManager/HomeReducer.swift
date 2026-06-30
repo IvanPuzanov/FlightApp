@@ -60,10 +60,10 @@ final class HomeReducer: HomeReducerProtocol {
     private func reduceCommonEvent(_ event: HomeEvent.UIEvent.CommonEvent, state: inout HomeState) -> [HomeEffect] {
         switch event {
         case .onViewDidLoad:
-            state.flightListState.bottomSheetDetents = [120]
+            state.flightListState.appearance.bottomSheetDetents = [120]
             return [.data(.loadData)]
         case let .onCalculateFlightListMaxHeight(maxHeight):
-            state.flightListState.bottomSheetDetents = [120, maxHeight / 2, maxHeight]
+            state.flightListState.appearance.bottomSheetDetents = [120, maxHeight / 2, maxHeight]
             return []
         }
     }
@@ -84,9 +84,9 @@ final class HomeReducer: HomeReducerProtocol {
         case 0.9...1:
             let opacity = (progress - 0.9) / (1 - 0.9)
             state.headerState.progress = opacity
-            state.flightListState.isGrabberHidden = true
+            state.flightListState.appearance.isGrabberHidden = true
         default:
-            state.flightListState.isGrabberHidden = false
+            state.flightListState.appearance.isGrabberHidden = false
         }
     }
 }

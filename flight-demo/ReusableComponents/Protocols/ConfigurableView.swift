@@ -11,4 +11,11 @@ protocol ConfigurableView {
     associatedtype ViewConfiguration: Equatable
 
     func configure(with configuration: ViewConfiguration)
+    func prepareForReuse()
+}
+
+extension ConfigurableView {
+    func prepareForReuse() {
+        prepareForReuse()
+    }
 }

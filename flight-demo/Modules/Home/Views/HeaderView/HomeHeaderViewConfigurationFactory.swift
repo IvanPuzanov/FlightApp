@@ -1,8 +1,8 @@
 //
-//  HomeMapConfigurationFactory.swift
+//  HomeHeaderViewConfigurationFactory.swift
 //  flight-demo
 //
-//  Created by Ivan Puzanov on 29.06.2026.
+//  Created by Ivan Puzanov on 30.06.2026.
 //
 
 import UIKit
@@ -21,11 +21,7 @@ protocol HomeHeaderViewConfigurationFactoryProtocol: AnyObject {
     ) -> HomeHeaderViewConfiguration
 }
 
-final class HomeConfigurationFactory {}
-
-// MARK: - HomeHeaderViewConfigurationFactoryProtocol
-
-extension HomeConfigurationFactory: HomeHeaderViewConfigurationFactoryProtocol {
+final class HomeHeaderConfigurationFactory: HomeHeaderViewConfigurationFactoryProtocol {
 
     // MARK: - Public
 

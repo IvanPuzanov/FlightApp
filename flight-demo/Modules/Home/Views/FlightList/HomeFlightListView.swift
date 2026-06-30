@@ -13,19 +13,43 @@ protocol HomeFlightListModuleOutputProtocol: ModuleOutputProtocol where Event ==
 
 final class HomeFlightListView: UIView {
 
+    // MARK: - Typealiases
+
+    private typealias Snapshot = NSDiffableDataSourceSnapshot<Int, String>
+    private typealias DataSource = UITableViewDiffableDataSource<Int, String>
+
     // MARK: - Dependencies
 
     weak var bottomSheet: (any BottomSheetProtocol)?
     private let presenter: any HomeFlightListModuleOutputProtocol
+    private let configurationFactory: HomeFlightListConfigurationFactoryProtocol
 
     // MARK: - UI
 
     private let grabberView = UIView()
+    private let tableView = UITableView()
+
+    // MARK: - Properties
+
+    private var cellTypes: [String: HomeFlightListCellType] = [:]
+    private lazy var dataSource = DataSource(tableView: tableView) { tableView, _, identifier in
+        guard let cellType = self.cellTypes[identifier] else { return nil }
+
+        switch cellType {
+        case let .shimmer(cellConfiguration):
+            let cell = tableView.dequeueReusableCell(with: cellConfiguration)
+            return cell
+        }
+    }
 
     // MARK: - Initialization
 
-    init(presenter: some HomeFlightListModuleOutputProtocol) {
+    init(
+        presenter: any HomeFlightListModuleOutputProtocol,
+        configurationFactory: HomeFlightListConfigurationFactoryProtocol
+    ) {
         self.presenter = presenter
+        self.configurationFactory = configurationFactory
         super.init(frame: .zero)
 
         setupUI()
@@ -38,12 +62,13 @@ final class HomeFlightListView: UIView {
     // MARK: - Private
 
     private func setupUI() {
-        addSubview(grabberView)
+        addSubviews(grabberView, tableView)
         withBackgroundColor(.Background.elevation1)
         withCornerRadius(44)
         withShadow()
 
         setupGrabberView()
+        setupTableView()
     }
 
     private func setupGrabberView() {
@@ -56,6 +81,17 @@ final class HomeFlightListView: UIView {
             $0.height.equalTo(6)
             $0.top.equalToSuperview().inset(12)
             $0.centerX.equalToSuperview()
+        }
+    }
+
+    private func setupTableView() {
+        tableView.isScrollEnabled = false
+        tableView.backgroundColor = .clear
+        tableView.separatorStyle = .none
+
+        tableView.snp.makeConstraints {
+            $0.top.equalTo(grabberView.snp.bottom).offset(10)
+            $0.leading.trailing.bottom.equalToSuperview()
         }
     }
 }
@@ -77,8 +113,24 @@ extension HomeFlightListView: BottomSheetContentViewProtocol {
 extension HomeFlightListView: HomeFlightListModuleInputProtocol {
 
     func apply(_ state: HomeState.FlightListState) {
-        bottomSheet?.setupDetents(state.bottomSheetDetents)
-        grabberView.isHidden = state.isGrabberHidden
-        layer.shadowOpacity = state.isGrabberHidden ? 0 : 0.1
+        configureAppearance(with: state.appearance)
+        renderTableView(from: state.contentState)
+    }
+
+    private func configureAppearance(with appearance: HomeState.FlightListState.Appearance) {
+        bottomSheet?.setupDetents(appearance.bottomSheetDetents)
+        layer.shadowOpacity = appearance.isGrabberHidden ? 0 : 0.1
+    }
+
+    private func renderTableView(from state: HomeState.FlightListState.ContentState) {
+        let newCellTypes = configurationFactory.createFlightListCellTypes(from: state)
+        let ids = newCellTypes.compactMap { $0.id }
+
+        cellTypes = Dictionary(uniqueKeysWithValues: zip(ids, newCellTypes))
+
+        var snapshot = Snapshot()
+        snapshot.appendSections([0])
+        snapshot.appendItems(ids, toSection: 0)
+        dataSource.apply(snapshot)
     }
 }

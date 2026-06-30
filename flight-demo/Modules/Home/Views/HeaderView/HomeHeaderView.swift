@@ -42,7 +42,17 @@ final class HomeHeaderView: UIView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
+    // MARK: - Lifecycle
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+
+        gradientView.snp.makeConstraints {
+            $0.bottom.equalTo(containerView.snp.bottom).inset(10)
+        }
+    }
+
     // MARK: - Private
 
     private func setupUI() {
@@ -63,7 +73,6 @@ final class HomeHeaderView: UIView {
     private func setupGradientView() {
         gradientView.snp.makeConstraints {
             $0.leading.trailing.top.equalToSuperview()
-            $0.height.equalTo(180)
         }
     }
 

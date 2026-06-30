@@ -20,7 +20,7 @@ final class TableViewReusableCell<View: UIView & ConfigurableView>: UITableViewC
 
     private var view = View()
 
-    // MARK: - Lifecycle
+    // MARK: - Initialization
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -30,6 +30,14 @@ final class TableViewReusableCell<View: UIView & ConfigurableView>: UITableViewC
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
+    }
+
+    // MARK: - Lifecycle
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+
+        view.prepareForReuse()
     }
 
     // MARK: - Private
