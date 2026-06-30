@@ -7,20 +7,20 @@
 
 import Foundation
 
-enum HomeBottomSheetCellType: Equatable {
-    case flightDetails(TableViewReusableCellConfiguration<ContainerView<FlightDetailsView>>)
-}
-
-extension HomeBottomSheetCellType: Identifiable {
-
-    private enum IDs {
-        static let flightDetails = "flightDetails"
-    }
-
-    var id: String {
-        switch self {
-        case .flightDetails:
-            return IDs.flightDetails
-        }
-    }
-}
+//enum HomeBottomSheetCellType: Equatable {
+//    case flightDetails(TableViewReusableCellConfiguration<ContainerView<FlightDetailsView>>)
+//}
+//
+//extension HomeBottomSheetCellType: Identifiable {
+//
+//    private enum IDs {
+//        static let flightDetails = "flightDetails"
+//    }
+//
+//    var id: String {
+//        switch self {
+//        case .flightDetails:
+//            return IDs.flightDetails
+//        }
+//    }
+//}

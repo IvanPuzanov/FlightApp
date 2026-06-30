@@ -14,11 +14,31 @@ enum HomeEvent {
 
 extension HomeEvent {
     enum UIEvent {
-        case onViewDidLoad
-        case onMapDidLoad
+        case map(MapEvent)
+        case header(HeaderEvent)
+        case flightList(FlightListEvent)
+        case common(CommonEvent)
     }
 
     enum DataEvent {
         case onGetLocation(Coordinate)
+    }
+}
+
+extension HomeEvent.UIEvent {
+    enum MapEvent {
+        case onMapDidLoad
+        case onDefaultRegionSet
+    }
+
+    enum HeaderEvent {}
+
+    enum FlightListEvent {
+        case onBottomSheetHeightChange(progress: CGFloat)
+    }
+
+    enum CommonEvent {
+        case onViewDidLoad
+        case onCalculateFlightListMaxHeight(CGFloat)
     }
 }

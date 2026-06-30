@@ -22,7 +22,6 @@ final class BottomSheetViewController<ContentView: BottomSheetContentViewProtoco
 
     // MARK: - UI
 
-    private let grabberView = UIView()
     private let contentView: ContentView
     private lazy var panGestureRecognizer = UIPanGestureRecognizer()
 
@@ -32,6 +31,7 @@ final class BottomSheetViewController<ContentView: BottomSheetContentViewProtoco
     private var currentHeight: CGFloat {
         heightConstraint?.layoutConstraints.first?.constant ?? 0
     }
+    private var maxDetent: CGFloat = 0
     private var heightConstraint: Constraint?
 
     // MARK: - Initialization
@@ -57,17 +57,15 @@ final class BottomSheetViewController<ContentView: BottomSheetContentViewProtoco
     // MARK: - Private
 
     private func setupUI() {
-        view.addSubviews(grabberView, contentView)
+        view.addSubviews(contentView)
 
         setupAppearance()
         setupGestureRecognizer()
-        setupGrabberView()
+        setupContentView()
     }
 
     private func setupAppearance() {
-        view.withBackgroundColor(.systemBackground)
-            .withCornerRadius(44, corners: [.topLeft, .topRight])
-            .withShadow(offsetY: -10)
+        view.withCornerRadius(44, corners: [.topLeft, .topRight])
 
         view.snp.makeConstraints {
             heightConstraint = $0.height.equalTo(120).constraint
@@ -79,23 +77,9 @@ final class BottomSheetViewController<ContentView: BottomSheetContentViewProtoco
         panGestureRecognizer.addTarget(self, action: #selector(handlePanGesture))
     }
 
-    private func setupGrabberView() {
-        grabberView
-            .withBackgroundColor(.separator)
-            .withCornerRadius(3)
-
-        grabberView.snp.makeConstraints {
-            $0.width.equalTo(50)
-            $0.height.equalTo(6)
-            $0.top.equalToSuperview().inset(12)
-            $0.centerX.equalToSuperview()
-        }
-    }
-
     private func setupContentView() {
         contentView.snp.makeConstraints {
-            $0.top.equalTo(grabberView.snp.bottom).offset(10)
-            $0.leading.trailing.bottom.equalToSuperview()
+            $0.edges.equalToSuperview()
         }
     }
 
@@ -103,10 +87,13 @@ final class BottomSheetViewController<ContentView: BottomSheetContentViewProtoco
     private func handlePanGesture() {
         switch panGestureRecognizer.state {
         case .began:
-            break
+            dispacthEventOnHeightChange()
         case .changed:
             let translation = panGestureRecognizer.translation(in: view)
             let newHeight = currentHeight - translation.y
+
+            guard newHeight <= maxDetent else { return }
+
             applyHeight(newHeight)
         case .cancelled, .ended:
             clipToNearestDetent()
@@ -126,7 +113,8 @@ final class BottomSheetViewController<ContentView: BottomSheetContentViewProtoco
     }
 
     private func dispacthEventOnHeightChange() {
-        contentView.dispatch(.onHeightDidChange(0))
+        let progress = currentHeight / maxDetent
+        contentView.dispatch(.onProgressDidChange(progress))
     }
 
     private func clipToNearestDetent() {
@@ -144,6 +132,7 @@ extension BottomSheetViewController: BottomSheetProtocol {
         guard self.detents != detents else { return }
 
         self.detents = detents.sorted()
+        self.maxDetent = detents.last ?? 0
         if let minHeight = detents.min() {
             applyHeight(minHeight)
         }

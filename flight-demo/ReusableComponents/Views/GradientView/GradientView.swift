@@ -9,7 +9,7 @@ import UIKit
 
 private enum Constants {
     static let gradientColors: [UIColor] = [
-        .Background.elevation1.withAlphaComponent(0.8),
+        .Background.elevation1,
         .Background.elevation1.withAlphaComponent(0)
     ]
 }
@@ -45,6 +45,12 @@ final class GradientView: UIView {
         guard traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) else { return }
         
         gradientLayer.colors = Constants.gradientColors.map { $0.cgColor }
+    }
+
+    // MARK: - Public
+
+    func offsetStartPoint(y: CGFloat) {
+        gradientLayer.startPoint = CGPoint(x: 0, y: y)
     }
 
     // MARK: - Private

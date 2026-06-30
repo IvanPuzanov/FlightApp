@@ -9,5 +9,5 @@ import Foundation
 
 enum BottomSheetEvent {
     /// Dispatch on height change. Through value from 0 to 1 (minimum detent to maximum detent)
-    case onHeightDidChange(CGFloat)
+    case onProgressDidChange(CGFloat)
 }

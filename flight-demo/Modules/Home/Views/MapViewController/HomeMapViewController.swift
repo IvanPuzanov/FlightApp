@@ -21,7 +21,6 @@ final class HomeMapViewController: UIViewController {
     // MARK: - UI
 
     private let mapView = MKMapView()
-    private let gradientView = GradientView()
 
     // MARK: - Initialization
 
@@ -40,24 +39,21 @@ final class HomeMapViewController: UIViewController {
         super.viewDidLoad()
 
         setupUI()
-        presenter.dispatch(.onViewDidLoad)
     }
 
     // MARK: - Private
 
     private func setupUI() {
-        view.addSubviews(mapView, gradientView)
+        view.addSubviews(mapView)
         view.backgroundColor = .systemBackground
         navigationController?.setNavigationBarHidden(true, animated: false)
 
         setupMapView()
         setupMapStyle()
-        setupGradientView()
     }
 
     private func setupMapView() {
         mapView.delegate = self
-        mapView.showsUserLocation = true
 
         mapView.snp.makeConstraints {
             $0.edges.equalToSuperview()
@@ -73,13 +69,6 @@ final class HomeMapViewController: UIViewController {
 
         mapView.preferredConfiguration = configuration
     }
-
-    private func setupGradientView() {
-        gradientView.snp.makeConstraints {
-            $0.height.equalTo(180)
-            $0.leading.trailing.top.equalToSuperview()
-        }
-    }
 }
 
 // MARK: - MKMapViewDelegate
@@ -87,7 +76,7 @@ final class HomeMapViewController: UIViewController {
 extension HomeMapViewController: MKMapViewDelegate {
 
     func mapViewDidFinishLoadingMap(_ mapView: MKMapView) {
-        presenter.dispatch(.onMapDidLoad)
+        presenter.dispatch(.map(.onMapDidLoad))
     }
 }
 
@@ -96,16 +85,22 @@ extension HomeMapViewController: MKMapViewDelegate {
 extension HomeMapViewController: HomeMapModuleInputProtocol {
 
     func apply(_ state: HomeState.MapState) {
-        moveToUserRegionIfNeeded(location: state.currentLocation)
+        moveToUserRegionIfNeeded(state: state)
     }
 
-    private func moveToUserRegionIfNeeded(location: Coordinate?) {
-        guard let location else { return }
+    private func moveToUserRegionIfNeeded(state: HomeState.MapState) {
+        guard
+            !state.isDefaultRegionSet,
+            let location = state.defaultRegionCoordinate
+        else {
+            return
+        }
 
         let region = MKCoordinateRegion(
             center: location.toCLLocationCoordinate2D,
             span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)
         )
         mapView.setRegion(region, animated: true)
+        presenter.dispatch(.map(.onDefaultRegionSet))
     }
 }

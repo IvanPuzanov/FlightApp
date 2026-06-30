@@ -21,11 +21,6 @@ protocol HomeHeaderViewConfigurationFactoryProtocol: AnyObject {
     ) -> HomeHeaderViewConfiguration
 }
 
-protocol HomeBottomSheetConfigurationFactoryProtocol: AnyObject {
-    func makeSegmentedControlConfiguration() -> SegmentedControlConfiguration
-    func makeFlightDetailsCellType() -> HomeBottomSheetCellType
-}
-
 final class HomeConfigurationFactory {}
 
 // MARK: - HomeHeaderViewConfigurationFactoryProtocol
@@ -37,7 +32,7 @@ extension HomeConfigurationFactory: HomeHeaderViewConfigurationFactoryProtocol {
     func makeHeaderViewConfiguration(
         from state: HomeState.HeaderState
     ) -> HomeHeaderViewConfiguration {
-        switch state {
+        switch state.mode {
         case let .flightInfo(number, description):
             return HomeHeaderViewConfiguration(
                 mode: createHeaderViewFlightInfoMode(number: number, description: description)
@@ -73,70 +68,6 @@ extension HomeConfigurationFactory: HomeHeaderViewConfigurationFactoryProtocol {
                 placeholderText: "Search flight or aircraft",
                 trailingIcon: Constants.searchTrailingIcon
             )
-        )
-    }
-}
-
-// MARK: - HomeBottomSheetConfigurationFactoryProtocol
-
-extension HomeConfigurationFactory: HomeBottomSheetConfigurationFactoryProtocol {
-
-    // MARK: - Public
-
-    func makeSegmentedControlConfiguration() -> SegmentedControlConfiguration {
-        SegmentedControlConfiguration(
-            segments: [
-                SegmentedControlConfiguration.Segment(text: "Trending", isSelected: true),
-                SegmentedControlConfiguration.Segment(text: "Near you", isSelected: false)
-            ]
-        )
-    }
-
-    func makeFlightDetailsCellType() -> HomeBottomSheetCellType {
-        .flightDetails(
-            TableViewReusableCellConfiguration<ContainerView<FlightDetailsView>>(
-                viewConfiguration: ContainerViewConfiguration<FlightDetailsView>(
-                    viewConfiguration: FlightDetailsViewConfiguration(
-                        departureAirportConfiguration: createFlightAirportViewConfiguration(
-                            airport: "CDG",
-                            cityAndCountry: "Paris, France",
-                            timeZone: "GMT +3"
-                        ),
-                        arrivalAirportConfiguration: createFlightAirportViewConfiguration(
-                            airport: "IST",
-                            cityAndCountry: "Istanbul, Turkey",
-                            timeZone: "GMT +3"
-                        )
-                    ),
-                    insets: .eachSide(16)
-                )
-            )
-        )
-    }
-
-    // MARK: - Private
-
-    private func createFlightAirportViewConfiguration(
-        airport: String,
-        cityAndCountry: String,
-        timeZone: String
-    ) -> FlightAirportViewConfiguration {
-        FlightAirportViewConfiguration(
-            titleLabelConfiguration: LabelConfiguration(
-                text: airport,
-                font: .systemFont(ofSize: 24)
-            ),
-            subtitleLabelConfiguration: LabelConfiguration(
-                text: cityAndCountry,
-                textAlignment: .center,
-                font: .boldSystemFont(ofSize: 16),
-                numberOfLines: 2
-            ),
-            descriptionLabelConfiguration: LabelConfiguration(
-                text: timeZone,
-                textColor: .secondaryLabel
-            ),
-            backgroundColor: .secondarySystemBackground
         )
     }
 }

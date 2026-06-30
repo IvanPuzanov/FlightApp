@@ -6,6 +6,7 @@
 //
 
 import CoreLocation
+import Combine
 
 final class HomePresenter {
 
@@ -18,6 +19,10 @@ final class HomePresenter {
     private var store: HomeStoreProtocol
     private let service: HomeServiceProtocol
     private let locationManager: LocationManagerProtocol
+
+    // MARK: - Properties
+
+    private var bag: Set<AnyCancellable> = []
 
     // MARK: - Initialization
 
@@ -36,22 +41,26 @@ final class HomePresenter {
     // MARK: - Private
 
     private func setupBinding() {
-        store.didDispatchEffect = { [weak self] effect in
-            guard let self else { return }
+        store.effectDidDispatch
+            .sink { [weak self] effect in
+                switch effect {
+                case let .ui(uiEffect):
+                    self?.handleUiEffect(uiEffect)
+                case let .data(dataEffect):
+                    self?.handleDataEffect(dataEffect)
+                }
+            }.store(in: &bag)
 
-            switch effect {
-            case let .data(dataEffect):
-                handleDataEffect(dataEffect)
-            case let .ui(uiEffect):
-                handleUiEffect(uiEffect)
+        store.stateDidChange
+            .compactMap { [weak store] in
+                store?.state
             }
-        }
-
-        store.didUpdateState = { [weak self] state in
-            self?.headerView?.apply(state.headerState)
-            self?.mapView?.apply(state.mapState)
-            self?.flightListView?.apply(state.flightListState)
-        }
+            .removeDuplicates()
+            .sink { [weak self] state in
+                self?.headerView?.apply(state.headerState)
+                self?.mapView?.apply(state.mapState)
+                self?.flightListView?.apply(state.flightListState)
+            }.store(in: &bag)
     }
 
     private func handleDataEffect(_ effect: HomeEffect.DataEffect) {
@@ -67,9 +76,9 @@ final class HomePresenter {
     private func handleUiEffect(_ effect: HomeEffect.UIEffect) {}
 }
 
-// MARK: - ModuleOutputProtocol
+// MARK: - HomeViewModuleOutputProtocol
 
-extension HomePresenter: HomeHeaderViewModuleOutputProtocol, HomeMapModuleOutputProtocol, HomeFlightListModuleOutputProtocol {
+extension HomePresenter: HomeViewModuleOutputProtocol, HomeHeaderViewModuleOutputProtocol, HomeMapModuleOutputProtocol, HomeFlightListModuleOutputProtocol {
 
     func dispatch(_ event: HomeEvent.UIEvent) {
         store.dispatch(event: .ui(event))

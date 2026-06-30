@@ -5,11 +5,12 @@
 //  Created by Ivan Puzanov on 28.06.2026.
 //
 
-import Foundation
+import Combine
 
-protocol HomeStoreProtocol {
-    var didDispatchEffect: ((HomeEffect) -> Void)? { get set }
-    var didUpdateState: ((HomeState) -> Void)? { get set }
+protocol HomeStoreProtocol: AnyObject {
+    var state: HomeState { get }
+    var stateDidChange: ObservableObjectPublisher { get }
+    var effectDidDispatch: PassthroughSubject<HomeEffect, Never> { get }
 
     func dispatch(event: HomeEvent)
 }
@@ -20,18 +21,16 @@ final class HomeStore {
 
     private let reducer: HomeReducerProtocol
 
-    // MARK: - Properties
+    // MARK: - Public properties
 
-    private var state: HomeState = .initial {
+    var state: HomeState = .initial {
         didSet {
-            guard oldValue != state else { return }
-
-            didUpdateState?(state)
+            stateDidChange.send()
         }
     }
 
-    var didDispatchEffect: ((HomeEffect) -> Void)?
-    var didUpdateState: ((HomeState) -> Void)?
+    var stateDidChange = ObservableObjectPublisher()
+    var effectDidDispatch = PassthroughSubject<HomeEffect, Never>()
 
     // MARK: - Initialization
 
@@ -47,7 +46,7 @@ extension HomeStore: HomeStoreProtocol {
     func dispatch(event: HomeEvent) {
         let effects = reducer.reduce(state: &state, event: event)
         effects.forEach {
-            didDispatchEffect?($0)
+            effectDidDispatch.send($0)
         }
     }
 }

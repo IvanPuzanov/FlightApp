@@ -5,6 +5,7 @@
 //  Created by Ivan Puzanov on 29.06.2026.
 //
 
+import SnapKit
 import UIKit
 
 protocol HomeHeaderViewModuleInputProtocol: ModuleInputProtocol where State == HomeState.HeaderState {}
@@ -17,6 +18,9 @@ final class HomeHeaderView: UIView {
     private let configurationFactory: HomeHeaderViewConfigurationFactoryProtocol
 
     // MARK: - UI
+
+    private let gradientView = GradientView()
+    private let containerView = UIView()
 
     private let leadingImageView = UIImageView()
     private let contentView = UIStackView()
@@ -42,12 +46,12 @@ final class HomeHeaderView: UIView {
     // MARK: - Private
 
     private func setupUI() {
-        addSubviews(leadingImageView, contentView, trailingImageView)
+        addSubviews(gradientView, containerView)
+        containerView.addSubviews(leadingImageView, contentView, trailingImageView)
         contentView.addArrangedSubviews(titleLabel, subtitleLabel, searchTextField)
-        withBackgroundColor(.Background.elevation1)
-        withCornerRadius(24)
-        withShadow()
 
+        setupGradientView()
+        setupContainerView()
         setupLeadingImageView()
         setupTrailingImageView()
         setupContentView()
@@ -56,17 +60,34 @@ final class HomeHeaderView: UIView {
         setupSearchTextField()
     }
 
+    private func setupGradientView() {
+        gradientView.snp.makeConstraints {
+            $0.leading.trailing.top.equalToSuperview()
+            $0.height.equalTo(180)
+        }
+    }
+
+    private func setupContainerView() {
+        containerView
+            .withBackgroundColor(.Background.header)
+            .withCornerRadius(24)
+
+        containerView.snp.makeConstraints {
+            $0.top.equalTo(safeAreaLayoutGuide).inset(10)
+            $0.leading.trailing.equalToSuperview().inset(16)
+        }
+    }
+
     private func setupLeadingImageView() {
         leadingImageView.tintColor = .Text.primary
         leadingImageView.contentMode = .scaleAspectFit
         leadingImageView.translatesAutoresizingMaskIntoConstraints = false
 
-        NSLayoutConstraint.activate([
-            leadingImageView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 14),
-            leadingImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
-            leadingImageView.heightAnchor.constraint(equalToConstant: 24),
-            leadingImageView.widthAnchor.constraint(equalToConstant: 24)
-        ])
+        leadingImageView.snp.makeConstraints {
+            $0.height.width.equalTo(24)
+            $0.centerY.equalToSuperview()
+            $0.leading.equalToSuperview().inset(14)
+        }
     }
 
     private func setupTrailingImageView() {
@@ -74,12 +95,11 @@ final class HomeHeaderView: UIView {
         trailingImageView.contentMode = .scaleAspectFit
         trailingImageView.translatesAutoresizingMaskIntoConstraints = false
 
-        NSLayoutConstraint.activate([
-            trailingImageView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -14),
-            trailingImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
-            trailingImageView.heightAnchor.constraint(equalToConstant: 24),
-            trailingImageView.widthAnchor.constraint(equalToConstant: 24)
-        ])
+        trailingImageView.snp.makeConstraints {
+            $0.height.width.equalTo(24)
+            $0.centerY.equalToSuperview()
+            $0.trailing.equalToSuperview().inset(14)
+        }
     }
 
     private func setupContentView() {
@@ -88,13 +108,12 @@ final class HomeHeaderView: UIView {
         contentView.spacing = 4
         contentView.translatesAutoresizingMaskIntoConstraints = false
 
-        NSLayoutConstraint.activate([
-            contentView.leadingAnchor.constraint(equalTo: leadingImageView.trailingAnchor, constant: 16),
-            contentView.trailingAnchor.constraint(equalTo: trailingImageView.leadingAnchor, constant: -16),
-            contentView.centerYAnchor.constraint(equalTo: centerYAnchor),
-            contentView.topAnchor.constraint(greaterThanOrEqualTo: topAnchor, constant: 18),
-            contentView.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor, constant: -18)
-        ])
+        contentView.snp.makeConstraints {
+            $0.centerY.equalToSuperview()
+            $0.leading.equalTo(leadingImageView.snp.trailing).offset(14)
+            $0.trailing.equalTo(trailingImageView.snp.leading).offset(-14)
+            $0.top.bottom.equalToSuperview().inset(18)
+        }
     }
 
     private func setupTitleLabel() {
@@ -120,6 +139,8 @@ extension HomeHeaderView: HomeHeaderViewModuleInputProtocol {
     func apply(_ state: HomeState.HeaderState) {
         let configuration = configurationFactory.makeHeaderViewConfiguration(from: state)
         configure(with: configuration)
+        updateBackgroundColor(with: state.progress)
+        gradientView.offsetStartPoint(y: state.progress)
     }
 }
 
@@ -138,6 +159,14 @@ extension HomeHeaderView {
 
             self.updateVisibility(for: configuration.mode)
         }
+    }
+
+    private func updateBackgroundColor(with progress: CGFloat) {
+        let newBackgroundColor = UIColor.interpolate(
+            from: .Background.header,
+            to: .Background.neutral1,
+            progress: progress)
+        containerView.backgroundColor = newBackgroundColor
     }
 
     private func updateVisibility(for mode: HomeHeaderViewConfiguration.Mode) {

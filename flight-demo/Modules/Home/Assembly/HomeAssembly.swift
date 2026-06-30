@@ -32,6 +32,7 @@ final class HomeAssembly: HomeAssemblyProtocol {
         let flightListView = HomeFlightListView(presenter: presenter)
         let flightListBottomSheet = BottomSheetViewController(contentView: flightListView)
         let viewController = HomeViewController(
+            presenter: presenter,
             headerView: headerView,
             mapViewController: mapViewController,
             flightListBottomSheet: flightListBottomSheet
