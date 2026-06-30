@@ -52,15 +52,7 @@ final class HomeReducer: HomeReducerProtocol {
     private func reduceFlightListEvent(_ event: HomeEvent.UIEvent.FlightListEvent, state: inout HomeState) -> [HomeEffect] {
         switch event {
         case let .onBottomSheetHeightChange(progress):
-            switch progress {
-            case 0.96...1:
-                let opacity = (progress - 0.96) / (1 - 0.96)
-                state.headerState.progress = opacity
-                state.flightListState.isGrabberHidden = true
-            default:
-                state.flightListState.isGrabberHidden = false
-            }
-
+            updateStateOnBottomSheetHeight(progress: progress, state: &state)
             return []
         }
     }
@@ -68,10 +60,10 @@ final class HomeReducer: HomeReducerProtocol {
     private func reduceCommonEvent(_ event: HomeEvent.UIEvent.CommonEvent, state: inout HomeState) -> [HomeEffect] {
         switch event {
         case .onViewDidLoad:
-            state.flightListState.bottomSheetDetents = [120, 500]
+            state.flightListState.bottomSheetDetents = [120]
             return [.data(.loadData)]
         case let .onCalculateFlightListMaxHeight(maxHeight):
-            state.flightListState.bottomSheetDetents = [120, 500, maxHeight]
+            state.flightListState.bottomSheetDetents = [120, maxHeight / 2, maxHeight]
             return []
         }
     }
@@ -83,5 +75,18 @@ final class HomeReducer: HomeReducerProtocol {
         }
 
         return []
+    }
+
+    // MARK: - Private flight list event handling
+
+    private func updateStateOnBottomSheetHeight(progress: CGFloat, state: inout HomeState) {
+        switch progress {
+        case 0.9...1:
+            let opacity = (progress - 0.9) / (1 - 0.9)
+            state.headerState.progress = opacity
+            state.flightListState.isGrabberHidden = true
+        default:
+            state.flightListState.isGrabberHidden = false
+        }
     }
 }

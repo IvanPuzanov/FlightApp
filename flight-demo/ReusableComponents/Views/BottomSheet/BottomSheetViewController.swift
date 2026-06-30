@@ -87,7 +87,7 @@ final class BottomSheetViewController<ContentView: BottomSheetContentViewProtoco
     private func handlePanGesture() {
         switch panGestureRecognizer.state {
         case .began:
-            dispacthEventOnHeightChange()
+            break
         case .changed:
             let translation = panGestureRecognizer.translation(in: view)
             let newHeight = currentHeight - translation.y
@@ -96,7 +96,8 @@ final class BottomSheetViewController<ContentView: BottomSheetContentViewProtoco
 
             applyHeight(newHeight)
         case .cancelled, .ended:
-            clipToNearestDetent()
+            let velocity = panGestureRecognizer.velocity(in: view)
+            clipToNearestDetent(with: velocity.y)
         default:
             break
         }
@@ -117,10 +118,21 @@ final class BottomSheetViewController<ContentView: BottomSheetContentViewProtoco
         contentView.dispatch(.onProgressDidChange(progress))
     }
 
-    private func clipToNearestDetent() {
-        if let nearestHeight = detents.min(by: { abs(currentHeight - $0) < abs(currentHeight - $1) }) {
-            applyHeight(nearestHeight, animated: true)
+    private func clipToNearestDetent(with velocity: CGFloat) {
+        let targetHeight: CGFloat
+
+        switch velocity {
+        case ..<(-800):
+            targetHeight = detents.first(where: { $0 > currentHeight }) ?? maxDetent
+        case 800...:
+            targetHeight = detents.last(where: { $0 < currentHeight }) ?? detents[0]
+        default:
+            targetHeight = detents.min {
+                abs($0 - currentHeight) < abs($1 - currentHeight)
+            } ?? currentHeight
         }
+
+        applyHeight(targetHeight, animated: true)
     }
 }
 
