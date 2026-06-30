@@ -7,16 +7,13 @@
 
 import CoreLocation
 
-protocol HomePresenterProtocol: AnyObject {
-    func dispatch(_ event: HomeEvent.UIEvent)
-}
-
 final class HomePresenter {
 
     // MARK: - Dependencies
 
-    weak var mapView: HomeMapViewControllerProtocol?
-    weak var bottomSheetView: HomeBottomSheetViewControllerProtocol?
+    weak var headerView: (any HomeHeaderViewModuleInputProtocol)?
+    weak var mapView: (any HomeMapModuleInputProtocol)?
+    weak var flightListView: (any HomeFlightListModuleInputProtocol)?
 
     private var store: HomeStoreProtocol
     private let service: HomeServiceProtocol
@@ -51,8 +48,9 @@ final class HomePresenter {
         }
 
         store.didUpdateState = { [weak self] state in
-            self?.mapView?.apply(state: state.mapState)
-            self?.bottomSheetView?.apply(state: state.bottomSheetState)
+            self?.headerView?.apply(state.headerState)
+            self?.mapView?.apply(state.mapState)
+            self?.flightListView?.apply(state.flightListState)
         }
     }
 
@@ -60,21 +58,18 @@ final class HomePresenter {
         switch effect {
         case .loadData:
             service.loadData()
-        }
-    }
-
-    private func handleUiEffect(_ effect: HomeEffect.UIEffect) {
-        switch effect {
-        case .moveMapToDefaultRegion:
+        case .getDefaultRegionLocation:
             let location = locationManager.getDefaultLocation()
             store.dispatch(event: .data(.onGetLocation(location)))
         }
     }
+
+    private func handleUiEffect(_ effect: HomeEffect.UIEffect) {}
 }
 
-// MARK: - HomePresenterProtocol
+// MARK: - ModuleOutputProtocol
 
-extension HomePresenter: HomePresenterProtocol {
+extension HomePresenter: HomeHeaderViewModuleOutputProtocol, HomeMapModuleOutputProtocol, HomeFlightListModuleOutputProtocol {
 
     func dispatch(_ event: HomeEvent.UIEvent) {
         store.dispatch(event: .ui(event))

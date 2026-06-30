@@ -13,11 +13,10 @@ enum HomeEffect {
 }
 
 extension HomeEffect {
-    enum UIEffect {
-        case moveMapToDefaultRegion
-    }
+    enum UIEffect {}
 
     enum DataEffect {
         case loadData
+        case getDefaultRegionLocation
     }
 }

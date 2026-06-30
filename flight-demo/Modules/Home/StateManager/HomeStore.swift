@@ -19,7 +19,6 @@ final class HomeStore {
     // MARK: - Dependencies
 
     private let reducer: HomeReducerProtocol
-    weak var presenter: HomePresenterProtocol?
 
     // MARK: - Properties
 

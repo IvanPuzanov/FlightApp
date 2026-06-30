@@ -8,8 +8,9 @@
 import MapKit
 
 struct HomeState: Equatable {
+    var headerState: HeaderState
     var mapState: MapState
-    var bottomSheetState: BottomSheetState
+    var flightListState: FlightListState
 }
 
 extension HomeState {
@@ -23,24 +24,19 @@ extension HomeState {
         case search(text: String?)
     }
 
-    struct BottomSheetState: Equatable {
-        var detents: [Detent]
-    }
-}
-
-extension HomeState.BottomSheetState {
-    enum Detent: Equatable {
-        case compact(CGFloat)
-        case medium(CGFloat)
-        case custom(CGFloat)
+    struct FlightListState: Equatable {
+        var bottomSheetDetents: [CGFloat]
     }
 }
 
 extension HomeState {
     static var initial: HomeState {
         HomeState(
+            headerState: .search(text: nil),
             mapState: .initial,
-            bottomSheetState: .initial
+            flightListState: FlightListState(
+                bottomSheetDetents: []
+            )
         )
     }
 }
@@ -50,14 +46,6 @@ extension HomeState.MapState {
         HomeState.MapState(
             currentLocation: nil,
             headerState: .search(text: nil)
-        )
-    }
-}
-
-extension HomeState.BottomSheetState {
-    static var initial: HomeState.BottomSheetState {
-        HomeState.BottomSheetState(
-            detents: []
         )
     }
 }

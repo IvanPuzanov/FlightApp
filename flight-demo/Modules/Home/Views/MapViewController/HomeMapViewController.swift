@@ -9,34 +9,24 @@ import MapKit
 import SnapKit
 import UIKit
 
-protocol HomeMapViewControllerProtocol: AnyObject {
-    func apply(state: HomeState.MapState)
-}
+protocol HomeMapModuleInputProtocol: ModuleInputProtocol where State == HomeState.MapState {}
+protocol HomeMapModuleOutputProtocol: ModuleOutputProtocol where Event == HomeEvent.UIEvent {}
 
 final class HomeMapViewController: UIViewController {
 
     // MARK: - Dependecies
 
-    private let presenter: HomePresenterProtocol
-    private let configurationFactory: HomeMapConfigurationFactoryProtocol
+    private let presenter: any HomeMapModuleOutputProtocol
 
     // MARK: - UI
 
     private let mapView = MKMapView()
     private let gradientView = GradientView()
-    private let headerView = HomeHeaderView()
-    private let bottomSheetViewController: HomeBottomSheetViewController
 
     // MARK: - Initialization
 
-    init(
-        presenter: HomePresenterProtocol,
-        configurationFactory: HomeMapConfigurationFactoryProtocol,
-        bottomSheetViewController: HomeBottomSheetViewController
-    ) {
+    init(presenter: any HomeMapModuleOutputProtocol) {
         self.presenter = presenter
-        self.configurationFactory = configurationFactory
-        self.bottomSheetViewController = bottomSheetViewController
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -56,15 +46,13 @@ final class HomeMapViewController: UIViewController {
     // MARK: - Private
 
     private func setupUI() {
-        view.addSubviews(mapView, gradientView, bottomSheetViewController.view, headerView)
+        view.addSubviews(mapView, gradientView)
         view.backgroundColor = .systemBackground
         navigationController?.setNavigationBarHidden(true, animated: false)
 
         setupMapView()
         setupMapStyle()
         setupGradientView()
-        setupBottomSheet()
-        setupHeaderView()
     }
 
     private func setupMapView() {
@@ -92,27 +80,6 @@ final class HomeMapViewController: UIViewController {
             $0.leading.trailing.top.equalToSuperview()
         }
     }
-
-    private func setupBottomSheet() {
-        addChild(bottomSheetViewController)
-        bottomSheetViewController.didMove(toParent: self)
-
-        bottomSheetViewController.view.snp.makeConstraints {
-            $0.leading.trailing.bottom.equalToSuperview()
-        }
-    }
-
-    private func setupHeaderView() {
-        headerView
-            .withBackgroundColor(.systemBackground)
-            .withCornerRadius(30)
-            .withShadow()
-
-        headerView.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide).inset(12)
-            $0.leading.trailing.equalToSuperview().inset(16)
-        }
-    }
 }
 
 // MARK: - MKMapViewDelegate
@@ -126,16 +93,10 @@ extension HomeMapViewController: MKMapViewDelegate {
 
 // MARK: - HomeViewControllerProtocol
 
-extension HomeMapViewController: HomeMapViewControllerProtocol {
+extension HomeMapViewController: HomeMapModuleInputProtocol {
 
-    func apply(state: HomeState.MapState) {
-        configureHeaderView(from: state.headerState)
+    func apply(_ state: HomeState.MapState) {
         moveToUserRegionIfNeeded(location: state.currentLocation)
-    }
-
-    private func configureHeaderView(from state: HomeState.HeaderState) {
-        let configuration = configurationFactory.makeHeaderViewConfiguration(from: state)
-        headerView.configure(with: configuration)
     }
 
     private func moveToUserRegionIfNeeded(location: Coordinate?) {

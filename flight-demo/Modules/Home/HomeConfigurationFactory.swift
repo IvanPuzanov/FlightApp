@@ -15,7 +15,7 @@ private enum Constants {
     static let searchTrailingIcon = UIImage(systemName: "slider.horizontal.3") ?? UIImage()
 }
 
-protocol HomeMapConfigurationFactoryProtocol: AnyObject {
+protocol HomeHeaderViewConfigurationFactoryProtocol: AnyObject {
     func makeHeaderViewConfiguration(
         from state: HomeState.HeaderState
     ) -> HomeHeaderViewConfiguration
@@ -28,9 +28,9 @@ protocol HomeBottomSheetConfigurationFactoryProtocol: AnyObject {
 
 final class HomeConfigurationFactory {}
 
-// MARK: - HomeMapConfigurationFactoryProtocol
+// MARK: - HomeHeaderViewConfigurationFactoryProtocol
 
-extension HomeConfigurationFactory: HomeMapConfigurationFactoryProtocol {
+extension HomeConfigurationFactory: HomeHeaderViewConfigurationFactoryProtocol {
 
     // MARK: - Public
 
@@ -98,8 +98,8 @@ extension HomeConfigurationFactory: HomeBottomSheetConfigurationFactoryProtocol 
                 viewConfiguration: ContainerViewConfiguration<FlightDetailsView>(
                     viewConfiguration: FlightDetailsViewConfiguration(
                         departureAirportConfiguration: createFlightAirportViewConfiguration(
-                            airport: "LED",
-                            cityAndCountry: "Saint-Petersburgh, Russia",
+                            airport: "CDG",
+                            cityAndCountry: "Paris, France",
                             timeZone: "GMT +3"
                         ),
                         arrivalAirportConfiguration: createFlightAirportViewConfiguration(

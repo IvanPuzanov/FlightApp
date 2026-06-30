@@ -7,7 +7,14 @@
 
 import UIKit
 
+protocol HomeHeaderViewModuleInputProtocol: ModuleInputProtocol where State == HomeState.HeaderState {}
+protocol HomeHeaderViewModuleOutputProtocol: ModuleOutputProtocol where Event == HomeEvent.UIEvent {}
+
 final class HomeHeaderView: UIView {
+
+    // MARK: - Dependencies
+
+    private let configurationFactory: HomeHeaderViewConfigurationFactoryProtocol
 
     // MARK: - UI
 
@@ -21,8 +28,9 @@ final class HomeHeaderView: UIView {
 
     // MARK: - Initialization
 
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    init(configurationFactory: HomeHeaderViewConfigurationFactoryProtocol) {
+        self.configurationFactory = configurationFactory
+        super.init(frame: .zero)
 
         setupUI()
     }
@@ -36,6 +44,9 @@ final class HomeHeaderView: UIView {
     private func setupUI() {
         addSubviews(leadingImageView, contentView, trailingImageView)
         contentView.addArrangedSubviews(titleLabel, subtitleLabel, searchTextField)
+        withBackgroundColor(.Background.elevation1)
+        withCornerRadius(24)
+        withShadow()
 
         setupLeadingImageView()
         setupTrailingImageView()
@@ -102,9 +113,19 @@ final class HomeHeaderView: UIView {
     }
 }
 
-// MARK: - ConfigurableView
+// MARK: - HomeHeaderViewModuleInputProtocol
 
-extension HomeHeaderView: ConfigurableView {
+extension HomeHeaderView: HomeHeaderViewModuleInputProtocol {
+
+    func apply(_ state: HomeState.HeaderState) {
+        let configuration = configurationFactory.makeHeaderViewConfiguration(from: state)
+        configure(with: configuration)
+    }
+}
+
+// MARK: - Configuration
+
+extension HomeHeaderView {
 
     func configure(with configuration: HomeHeaderViewConfiguration) {
         UIView.animate(withDuration: 0.3) {
