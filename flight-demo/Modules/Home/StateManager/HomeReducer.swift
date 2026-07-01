@@ -24,9 +24,12 @@ final class HomeReducer: HomeReducerProtocol {
         }
     }
 
-    // MARK: - Private
+    // MARK: - Private UI event handling
 
-    private func reduceUiEvent(_ event: HomeEvent.UIEvent, state: inout HomeState) -> [HomeEffect] {
+    private func reduceUiEvent(
+        _ event: HomeEvent.UIEvent,
+        state: inout HomeState
+    ) -> [HomeEffect] {
         switch event {
         case let .map(mapEvent):
             return reduceMapEvent(mapEvent, state: &state)
@@ -37,7 +40,10 @@ final class HomeReducer: HomeReducerProtocol {
         }
     }
 
-    private func reduceMapEvent(_ event: HomeEvent.UIEvent.MapEvent, state: inout HomeState) -> [HomeEffect] {
+    private func reduceMapEvent(
+        _ event: HomeEvent.UIEvent.MapEvent,
+        state: inout HomeState
+    ) -> [HomeEffect] {
         switch event {
         case .onMapDidLoad:
             return state.mapState.isDefaultRegionSet
@@ -49,7 +55,10 @@ final class HomeReducer: HomeReducerProtocol {
         }
     }
 
-    private func reduceFlightListEvent(_ event: HomeEvent.UIEvent.FlightListEvent, state: inout HomeState) -> [HomeEffect] {
+    private func reduceFlightListEvent(
+        _ event: HomeEvent.UIEvent.FlightListEvent,
+        state: inout HomeState
+    ) -> [HomeEffect] {
         switch event {
         case let .onBottomSheetHeightChange(progress):
             updateStateOnBottomSheetHeight(progress: progress, state: &state)
@@ -57,21 +66,37 @@ final class HomeReducer: HomeReducerProtocol {
         }
     }
 
-    private func reduceCommonEvent(_ event: HomeEvent.UIEvent.CommonEvent, state: inout HomeState) -> [HomeEffect] {
+    private func reduceCommonEvent(
+        _ event: HomeEvent.UIEvent.CommonEvent,
+        state: inout HomeState
+    ) -> [HomeEffect] {
         switch event {
         case .onViewDidLoad:
             state.flightListState.appearance.bottomSheetDetents = [120]
-            return [.data(.loadData)]
+            return [.data(.loadFlights)]
         case let .onCalculateFlightListMaxHeight(maxHeight):
             state.flightListState.appearance.bottomSheetDetents = [120, maxHeight / 2, maxHeight]
             return []
         }
     }
 
-    private func reduceDataEvent(_ event: HomeEvent.DataEvent, state: inout HomeState) -> [HomeEffect] {
+    // MARK: - Private Data event handling
+
+    private func reduceDataEvent(
+        _ event: HomeEvent.DataEvent,
+        state: inout HomeState
+    ) -> [HomeEffect] {
         switch event {
         case let .onGetLocation(coordinate):
             state.mapState.defaultRegionCoordinate = coordinate
+        case .onAirportsLoaded:
+            break
+        case .onAirportsFailed:
+            break
+        case let .onFlightsLoaded(flights):
+            state.flightListState.contentState = flights.isEmpty ? .status(.empty) : .status(.empty)
+        case .onFlightsFailed:
+            state.flightListState.contentState = .status(.error)
         }
 
         return []

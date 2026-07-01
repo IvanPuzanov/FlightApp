@@ -44,8 +44,6 @@ final class HomePresenter {
         store.effectDidDispatch
             .sink { [weak self] effect in
                 switch effect {
-                case let .ui(uiEffect):
-                    self?.handleUiEffect(uiEffect)
                 case let .data(dataEffect):
                     self?.handleDataEffect(dataEffect)
                 }
@@ -65,15 +63,37 @@ final class HomePresenter {
 
     private func handleDataEffect(_ effect: HomeEffect.DataEffect) {
         switch effect {
-        case .loadData:
-            service.loadData()
+        case .loadAirports:
+            loadAirports()
+        case .loadFlights:
+            loadFlights()
         case .getDefaultRegionLocation:
             let location = locationManager.getDefaultLocation()
             store.dispatch(event: .data(.onGetLocation(location)))
         }
     }
 
-    private func handleUiEffect(_ effect: HomeEffect.UIEffect) {}
+    private func loadAirports() {
+        service.loadAirports()
+            .sink { [weak self] completion in
+                guard case .failure = completion else { return }
+
+                self?.store.dispatch(event: .data(.onAirportsFailed))
+            } receiveValue: { [weak self] airports in
+                self?.store.dispatch(event: .data(.onAirportsLoaded(airports)))
+            }.store(in: &bag)
+    }
+
+    private func loadFlights() {
+        service.loadFlights()
+            .sink { [weak self] completion in
+                guard case .failure = completion else { return }
+
+                self?.store.dispatch(event: .data(.onFlightsFailed))
+            } receiveValue: { [weak self] flights in
+                self?.store.dispatch(event: .data(.onFlightsLoaded(flights)))
+            }.store(in: &bag)
+    }
 }
 
 // MARK: - HomeViewModuleOutputProtocol

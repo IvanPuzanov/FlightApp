@@ -22,6 +22,12 @@ extension HomeState.FlightListState {
 
     enum ContentState: Equatable {
         case loading
+        case status(Status)
+    }
+
+    enum Status {
+        case error
+        case empty
     }
 }
 

@@ -22,6 +22,12 @@ extension HomeEvent {
 
     enum DataEvent {
         case onGetLocation(Coordinate)
+
+        case onAirportsLoaded([Airport])
+        case onAirportsFailed
+
+        case onFlightsLoaded([Flight])
+        case onFlightsFailed
     }
 }
 

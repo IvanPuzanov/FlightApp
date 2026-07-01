@@ -18,7 +18,10 @@ final class HomeAssembly: HomeAssemblyProtocol {
     func assemble() -> UIViewController {
         let reducer = HomeReducer()
         let store = HomeStore(reducer: reducer)
-        let service = HomeService()
+        let localStorageService = LocalStorageService()
+        let localDataSource = LocalDataSource(localStorageService: localStorageService)
+        let repository = Repository(localDataSource: localDataSource)
+        let service = HomeService(repository: repository)
         let locationManager = LocationManager()
         let presenter = HomePresenter(
             store: store,

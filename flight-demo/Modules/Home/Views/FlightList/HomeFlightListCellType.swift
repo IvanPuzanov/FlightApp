@@ -13,6 +13,7 @@ enum HomeFlightListCellType: Equatable {
 
 extension HomeFlightListCellType: Identifiable {
 
+
     var id: String {
         switch self {
         case let .shimmer(cellConfiguration):

@@ -27,6 +27,7 @@ final class HomeFlightListView: UIView {
     // MARK: - UI
 
     private let grabberView = UIView()
+    private let statusView = StatusView()
     private let tableView = UITableView()
 
     // MARK: - Properties
@@ -62,12 +63,13 @@ final class HomeFlightListView: UIView {
     // MARK: - Private
 
     private func setupUI() {
-        addSubviews(grabberView, tableView)
+        addSubviews(grabberView, statusView, tableView)
         withBackgroundColor(.Background.elevation1)
         withCornerRadius(44)
         withShadow()
 
         setupGrabberView()
+        setupStatusView()
         setupTableView()
     }
 
@@ -81,6 +83,14 @@ final class HomeFlightListView: UIView {
             $0.height.equalTo(6)
             $0.top.equalToSuperview().inset(12)
             $0.centerX.equalToSuperview()
+        }
+    }
+
+    private func setupStatusView() {
+        statusView.snp.makeConstraints {
+            $0.top.equalTo(grabberView.snp.bottom).offset(10)
+            $0.leading.trailing.equalToSuperview()
+            $0.bottom.greaterThanOrEqualToSuperview()
         }
     }
 
@@ -114,12 +124,25 @@ extension HomeFlightListView: HomeFlightListModuleInputProtocol {
 
     func apply(_ state: HomeState.FlightListState) {
         configureAppearance(with: state.appearance)
+        updateVisibility(with: state.contentState)
         renderTableView(from: state.contentState)
+        renderStatusViewIfNeeded(from: state.contentState)
     }
 
     private func configureAppearance(with appearance: HomeState.FlightListState.Appearance) {
         bottomSheet?.setupDetents(appearance.bottomSheetDetents)
         layer.shadowOpacity = appearance.isGrabberHidden ? 0 : 0.1
+    }
+
+    private func updateVisibility(with state: HomeState.FlightListState.ContentState) {
+        switch state {
+        case .loading:
+            tableView.isHidden = false
+            statusView.isHidden = true
+        case .status:
+            tableView.isHidden = true
+            statusView.isHidden = false
+        }
     }
 
     private func renderTableView(from state: HomeState.FlightListState.ContentState) {
@@ -132,5 +155,15 @@ extension HomeFlightListView: HomeFlightListModuleInputProtocol {
         snapshot.appendSections([0])
         snapshot.appendItems(ids, toSection: 0)
         dataSource.apply(snapshot)
+    }
+
+    private func renderStatusViewIfNeeded(from state: HomeState.FlightListState.ContentState) {
+        switch state {
+        case .loading:
+            break
+        case let .status(status):
+            let configuration = configurationFactory.createStatusViewConfiguration(from: status)
+            statusView.configure(with: configuration)
+        }
     }
 }
