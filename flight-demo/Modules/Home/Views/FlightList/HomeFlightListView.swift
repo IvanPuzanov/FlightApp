@@ -40,6 +40,9 @@ final class HomeFlightListView: UIView {
         case let .shimmer(cellConfiguration):
             let cell = tableView.dequeueReusableCell(with: cellConfiguration)
             return cell
+        case let .flight(cellConfiguration):
+            let cell = tableView.dequeueReusableCell(with: cellConfiguration)
+            return cell
         }
     }
 
@@ -65,7 +68,7 @@ final class HomeFlightListView: UIView {
     private func setupUI() {
         addSubviews(grabberView, statusView, tableView)
         withBackgroundColor(.Background.elevation1)
-        withCornerRadius(44)
+        withCornerRadius(30)
         withShadow()
 
         setupGrabberView()
@@ -98,6 +101,7 @@ final class HomeFlightListView: UIView {
         tableView.isScrollEnabled = false
         tableView.backgroundColor = .clear
         tableView.separatorStyle = .none
+        dataSource.defaultRowAnimation = .fade
 
         tableView.snp.makeConstraints {
             $0.top.equalTo(grabberView.snp.bottom).offset(10)
@@ -136,7 +140,7 @@ extension HomeFlightListView: HomeFlightListModuleInputProtocol {
 
     private func updateVisibility(with state: HomeState.FlightListState.ContentState) {
         switch state {
-        case .loading:
+        case .loading, .content:
             tableView.isHidden = false
             statusView.isHidden = true
         case .status:
@@ -147,6 +151,7 @@ extension HomeFlightListView: HomeFlightListModuleInputProtocol {
 
     private func renderTableView(from state: HomeState.FlightListState.ContentState) {
         let newCellTypes = configurationFactory.createFlightListCellTypes(from: state)
+
         let ids = newCellTypes.compactMap { $0.id }
 
         cellTypes = Dictionary(uniqueKeysWithValues: zip(ids, newCellTypes))
@@ -159,7 +164,7 @@ extension HomeFlightListView: HomeFlightListModuleInputProtocol {
 
     private func renderStatusViewIfNeeded(from state: HomeState.FlightListState.ContentState) {
         switch state {
-        case .loading:
+        case .loading, .content:
             break
         case let .status(status):
             let configuration = configurationFactory.createStatusViewConfiguration(from: status)

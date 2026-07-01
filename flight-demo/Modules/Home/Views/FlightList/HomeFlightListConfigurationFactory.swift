@@ -31,9 +31,11 @@ final class HomeFlightListConfigurationFactory: HomeFlightListConfigurationFacto
     ) -> [HomeFlightListCellType] {
         switch state {
         case .loading:
-            createShimmerCellTypes()
+            return createShimmerCellTypes()
         case .status:
-            []
+            return []
+        case let .content(flights):
+            return createFlightItemCellTypes(from: flights)
         }
     }
 
@@ -86,5 +88,60 @@ final class HomeFlightListConfigurationFactory: HomeFlightListConfigurationFacto
                 )
             )
         }
+    }
+
+    private func createFlightItemCellTypes(from flights: [Flight]) -> [HomeFlightListCellType] {
+        flights.map {
+            .flight(
+                TableViewReusableCellConfiguration<ContainerView<HomeFlightListItemView>>(
+                    viewConfiguration: ContainerViewConfiguration<HomeFlightListItemView>(
+                        viewConfiguration: createHomeFlightListItemViewConfiguration(from: $0),
+                        insets: .custom(top: 6, bottom: 6, left: 16, right: 16)
+                    )
+                )
+            )
+        }
+    }
+
+    private func createHomeFlightListItemViewConfiguration(
+        from flight: Flight
+    ) -> HomeFlightListItemViewConfiguration {
+        HomeFlightListItemViewConfiguration(
+            id: flight.flightNumber,
+            airlineImage: UIImage(systemName: "airplane") ?? UIImage(),
+            airlineLabelConfiguration: LabelConfiguration(text: flight.airline),
+            flightNumberBadgeConfiguration: BadgeViewConfiguration(
+                image: nil,
+                labelConfiguration: LabelConfiguration(
+                    text: flight.flightNumber,
+                    font: .systemFont(ofSize: 14)
+                ),
+                backgroundColor: .quaternarySystemFill
+            ),
+            aircarftBadgeConfiguration: BadgeViewConfiguration(
+                image: nil,
+                labelConfiguration: LabelConfiguration(
+                    text: flight.aircraft,
+                    font: .systemFont(ofSize: 14)
+                ),
+                backgroundColor: .quaternarySystemFill
+            ),
+            originCityLabelConfiguration: LabelConfiguration(
+                text: flight.originCity,
+                font: .systemFont(ofSize: 14, weight: .bold)
+            ),
+            originIATALabelConfiguration: LabelConfiguration(
+                text: flight.originIata,
+                font: .systemFont(ofSize: 24)
+            ),
+            destinationCityLabelConfiguration: LabelConfiguration(
+                text: flight.destinationCity,
+                font: .systemFont(ofSize: 14, weight: .bold)
+            ),
+            destinationIATALabelConfiguration: LabelConfiguration(
+                text: flight.destinationIata,
+                font: .systemFont(ofSize: 24)
+            )
+        )
     }
 }

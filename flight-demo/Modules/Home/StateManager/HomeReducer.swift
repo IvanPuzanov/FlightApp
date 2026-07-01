@@ -94,7 +94,7 @@ final class HomeReducer: HomeReducerProtocol {
         case .onAirportsFailed:
             break
         case let .onFlightsLoaded(flights):
-            state.flightListState.contentState = flights.isEmpty ? .status(.empty) : .status(.empty)
+            state.flightListState.contentState = flights.isEmpty ? .status(.empty) : .content(flights)
         case .onFlightsFailed:
             state.flightListState.contentState = .status(.error)
         }

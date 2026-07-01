@@ -15,7 +15,5 @@ protocol ConfigurableView {
 }
 
 extension ConfigurableView {
-    func prepareForReuse() {
-        prepareForReuse()
-    }
+    func prepareForReuse() {}
 }

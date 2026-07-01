@@ -11,6 +11,8 @@ struct FlightResponseModel: Decodable {
     let flightNumber: String
     let airline: String
     let aircraft: String
+    let originCity: String
     let originIata: String
+    let destinationCity: String
     let destinationIata: String
 }
