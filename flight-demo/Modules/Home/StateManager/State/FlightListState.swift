@@ -17,7 +17,7 @@ extension HomeState {
 extension HomeState.FlightListState {
     struct Appearance: Equatable {
         var bottomSheetDetents: [CGFloat]
-        var isGrabberHidden: Bool
+        var bottomSheetProgress: CGFloat
     }
 
     enum ContentState: Equatable {
@@ -35,7 +35,10 @@ extension HomeState.FlightListState {
 extension HomeState.FlightListState {
     static var initial: HomeState.FlightListState {
         HomeState.FlightListState(
-            appearance: Appearance(bottomSheetDetents: [], isGrabberHidden: false),
+            appearance: Appearance(
+                bottomSheetDetents: [],
+                bottomSheetProgress: 0
+            ),
             contentState: .loading
         )
     }

@@ -75,7 +75,7 @@ final class HomeReducer: HomeReducerProtocol {
             state.flightListState.appearance.bottomSheetDetents = [120]
             return [.data(.loadFlights)]
         case let .onCalculateFlightListMaxHeight(maxHeight):
-            state.flightListState.appearance.bottomSheetDetents = [120, maxHeight / 2, maxHeight]
+            state.flightListState.appearance.bottomSheetDetents = [120, maxHeight / 2, maxHeight - 38]
             return []
         }
     }
@@ -105,13 +105,8 @@ final class HomeReducer: HomeReducerProtocol {
     // MARK: - Private flight list event handling
 
     private func updateStateOnBottomSheetHeight(progress: CGFloat, state: inout HomeState) {
-        switch progress {
-        case 0.9...1:
-            let opacity = (progress - 0.9) / (1 - 0.9)
-            state.headerState.progress = opacity
-            state.flightListState.appearance.isGrabberHidden = true
-        default:
-            state.flightListState.appearance.isGrabberHidden = false
-        }
+        let bottomSheetProgress = max(0, (progress - 0.95) / (1 - 0.95))
+        state.headerState.bottomSheetProgress = bottomSheetProgress
+        state.flightListState.appearance.bottomSheetProgress = bottomSheetProgress
     }
 }

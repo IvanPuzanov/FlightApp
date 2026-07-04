@@ -8,6 +8,10 @@
 import SnapKit
 import UIKit
 
+private enum Constants {
+    static let cornerRadius: CGFloat = 30
+}
+
 protocol HomeFlightListModuleInputProtocol: ModuleInputProtocol where State == HomeState.FlightListState {}
 protocol HomeFlightListModuleOutputProtocol: ModuleOutputProtocol where Event == HomeEvent.UIEvent {}
 
@@ -68,7 +72,7 @@ final class HomeFlightListView: UIView {
     private func setupUI() {
         addSubviews(grabberView, statusView, tableView)
         withBackgroundColor(.Background.elevation1)
-        withCornerRadius(30)
+        withCornerRadius(Constants.cornerRadius, corners: [.topLeft, .topRight])
         withShadow()
 
         setupGrabberView()
@@ -135,7 +139,10 @@ extension HomeFlightListView: HomeFlightListModuleInputProtocol {
 
     private func configureAppearance(with appearance: HomeState.FlightListState.Appearance) {
         bottomSheet?.setupDetents(appearance.bottomSheetDetents)
-        layer.shadowOpacity = appearance.isGrabberHidden ? 0 : 0.1
+        layer.shadowOpacity = Float((1 - appearance.bottomSheetProgress) / 10)
+
+        let cornerRadius = min(Constants.cornerRadius, (1 / appearance.bottomSheetProgress))
+        withCornerRadius(cornerRadius)
     }
 
     private func updateVisibility(with state: HomeState.FlightListState.ContentState) {

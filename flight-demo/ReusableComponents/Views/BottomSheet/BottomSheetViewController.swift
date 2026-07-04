@@ -24,6 +24,7 @@ final class BottomSheetViewController<ContentView: BottomSheetContentViewProtoco
 
     private let contentView: ContentView
     private lazy var panGestureRecognizer = UIPanGestureRecognizer()
+    private var animator: UIViewPropertyAnimator?
 
     // MARK: - Properties
 
@@ -65,8 +66,6 @@ final class BottomSheetViewController<ContentView: BottomSheetContentViewProtoco
     }
 
     private func setupAppearance() {
-        view.withCornerRadius(44, corners: [.topLeft, .topRight])
-
         view.snp.makeConstraints {
             heightConstraint = $0.height.equalTo(120).constraint
         }
@@ -87,7 +86,7 @@ final class BottomSheetViewController<ContentView: BottomSheetContentViewProtoco
     private func handlePanGesture() {
         switch panGestureRecognizer.state {
         case .began:
-            break
+            animator?.stopAnimation(true)
         case .changed:
             let translation = panGestureRecognizer.translation(in: view)
             let newHeight = currentHeight - translation.y
@@ -106,11 +105,13 @@ final class BottomSheetViewController<ContentView: BottomSheetContentViewProtoco
     }
 
     private func applyHeight(_ height: CGFloat, animated: Bool = false) {
-        UIView.animate(withDuration: animated ? 0.3 : 0) {
+        animator = UIViewPropertyAnimator(duration: 0.5, dampingRatio: 0.9) {
             self.heightConstraint?.update(offset: height)
             self.view.superview?.layoutIfNeeded()
             self.dispacthEventOnHeightChange()
         }
+
+        animator?.startAnimation()
     }
 
     private func dispacthEventOnHeightChange() {

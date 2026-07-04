@@ -10,7 +10,7 @@ import Foundation
 extension HomeState {
     struct HeaderState: Equatable {
         var mode: Mode
-        var progress: CGFloat
+        var bottomSheetProgress: CGFloat
     }
 }
 
@@ -25,7 +25,7 @@ extension HomeState.HeaderState {
     static var initial: HomeState.HeaderState {
         HomeState.HeaderState(
             mode: .search(text: nil),
-            progress: .zero
+            bottomSheetProgress: .zero
         )
     }
 }

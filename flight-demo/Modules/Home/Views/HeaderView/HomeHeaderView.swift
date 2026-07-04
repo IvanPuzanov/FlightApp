@@ -148,8 +148,8 @@ extension HomeHeaderView: HomeHeaderViewModuleInputProtocol {
     func apply(_ state: HomeState.HeaderState) {
         let configuration = configurationFactory.makeHeaderViewConfiguration(from: state)
         configure(with: configuration)
-        updateBackgroundColor(with: state.progress)
-        gradientView.offsetStartPoint(y: state.progress)
+        updateBackgroundColor(with: state.bottomSheetProgress)
+        gradientView.offsetStartPoint(y: state.bottomSheetProgress)
     }
 }
 
