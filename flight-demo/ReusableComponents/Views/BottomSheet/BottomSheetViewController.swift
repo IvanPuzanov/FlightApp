@@ -107,13 +107,16 @@ final class BottomSheetViewController<ContentView: BottomSheetContentViewProtoco
     }
 
     private func applyHeight(_ height: CGFloat, animated: Bool = false) {
-        animator = UIViewPropertyAnimator(duration: 0.5, dampingRatio: 0.9) {
+        animator = UIViewPropertyAnimator(duration: 0.4, dampingRatio: 0.9) {
             self.heightConstraint?.update(offset: height)
             self.view.superview?.layoutIfNeeded()
             self.dispacthEventOnHeightChange()
         }
 
         animator?.startAnimation()
+        animator?.addCompletion { _ in
+            self.updateScrollViewAvailability()
+        }
     }
 
     private func dispacthEventOnHeightChange() {

@@ -16,6 +16,7 @@ protocol HomeFlightListConfigurationFactoryProtocol: AnyObject {
     func createStatusViewConfiguration(
         from status: HomeState.FlightListState.Status
     ) -> StatusViewConfiguration
+    func createMapButtonConfiguration() -> HomeFlightListMapButtonConfiguration
 }
 
 final class HomeFlightListConfigurationFactory: HomeFlightListConfigurationFactoryProtocol {
@@ -69,6 +70,15 @@ final class HomeFlightListConfigurationFactory: HomeFlightListConfigurationFacto
                 textColor: .secondaryLabel,
                 font: .systemFont(ofSize: 16)
             )
+        )
+    }
+
+    func createMapButtonConfiguration() -> HomeFlightListMapButtonConfiguration {
+        HomeFlightListMapButtonConfiguration(
+            image: UIImage(systemName: "map.fill"),
+            imageTintColor: .white,
+            labelConfiguration: LabelConfiguration(text: "Map", textColor: .white),
+            backgroundColor: .black
         )
     }
 

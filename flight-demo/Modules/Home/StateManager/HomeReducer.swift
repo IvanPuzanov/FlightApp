@@ -96,7 +96,7 @@ final class HomeReducer: HomeReducerProtocol {
             state.flightListState.appearance.bottomSheetDetents = [200]
             return [.data(.loadFlights)]
         case let .onCalculateFlightListMaxHeight(maxHeight):
-            state.flightListState.appearance.bottomSheetDetents = [200, 520, maxHeight - 38]
+            state.flightListState.appearance.bottomSheetDetents = [200, 520, maxHeight - 40]
             return []
         }
     }

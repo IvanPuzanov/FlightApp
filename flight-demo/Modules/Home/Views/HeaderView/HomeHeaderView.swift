@@ -31,6 +31,10 @@ final class HomeHeaderView: UIView {
     private let subtitleLabel = UILabel()
     private let searchTextField = UITextField()
 
+    // MARK: - Protperties
+
+    private var currentProgress: CGFloat = 0
+
     // MARK: - Initialization
 
     init(
@@ -46,6 +50,14 @@ final class HomeHeaderView: UIView {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    // MARK: - Lifecycle
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        updateBackgroundColor(with: currentProgress)
     }
 
     // MARK: - Private
@@ -74,7 +86,7 @@ final class HomeHeaderView: UIView {
 
     private func setupContainerView() {
         containerView
-            .withBackgroundColor(.Background.header)
+            .withBackgroundColor(.systemBackground)
             .withCornerRadius(24)
 
         containerView.snp.makeConstraints {
@@ -165,6 +177,7 @@ extension HomeHeaderView: HomeHeaderViewModuleInputProtocol {
 
     func apply(_ state: HomeState.HeaderState) {
         let configuration = configurationFactory.makeHeaderViewConfiguration(from: state)
+        currentProgress = state.bottomSheetProgress
         configure(with: configuration)
         updateBackgroundColor(with: state.bottomSheetProgress)
         gradientView.offsetStartPoint(y: state.bottomSheetProgress)
@@ -204,8 +217,8 @@ extension HomeHeaderView {
 
     private func updateBackgroundColor(with progress: CGFloat) {
         let newBackgroundColor = UIColor.interpolate(
-            from: .Background.header,
-            to: .Background.neutral1,
+            from: .systemBackground,
+            to: .secondarySystemBackground,
             progress: progress
         )
         containerView.backgroundColor = newBackgroundColor

@@ -33,6 +33,11 @@ final class HomeFlightListView: UIView {
     private let grabberView = UIView()
     private let statusView = StatusView()
     private let tableView = UITableView()
+    private let mapButton = HomeFlightListMapButton()
+
+    // MARK: - Properties
+
+    private var mapButtonBottomConstraint: Constraint?
 
     // MARK: - Properties
 
@@ -70,7 +75,7 @@ final class HomeFlightListView: UIView {
     // MARK: - Private
 
     private func setupUI() {
-        addSubviews(grabberView, statusView, tableView)
+        addSubviews(grabberView, statusView, tableView, mapButton)
         withBackgroundColor(.Background.elevation1)
         withCornerRadius(Constants.cornerRadius, corners: [.topLeft, .topRight])
         withShadow()
@@ -78,6 +83,7 @@ final class HomeFlightListView: UIView {
         setupGrabberView()
         setupStatusView()
         setupTableView()
+        setupMapButton()
     }
 
     private func setupGrabberView() {
@@ -115,6 +121,17 @@ final class HomeFlightListView: UIView {
             $0.leading.trailing.bottom.equalToSuperview()
         }
     }
+
+    private func setupMapButton() {
+        mapButton.alpha = 0
+        mapButton.configure(with: configurationFactory.createMapButtonConfiguration())
+        mapButton.snp.makeConstraints {
+            $0.centerX.equalToSuperview()
+            mapButtonBottomConstraint = $0.bottom.equalTo(safeAreaLayoutGuide.snp.bottom)
+                .offset(-10)
+                .constraint
+        }
+    }
 }
 
 // MARK: - BottomSheetContentViewProtocol
@@ -150,6 +167,22 @@ extension HomeFlightListView: HomeFlightListModuleInputProtocol {
 
         let cornerRadius = min(Constants.cornerRadius, (1 / appearance.bottomSheetProgress))
         withCornerRadius(cornerRadius)
+
+        configureMapButtonAppearance(progress: appearance.bottomSheetProgress)
+    }
+
+    private func configureMapButtonAppearance(progress: CGFloat) {
+        UIView.animate(withDuration: 0.3, delay: 0, options: [.beginFromCurrentState]) {
+            if progress == 1 {
+                self.mapButton.alpha = 1
+                self.mapButtonBottomConstraint?.update(offset: -10)
+            } else {
+                self.mapButton.alpha = 0
+                self.mapButtonBottomConstraint?.update(offset: -1)
+            }
+
+            self.layoutIfNeeded()
+        }
     }
 
     private func updateVisibility(with state: HomeState.FlightListState.ContentState) {
