@@ -96,7 +96,7 @@ final class HomeFlightListConfigurationFactory: HomeFlightListConfigurationFacto
                 TableViewReusableCellConfiguration<ContainerView<HomeFlightListItemView>>(
                     viewConfiguration: ContainerViewConfiguration<HomeFlightListItemView>(
                         viewConfiguration: createHomeFlightListItemViewConfiguration(from: $0),
-                        insets: .custom(top: 6, bottom: 6, left: 16, right: 16)
+                        insets: .custom(top: 8, bottom: 8, left: 16, right: 16)
                     )
                 )
             )
@@ -108,40 +108,70 @@ final class HomeFlightListConfigurationFactory: HomeFlightListConfigurationFacto
     ) -> HomeFlightListItemViewConfiguration {
         HomeFlightListItemViewConfiguration(
             id: flight.flightNumber,
-            airlineImage: UIImage(systemName: "airplane") ?? UIImage(),
-            airlineLabelConfiguration: LabelConfiguration(text: flight.airline),
-            flightNumberBadgeConfiguration: BadgeViewConfiguration(
-                image: nil,
-                labelConfiguration: LabelConfiguration(
-                    text: flight.flightNumber,
-                    font: .systemFont(ofSize: 14)
-                ),
-                backgroundColor: .quaternarySystemFill
+            airlineImageUrl: URL(
+                string: "https://images.kiwi.com/airlines/128/\(flight.airlineCode).png"
             ),
-            aircarftBadgeConfiguration: BadgeViewConfiguration(
-                image: nil,
-                labelConfiguration: LabelConfiguration(
-                    text: flight.aircraft,
-                    font: .systemFont(ofSize: 14)
-                ),
-                backgroundColor: .quaternarySystemFill
+            airlineLabelConfiguration: LabelConfiguration(text: flight.airline),
+            flightNumberLabelConfiguration: LabelConfiguration(
+                text: flight.flightNumber,
+                font: .systemFont(ofSize: 14)
+            ),
+            statusBadgeViewConfiguration: BadgeViewConfiguration(
+                image: UIImage(systemName: "circle.fill"),
+                imageTintColor: createColor(from: flight.status),
+                labelConfiguration: createStatusLabelConfiguration(from: flight.status),
+                backgroundColor: createColor(from: flight.status).withAlphaComponent(0.1)
             ),
             originCityLabelConfiguration: LabelConfiguration(
                 text: flight.originCity,
-                font: .systemFont(ofSize: 14, weight: .bold)
+                font: .systemFont(ofSize: 16)
             ),
             originIATALabelConfiguration: LabelConfiguration(
                 text: flight.originIata,
-                font: .systemFont(ofSize: 24)
+                font: .systemFont(ofSize: 22, weight: .bold)
             ),
             destinationCityLabelConfiguration: LabelConfiguration(
                 text: flight.destinationCity,
-                font: .systemFont(ofSize: 14, weight: .bold)
+                font: .systemFont(ofSize: 16)
             ),
             destinationIATALabelConfiguration: LabelConfiguration(
                 text: flight.destinationIata,
-                font: .systemFont(ofSize: 24)
+                font: .systemFont(ofSize: 22, weight: .bold)
             )
         )
+    }
+
+    private func createStatusLabelConfiguration(from status: Flight.FlightStatus) -> LabelConfiguration {
+        let text: String
+
+        switch status {
+        case .boarding:
+            text = "Boarding"
+        case .inAir:
+            text = "In Air"
+        case .delayed:
+            text = "Delayed"
+        case .landed:
+            text = "Landed"
+        case .cancelled:
+            text = "Cancelled"
+        }
+
+        return LabelConfiguration(text: text, font: .systemFont(ofSize: 14))
+    }
+
+    private func createColor(from flightStatus: Flight.FlightStatus) -> UIColor {
+        switch flightStatus {
+        case .boarding:
+            return .systemBlue
+        case .inAir:
+            return .systemGreen
+        case .delayed:
+            return .systemOrange
+        case .landed:
+            return .secondarySystemFill
+        case .cancelled:
+            return .systemRed
+        }
     }
 }

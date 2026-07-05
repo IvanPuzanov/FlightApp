@@ -9,10 +9,10 @@ import UIKit
 
 struct HomeFlightListItemViewConfiguration: Equatable {
     let id: String
-    let airlineImage: UIImage
+    let airlineImageUrl: URL?
     let airlineLabelConfiguration: LabelConfiguration
-    let flightNumberBadgeConfiguration: BadgeViewConfiguration
-    let aircarftBadgeConfiguration: BadgeViewConfiguration
+    let flightNumberLabelConfiguration: LabelConfiguration
+    let statusBadgeViewConfiguration: BadgeViewConfiguration
     let originCityLabelConfiguration: LabelConfiguration
     let originIATALabelConfiguration: LabelConfiguration
     let destinationCityLabelConfiguration: LabelConfiguration

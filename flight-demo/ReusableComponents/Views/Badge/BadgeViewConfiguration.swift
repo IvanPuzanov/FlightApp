@@ -9,6 +9,7 @@ import UIKit
 
 struct BadgeViewConfiguration: Equatable {
     let image: UIImage?
+    let imageTintColor: UIColor
     let labelConfiguration: LabelConfiguration
     let backgroundColor: UIColor
 }

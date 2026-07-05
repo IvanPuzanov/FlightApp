@@ -47,6 +47,7 @@ final class BadgeView: UIView {
     }
 
     private func setupContainerView() {
+        containerView.spacing = 10
         containerView.snp.makeConstraints {
             $0.top.bottom.equalToSuperview().inset(4)
             $0.leading.trailing.equalToSuperview().inset(8)
@@ -69,6 +70,7 @@ extension BadgeView: ConfigurableView {
     func configure(with configuration: BadgeViewConfiguration) {
         imageView.image = configuration.image
         imageView.isHidden = configuration.image == nil
+        imageView.tintColor = configuration.imageTintColor
         titleLabel.configure(with: configuration.labelConfiguration)
         backgroundColor = configuration.backgroundColor
     }

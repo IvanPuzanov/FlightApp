@@ -10,14 +10,17 @@ import UIKit
 
 final class HomeFlightListItemView: UIView {
 
+    // MARK: - Dependencies
+
+    private let imageResolver = ImageResolver()
+
     // MARK: - UI
 
     private let airlineImageView = UIImageView()
     private let airlineLabel = UILabel()
+    private let flightNumberLabel = UILabel()
 
-    private let badgesContainerView = UIStackView()
-    private let flightNumberBadgeView = BadgeView()
-    private let aircraftBadgeView = BadgeView()
+    private let statusBadgeView = BadgeView()
 
     private let originAirportCityLabel = UILabel()
     private let originAirportIATALabel = UILabel()
@@ -40,13 +43,13 @@ final class HomeFlightListItemView: UIView {
     // MARK: - Private
 
     private func setupUI() {
-        addSubviews(airlineImageView, airlineLabel, badgesContainerView, originAirportCityLabel, originAirportIATALabel, destinationAirportCityLabel, destinationAirportIATALabel)
-        badgesContainerView.addArrangedSubviews(flightNumberBadgeView, aircraftBadgeView)
+        addSubviews(airlineImageView, statusBadgeView, airlineLabel, flightNumberLabel, originAirportCityLabel, originAirportIATALabel, destinationAirportCityLabel, destinationAirportIATALabel)
 
         setupView()
         setupAirlineImageView()
+        setupStatusBadgeView()
         setupAirlineLabel()
-        setupBadgesContainerView()
+        setupFlightNumberLabel()
         setupOriginAirportIATALabel()
         setupOriginAirportCityLabel()
         setupDestinationAirportIATALabel()
@@ -54,35 +57,42 @@ final class HomeFlightListItemView: UIView {
     }
 
     private func setupView() {
-        withBackgroundColor(.quaternarySystemFill)
+        withBackgroundColor(.Background.elevation2)
         withCornerRadius(24)
+        withShadow()
     }
 
     private func setupAirlineImageView() {
-        airlineImageView.contentMode = .scaleAspectFit
+        airlineImageView.contentMode = .scaleAspectFill
         airlineImageView.tintColor = .Text.primary
-        airlineImageView.withCornerRadius(12)
+        airlineImageView.clipsToBounds = true
+        airlineImageView.withCornerRadius(19.5)
         airlineImageView.withBackgroundColor(.quaternarySystemFill)
 
         airlineImageView.snp.makeConstraints {
-            $0.width.height.equalTo(24)
+            $0.width.height.equalTo(39)
             $0.leading.top.equalToSuperview().inset(16)
+        }
+    }
+
+    private func setupStatusBadgeView() {
+        statusBadgeView.snp.makeConstraints {
+            $0.top.trailing.equalToSuperview().inset(16)
         }
     }
 
     private func setupAirlineLabel() {
         airlineLabel.snp.makeConstraints {
-            $0.trailing.lessThanOrEqualTo(badgesContainerView.snp.leading).offset(-12)
+            $0.trailing.lessThanOrEqualTo(statusBadgeView.snp.leading).offset(-12)
             $0.leading.equalTo(airlineImageView.snp.trailing).offset(12)
-            $0.centerY.equalTo(airlineImageView)
+            $0.bottom.equalTo(airlineImageView.snp.centerY).offset(-1)
         }
     }
 
-    private func setupBadgesContainerView() {
-        badgesContainerView.spacing = 8
-
-        badgesContainerView.snp.makeConstraints {
-            $0.trailing.top.equalToSuperview().inset(16)
+    private func setupFlightNumberLabel() {
+        flightNumberLabel.snp.makeConstraints {
+            $0.top.equalTo(airlineImageView.snp.centerY).offset(1)
+            $0.leading.equalTo(airlineImageView.snp.trailing).offset(12)
         }
     }
 
@@ -96,7 +106,7 @@ final class HomeFlightListItemView: UIView {
         originAirportCityLabel.snp.makeConstraints {
             $0.leading.equalTo(originAirportIATALabel)
             $0.bottom.equalTo(originAirportIATALabel.snp.top).offset(-4)
-            $0.top.equalTo(airlineImageView.snp.bottom).offset(40)
+            $0.top.greaterThanOrEqualTo(airlineImageView.snp.bottom).offset(40)
         }
     }
 
@@ -110,7 +120,7 @@ final class HomeFlightListItemView: UIView {
         destinationAirportCityLabel.snp.makeConstraints {
             $0.trailing.equalTo(destinationAirportIATALabel)
             $0.bottom.equalTo(destinationAirportIATALabel.snp.top).offset(-4)
-            $0.top.equalTo(airlineImageView.snp.bottom).offset(40)
+            $0.top.greaterThanOrEqualTo(airlineImageView.snp.bottom).offset(40)
         }
     }
 }
@@ -120,13 +130,28 @@ final class HomeFlightListItemView: UIView {
 extension HomeFlightListItemView: ConfigurableView {
 
     func configure(with configuration: HomeFlightListItemViewConfiguration) {
-        airlineImageView.image = configuration.airlineImage
+        configureImageView(with: configuration.airlineImageUrl)
+        statusBadgeView.configure(with: configuration.statusBadgeViewConfiguration)
         airlineLabel.configure(with: configuration.airlineLabelConfiguration)
-        flightNumberBadgeView.configure(with: configuration.flightNumberBadgeConfiguration)
-        aircraftBadgeView.configure(with: configuration.aircarftBadgeConfiguration)
+        flightNumberLabel.configure(with: configuration.flightNumberLabelConfiguration)
         originAirportCityLabel.configure(with: configuration.originCityLabelConfiguration)
         originAirportIATALabel.configure(with: configuration.originIATALabelConfiguration)
         destinationAirportCityLabel.configure(with: configuration.destinationCityLabelConfiguration)
         destinationAirportIATALabel.configure(with: configuration.destinationIATALabelConfiguration)
+    }
+
+    func prepareForReuse() {
+        airlineImageView.image = nil
+    }
+
+    private func configureImageView(with imageURL: URL?) {
+        guard let imageURL else { return }
+
+        imageResolver.resolveImage(
+            from: imageURL,
+            fallback: UIImage(systemName: "airplane.departure")
+        ) { image in
+            self.airlineImageView.image = image
+        }
     }
 }

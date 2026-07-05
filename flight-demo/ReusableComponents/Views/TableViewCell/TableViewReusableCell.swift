@@ -46,6 +46,7 @@ final class TableViewReusableCell<View: UIView & ConfigurableView>: UITableViewC
         contentView.addSubview(view)
         backgroundColor = .clear
         selectionStyle = .none
+        layer.masksToBounds = false
 
         view.snp.makeConstraints {
             $0.edges.equalToSuperview()
