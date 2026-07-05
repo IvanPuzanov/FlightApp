@@ -8,7 +8,7 @@
 import SnapKit
 import UIKit
 
-protocol BottomSheetContentViewProtocol: UIView & ModuleInputProtocol {
+protocol BottomSheetContentViewProtocol: UIView & ScrollProvider & ModuleInputProtocol {
     var bottomSheet: BottomSheetProtocol? { get set }
 
     func dispatch(_ event: BottomSheetEvent)
@@ -18,7 +18,7 @@ protocol BottomSheetProtocol: AnyObject {
     func setupDetents(_ detents: [CGFloat])
 }
 
-final class BottomSheetViewController<ContentView: BottomSheetContentViewProtocol>: UIViewController {
+final class BottomSheetViewController<ContentView: BottomSheetContentViewProtocol>: UIViewController, UIGestureRecognizerDelegate {
 
     // MARK: - UI
 
@@ -73,6 +73,7 @@ final class BottomSheetViewController<ContentView: BottomSheetContentViewProtoco
 
     private func setupGestureRecognizer() {
         view.addGestureRecognizer(panGestureRecognizer)
+        panGestureRecognizer.delegate = self
         panGestureRecognizer.addTarget(self, action: #selector(handlePanGesture))
     }
 
@@ -90,6 +91,7 @@ final class BottomSheetViewController<ContentView: BottomSheetContentViewProtoco
         case .changed:
             let translation = panGestureRecognizer.translation(in: view)
             let newHeight = currentHeight - translation.y
+            updateScrollViewAvailability()
 
             guard newHeight <= maxDetent else { return }
 
@@ -134,6 +136,36 @@ final class BottomSheetViewController<ContentView: BottomSheetContentViewProtoco
         }
 
         applyHeight(targetHeight, animated: true)
+    }
+
+    private func updateScrollViewAvailability() {
+        let translation = panGestureRecognizer.translation(in: view)
+        let scrollView = contentView.scrollView
+        let isScrollOnTop = scrollView.contentOffset.y <= 0
+        let isAtMaxDetent = currentHeight >= maxDetent
+        let isSwipingDown = translation.y > 0
+
+        if isAtMaxDetent {
+            scrollView.isScrollEnabled = !(isSwipingDown && isScrollOnTop)
+        } else {
+            scrollView.isScrollEnabled = false
+        }
+    }
+
+    // MARK: - UIGestureRecognizerDelegate
+
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        guard gestureRecognizer === panGestureRecognizer else { return true }
+
+        return currentHeight < maxDetent || contentView.scrollView.contentOffset.y <= 0
+    }
+
+    func gestureRecognizer(
+        _ gestureRecognizer: UIGestureRecognizer,
+        shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
+    ) -> Bool {
+        gestureRecognizer === panGestureRecognizer
+        && otherGestureRecognizer === contentView.scrollView.panGestureRecognizer
     }
 }
 

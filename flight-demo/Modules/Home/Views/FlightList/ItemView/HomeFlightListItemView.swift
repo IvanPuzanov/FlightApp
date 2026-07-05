@@ -72,7 +72,7 @@ final class HomeFlightListItemView: UIView {
 
     private func setupAirlineLabel() {
         airlineLabel.snp.makeConstraints {
-            $0.trailing.equalTo(badgesContainerView.snp.leading).offset(-12)
+            $0.trailing.lessThanOrEqualTo(badgesContainerView.snp.leading).offset(-12)
             $0.leading.equalTo(airlineImageView.snp.trailing).offset(12)
             $0.centerY.equalTo(airlineImageView)
         }

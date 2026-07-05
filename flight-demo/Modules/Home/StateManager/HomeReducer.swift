@@ -72,10 +72,10 @@ final class HomeReducer: HomeReducerProtocol {
     ) -> [HomeEffect] {
         switch event {
         case .onViewDidLoad:
-            state.flightListState.appearance.bottomSheetDetents = [120]
+            state.flightListState.appearance.bottomSheetDetents = [200]
             return [.data(.loadFlights)]
         case let .onCalculateFlightListMaxHeight(maxHeight):
-            state.flightListState.appearance.bottomSheetDetents = [120, maxHeight / 2, maxHeight - 38]
+            state.flightListState.appearance.bottomSheetDetents = [200, 520, maxHeight - 38]
             return []
         }
     }

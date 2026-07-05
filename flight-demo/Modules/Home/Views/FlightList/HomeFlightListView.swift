@@ -118,6 +118,10 @@ final class HomeFlightListView: UIView {
 
 extension HomeFlightListView: BottomSheetContentViewProtocol {
 
+    var scrollView: UIScrollView {
+        tableView
+    }
+
     func dispatch(_ event: BottomSheetEvent) {
         switch event {
         case let .onProgressDidChange(progress):
