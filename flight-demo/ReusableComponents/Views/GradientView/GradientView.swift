@@ -56,7 +56,7 @@ final class GradientView: UIView {
     // MARK: - Private
 
     private func setupUI() {
-        isUserInteractionEnabled = false
+//        isUserInteractionEnabled = false
 
         gradientLayer.colors = Constants.gradientColors.map { $0.cgColor }
         gradientLayer.startPoint = CGPoint(x: 0, y: 0)

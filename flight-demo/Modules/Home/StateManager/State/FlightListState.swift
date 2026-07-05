@@ -10,6 +10,7 @@ import Foundation
 extension HomeState {
     struct FlightListState: Equatable {
         var appearance: Appearance
+        var parameters: Parameters
         var contentState: ContentState
     }
 }
@@ -18,6 +19,11 @@ extension HomeState.FlightListState {
     struct Appearance: Equatable {
         var bottomSheetDetents: [CGFloat]
         var bottomSheetProgress: CGFloat
+    }
+
+    struct Parameters: Equatable {
+        var flights: [Flight]
+        var searchText: String?
     }
 
     enum ContentState: Equatable {
@@ -38,6 +44,10 @@ extension HomeState.FlightListState {
             appearance: Appearance(
                 bottomSheetDetents: [],
                 bottomSheetProgress: 0
+            ),
+            parameters: Parameters(
+                flights: [],
+                searchText: nil
             ),
             contentState: .loading
         )

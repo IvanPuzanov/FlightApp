@@ -37,7 +37,12 @@ extension HomeEvent.UIEvent {
         case onDefaultRegionSet
     }
 
-    enum HeaderEvent {}
+    enum HeaderEvent {
+        case onFilterTap
+        case onMoreTap
+        case onSearchTextEnter(text: String?)
+        case onSearchTextEndEditing
+    }
 
     enum FlightListEvent {
         case onBottomSheetHeightChange(progress: CGFloat)

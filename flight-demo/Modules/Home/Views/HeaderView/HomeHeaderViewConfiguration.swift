@@ -22,6 +22,7 @@ extension HomeHeaderViewConfiguration {
         let titleLabelText: String
         let subtitleLabelText: String
         let trailingIcon: UIImage
+        @Equated var onTrailingIconTap: (() -> Void)?
     }
 
     struct SearchModel: Equatable {
@@ -29,5 +30,6 @@ extension HomeHeaderViewConfiguration {
         let text: String?
         let placeholderText: String
         let trailingIcon: UIImage
+        @Equated var onTrailingIconTap: (() -> Void)?
     }
 }

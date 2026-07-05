@@ -29,7 +29,10 @@ final class HomeAssembly: HomeAssemblyProtocol {
             locationManager: locationManager
         )
         let homeHeaderConfigurationFactroy = HomeHeaderConfigurationFactory()
-        let headerView = HomeHeaderView(configurationFactory: homeHeaderConfigurationFactroy)
+        let headerView = HomeHeaderView(
+            presenter: presenter,
+            configurationFactory: homeHeaderConfigurationFactroy
+        )
         let mapViewController = HomeMapViewController(presenter: presenter)
         let flightListConfigurationFactory = HomeFlightListConfigurationFactory()
         let flightListView = HomeFlightListView(
@@ -43,6 +46,8 @@ final class HomeAssembly: HomeAssemblyProtocol {
             mapViewController: mapViewController,
             flightListBottomSheet: flightListBottomSheet
         )
+
+        homeHeaderConfigurationFactroy.delegate = headerView
 
         presenter.headerView = headerView
         presenter.mapView = mapViewController

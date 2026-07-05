@@ -19,6 +19,7 @@ final class TableViewReusableCell<View: UIView & ConfigurableView>: UITableViewC
     // MARK: - UI
 
     private var view = View()
+    private var masksToBoundsObserver: NSKeyValueObservation?
 
     // MARK: - Initialization
 
@@ -26,6 +27,9 @@ final class TableViewReusableCell<View: UIView & ConfigurableView>: UITableViewC
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
         setupUI()
+        masksToBoundsObserver = layer.observe(\.masksToBounds, changeHandler: { [weak self] _, _ in
+            self?.layer.masksToBounds = false
+        })
     }
 
     required init?(coder: NSCoder) {

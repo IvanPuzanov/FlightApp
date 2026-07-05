@@ -15,6 +15,7 @@ final class HomeHeaderView: UIView {
 
     // MARK: - Dependencies
 
+    private let presenter: any HomeHeaderViewModuleOutputProtocol
     private let configurationFactory: HomeHeaderViewConfigurationFactoryProtocol
 
     // MARK: - UI
@@ -24,7 +25,7 @@ final class HomeHeaderView: UIView {
 
     private let leadingImageView = UIImageView()
     private let contentView = UIStackView()
-    private let trailingImageView = UIImageView()
+    private let trailingButton = UIButton()
 
     private let titleLabel = UILabel()
     private let subtitleLabel = UILabel()
@@ -32,7 +33,11 @@ final class HomeHeaderView: UIView {
 
     // MARK: - Initialization
 
-    init(configurationFactory: HomeHeaderViewConfigurationFactoryProtocol) {
+    init(
+        presenter: any HomeHeaderViewModuleOutputProtocol,
+        configurationFactory: HomeHeaderViewConfigurationFactoryProtocol
+    ) {
+        self.presenter = presenter
         self.configurationFactory = configurationFactory
         super.init(frame: .zero)
 
@@ -43,36 +48,27 @@ final class HomeHeaderView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    // MARK: - Lifecycle
-
-    override func layoutSubviews() {
-        super.layoutSubviews()
-
-        gradientView.snp.makeConstraints {
-            $0.bottom.equalTo(containerView.snp.bottom).inset(10)
-        }
-    }
-
     // MARK: - Private
 
     private func setupUI() {
         addSubviews(gradientView, containerView)
-        containerView.addSubviews(leadingImageView, contentView, trailingImageView)
+        containerView.addSubviews(leadingImageView, contentView, trailingButton)
         contentView.addArrangedSubviews(titleLabel, subtitleLabel, searchTextField)
 
-        setupGradientView()
         setupContainerView()
         setupLeadingImageView()
-        setupTrailingImageView()
+        setupTrailingButton()
         setupContentView()
         setupTitleLabel()
         setupSubtitleLabel()
         setupSearchTextField()
+        setupGradientView()
     }
 
     private func setupGradientView() {
         gradientView.snp.makeConstraints {
             $0.leading.trailing.top.equalToSuperview()
+            $0.bottom.equalTo(contentView).offset(10)
         }
     }
 
@@ -84,13 +80,13 @@ final class HomeHeaderView: UIView {
         containerView.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide).inset(10)
             $0.leading.trailing.equalToSuperview().inset(16)
+            $0.bottom.equalToSuperview()
         }
     }
 
     private func setupLeadingImageView() {
         leadingImageView.tintColor = .Text.primary
         leadingImageView.contentMode = .scaleAspectFit
-        leadingImageView.translatesAutoresizingMaskIntoConstraints = false
 
         leadingImageView.snp.makeConstraints {
             $0.height.width.equalTo(24)
@@ -99,12 +95,11 @@ final class HomeHeaderView: UIView {
         }
     }
 
-    private func setupTrailingImageView() {
-        trailingImageView.tintColor = .Text.primary
-        trailingImageView.contentMode = .scaleAspectFit
-        trailingImageView.translatesAutoresizingMaskIntoConstraints = false
+    private func setupTrailingButton() {
+        trailingButton.tintColor = .Text.primary
+        trailingButton.contentMode = .scaleAspectFit
 
-        trailingImageView.snp.makeConstraints {
+        trailingButton.snp.makeConstraints {
             $0.height.width.equalTo(24)
             $0.centerY.equalToSuperview()
             $0.trailing.equalToSuperview().inset(14)
@@ -120,7 +115,7 @@ final class HomeHeaderView: UIView {
         contentView.snp.makeConstraints {
             $0.centerY.equalToSuperview()
             $0.leading.equalTo(leadingImageView.snp.trailing).offset(14)
-            $0.trailing.equalTo(trailingImageView.snp.leading).offset(-14)
+            $0.trailing.equalTo(trailingButton.snp.leading).offset(-14)
             $0.top.bottom.equalToSuperview().inset(18)
         }
     }
@@ -136,8 +131,31 @@ final class HomeHeaderView: UIView {
     }
 
     private func setupSearchTextField() {
+        searchTextField.delegate = self
+        searchTextField.clearButtonMode = .whileEditing
         searchTextField.font = .systemFont(ofSize: 16)
+        searchTextField.returnKeyType = .done
         searchTextField.textColor = .Text.primary
+        searchTextField.addTarget(self, action: #selector(handleSearchTextTyping), for: .editingChanged)
+
+        searchTextField.snp.makeConstraints {
+            $0.width.equalTo(contentView)
+        }
+    }
+
+    @objc
+    func handleSearchTextTyping() {
+        presenter.dispatch(.header(.onSearchTextEnter(text: searchTextField.text)))
+    }
+}
+
+// MARK: - UITextFieldDelegate
+
+extension HomeHeaderView: UITextFieldDelegate {
+
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        presenter.dispatch(.header(.onSearchTextEndEditing))
+        return textField.resignFirstResponder()
     }
 }
 
@@ -150,6 +168,20 @@ extension HomeHeaderView: HomeHeaderViewModuleInputProtocol {
         configure(with: configuration)
         updateBackgroundColor(with: state.bottomSheetProgress)
         gradientView.offsetStartPoint(y: state.bottomSheetProgress)
+    }
+}
+
+// MARK: - HomeHeaderViewConfigurationFactoryDelegate
+
+extension HomeHeaderView: HomeHeaderViewConfigurationFactoryDelegate {
+
+    func trailingIconButtonDidTap(mode: HomeState.HeaderState.Mode) {
+        switch mode {
+        case .flightInfo:
+            presenter.dispatch(.header(.onMoreTap))
+        case .search:
+            presenter.dispatch(.header(.onFilterTap))
+        }
     }
 }
 
@@ -174,7 +206,8 @@ extension HomeHeaderView {
         let newBackgroundColor = UIColor.interpolate(
             from: .Background.header,
             to: .Background.neutral1,
-            progress: progress)
+            progress: progress
+        )
         containerView.backgroundColor = newBackgroundColor
     }
 
@@ -203,15 +236,24 @@ extension HomeHeaderView {
 
     private func configureFlightDetails(from model: HomeHeaderViewConfiguration.FlightDetailsModel) {
         leadingImageView.image = model.leadingIcon
-        trailingImageView.image = model.trailingIcon
+        trailingButton.setImage(model.trailingIcon, for: .normal)
         titleLabel.text = model.titleLabelText
         subtitleLabel.text = model.subtitleLabelText
+        configureTrailingButtonAction(onTap: model.onTrailingIconTap)
     }
 
     private func configureSearch(from model: HomeHeaderViewConfiguration.SearchModel) {
         leadingImageView.image = model.leadingIcon
-        trailingImageView.image = model.trailingIcon
+        trailingButton.setImage(model.trailingIcon, for: .normal)
         searchTextField.text = model.text
         searchTextField.placeholder = model.placeholderText
+        configureTrailingButtonAction(onTap: model.onTrailingIconTap)
+    }
+
+    private func configureTrailingButtonAction(onTap: (() -> Void)?) {
+        let action = UIAction { _ in
+            onTap?()
+        }
+        trailingButton.addAction(action, for: .touchUpInside)
     }
 }

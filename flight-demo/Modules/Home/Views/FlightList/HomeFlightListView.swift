@@ -105,6 +105,9 @@ final class HomeFlightListView: UIView {
         tableView.isScrollEnabled = false
         tableView.backgroundColor = .clear
         tableView.separatorStyle = .none
+        tableView.keyboardDismissMode = .onDrag
+        tableView.clipsToBounds = false
+
         dataSource.defaultRowAnimation = .fade
 
         tableView.snp.makeConstraints {

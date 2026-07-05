@@ -51,13 +51,29 @@ final class HomePresenter {
 
         store.stateDidChange
             .compactMap { [weak store] in
-                store?.state
+                store?.state.mapState
             }
             .removeDuplicates()
             .sink { [weak self] state in
-                self?.headerView?.apply(state.headerState)
-                self?.mapView?.apply(state.mapState)
-                self?.flightListView?.apply(state.flightListState)
+                self?.mapView?.apply(state)
+            }.store(in: &bag)
+
+        store.stateDidChange
+            .compactMap { [weak store] in
+                store?.state.headerState
+            }
+            .removeDuplicates()
+            .sink { [weak self] state in
+                self?.headerView?.apply(state)
+            }.store(in: &bag)
+
+        store.stateDidChange
+            .compactMap { [weak store] in
+                store?.state.flightListState
+            }
+            .removeDuplicates()
+            .sink { [weak self] state in
+                self?.flightListView?.apply(state)
             }.store(in: &bag)
     }
 

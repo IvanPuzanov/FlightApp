@@ -15,6 +15,10 @@ private enum Constants {
     static let searchTrailingIcon = UIImage(systemName: "slider.horizontal.3") ?? UIImage()
 }
 
+protocol HomeHeaderViewConfigurationFactoryDelegate: AnyObject {
+    func trailingIconButtonDidTap(mode: HomeState.HeaderState.Mode)
+}
+
 protocol HomeHeaderViewConfigurationFactoryProtocol: AnyObject {
     func makeHeaderViewConfiguration(
         from state: HomeState.HeaderState
@@ -22,6 +26,10 @@ protocol HomeHeaderViewConfigurationFactoryProtocol: AnyObject {
 }
 
 final class HomeHeaderConfigurationFactory: HomeHeaderViewConfigurationFactoryProtocol {
+
+    // MARK: - Properties
+
+    weak var delegate: HomeHeaderViewConfigurationFactoryDelegate?
 
     // MARK: - Public
 
@@ -31,11 +39,22 @@ final class HomeHeaderConfigurationFactory: HomeHeaderViewConfigurationFactoryPr
         switch state.mode {
         case let .flightInfo(number, description):
             return HomeHeaderViewConfiguration(
-                mode: createHeaderViewFlightInfoMode(number: number, description: description)
+                mode: createHeaderViewFlightInfoMode(
+                    number: number,
+                    description: description,
+                    onTrailingIconTap: { [weak self] in
+                        self?.delegate?.trailingIconButtonDidTap(mode: state.mode)
+                    }
+                )
             )
         case let .search(text):
             return HomeHeaderViewConfiguration(
-                mode: createHeaderViewSearchMode(text: text)
+                mode: createHeaderViewSearchMode(
+                    text: text,
+                    onTrailingIconTap: { [weak self] in
+                        self?.delegate?.trailingIconButtonDidTap(mode: state.mode)
+                    }
+                )
             )
         }
     }
@@ -44,25 +63,31 @@ final class HomeHeaderConfigurationFactory: HomeHeaderViewConfigurationFactoryPr
 
     private func createHeaderViewFlightInfoMode(
         number: String,
-        description: String
+        description: String,
+        onTrailingIconTap: (() -> Void)?
     ) -> HomeHeaderViewConfiguration.Mode {
         .flightInfo(
             HomeHeaderViewConfiguration.FlightDetailsModel(
                 leadingIcon: Constants.flightInfoLeadingIcon,
                 titleLabelText: number,
                 subtitleLabelText: description,
-                trailingIcon: Constants.flightInfoTrailingIcon
+                trailingIcon: Constants.flightInfoTrailingIcon,
+                onTrailingIconTap: onTrailingIconTap
             )
         )
     }
 
-    private func createHeaderViewSearchMode(text: String?) -> HomeHeaderViewConfiguration.Mode {
+    private func createHeaderViewSearchMode(
+        text: String?,
+        onTrailingIconTap: (() -> Void)?
+    ) -> HomeHeaderViewConfiguration.Mode {
         .search(
             HomeHeaderViewConfiguration.SearchModel(
                 leadingIcon: Constants.searchLeadingIcon,
                 text: text,
-                placeholderText: "Search flight or aircraft",
-                trailingIcon: Constants.searchTrailingIcon
+                placeholderText: "Search flight or airline",
+                trailingIcon: Constants.searchTrailingIcon,
+                onTrailingIconTap: onTrailingIconTap
             )
         )
     }
