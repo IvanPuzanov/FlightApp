@@ -16,18 +16,28 @@ final class ImageResolver: ImageResolverProtocol {
 
     // MARK: - Properties
 
+    private let urlSession = URLSession(configuration: .default)
     private var bag: Set<AnyCancellable> = []
 
     // MARK: - Pubic
 
     func resolveImage(from url: URL, fallback: UIImage?, completion: @escaping (UIImage?) -> Void) {
-        URLSession.shared
-            .dataTaskPublisher(for: url)
-            .map { UIImage(data: $0.data) }
-            .replaceError(with: fallback)
-            .receive(on: DispatchQueue.main)
-            .sink { image in
-                completion(image)
-            }.store(in: &bag)
+        let key = url.absoluteString
+
+        if let data = ResponseCache.shared.get(for: key), let image = UIImage(data: data) {
+            completion(image)
+        } else {
+            urlSession
+                .dataTaskPublisher(for: url)
+                .handleEvents(receiveOutput: { output in
+                    ResponseCache.shared.set(output.data, for: key)
+                })
+                .map { UIImage(data: $0.data) }
+                .replaceError(with: fallback)
+                .receive(on: DispatchQueue.main)
+                .sink { image in
+                    completion(image)
+                }.store(in: &bag)
+        }
     }
 }

@@ -111,7 +111,10 @@ final class HomeFlightListConfigurationFactory: HomeFlightListConfigurationFacto
             airlineImageUrl: URL(
                 string: "https://images.kiwi.com/airlines/128/\(flight.airlineCode).png"
             ),
-            airlineLabelConfiguration: LabelConfiguration(text: flight.airline),
+            airlineLabelConfiguration: LabelConfiguration(
+                text: flight.airline,
+                font: .systemFont(ofSize: 16, weight: .bold)
+            ),
             flightNumberLabelConfiguration: LabelConfiguration(
                 text: flight.flightNumber,
                 font: .systemFont(ofSize: 14)
