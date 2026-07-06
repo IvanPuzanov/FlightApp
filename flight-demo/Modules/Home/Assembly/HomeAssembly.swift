@@ -16,42 +16,42 @@ final class HomeAssembly: HomeAssemblyProtocol {
     // MARK: - Public
 
     func assemble() -> UIViewController {
-        let reducer = HomeReducer()
-        let store = HomeStore(reducer: reducer)
         let localStorageService = LocalStorageService()
         let localDataSource = LocalDataSource(localStorageService: localStorageService)
-        let repository = Repository(localDataSource: localDataSource)
+        let locationService = LocationService()
+        let repository = Repository(
+            localDataSource: localDataSource,
+            locationService: locationService
+        )
         let service = HomeService(repository: repository)
-        let locationManager = LocationManager()
-        let presenter = HomePresenter(
-            store: store,
-            service: service,
-            locationManager: locationManager
+        let effectHandlers = [
+            DataEffectHandler(service: service)
+        ]
+        let reducer = HomeReducer()
+        let store = HomeStore(
+            reducer: reducer,
+            effectHandlers: effectHandlers
         )
         let homeHeaderConfigurationFactroy = HomeHeaderConfigurationFactory()
         let headerView = HomeHeaderView(
-            presenter: presenter,
+            store: store,
             configurationFactory: homeHeaderConfigurationFactroy
         )
-        let mapViewController = HomeMapViewController(presenter: presenter)
+        let mapViewController = HomeMapViewController(store: store)
         let flightListConfigurationFactory = HomeFlightListConfigurationFactory()
         let flightListView = HomeFlightListView(
-            presenter: presenter,
+            store: store,
             configurationFactory: flightListConfigurationFactory
         )
         let flightListBottomSheet = BottomSheetViewController(contentView: flightListView)
         let viewController = HomeViewController(
-            presenter: presenter,
+            store: store,
             headerView: headerView,
             mapViewController: mapViewController,
             flightListBottomSheet: flightListBottomSheet
         )
 
         homeHeaderConfigurationFactroy.delegate = headerView
-
-        presenter.headerView = headerView
-        presenter.mapView = mapViewController
-        presenter.flightListView = flightListView
 
         return viewController
     }

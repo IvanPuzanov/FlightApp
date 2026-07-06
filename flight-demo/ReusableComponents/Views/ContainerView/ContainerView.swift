@@ -46,6 +46,10 @@ extension ContainerView: ConfigurableView {
         configureInsets(configuration.insets)
     }
 
+    func prepareForReuse() {
+        contentView.prepareForReuse()
+    }
+
     private func configureInsets(_ insets: Insets) {
         contentView.snp.updateConstraints {
             switch insets {

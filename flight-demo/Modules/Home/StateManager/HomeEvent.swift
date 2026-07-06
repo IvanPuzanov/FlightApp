@@ -22,6 +22,7 @@ extension HomeEvent {
 
     enum DataEvent {
         case onGetLocation(Coordinate)
+        case onGetLocationFailed
 
         case onAirportsLoaded([Airport])
         case onAirportsFailed
@@ -40,11 +41,13 @@ extension HomeEvent.UIEvent {
     enum HeaderEvent {
         case onFilterTap
         case onMoreTap
+        case onSearchStartEditing
         case onSearchTextEnter(text: String?)
         case onSearchTextEndEditing
     }
 
     enum FlightListEvent {
+        case onSetup(cornerRadius: CGFloat, shadowOpacity: Float)
         case onBottomSheetHeightChange(progress: CGFloat)
     }
 

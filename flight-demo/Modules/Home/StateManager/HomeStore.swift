@@ -10,7 +10,6 @@ import Combine
 protocol HomeStoreProtocol: AnyObject {
     var state: HomeState { get }
     var stateDidChange: ObservableObjectPublisher { get }
-    var effectDidDispatch: PassthroughSubject<HomeEffect, Never> { get }
 
     func dispatch(event: HomeEvent)
 }
@@ -20,6 +19,7 @@ final class HomeStore {
     // MARK: - Dependencies
 
     private let reducer: HomeReducerProtocol
+    private let effectHandlers: [EffectHandlerProtocol]
 
     // MARK: - Public properties
 
@@ -30,12 +30,15 @@ final class HomeStore {
     }
 
     var stateDidChange = ObservableObjectPublisher()
-    var effectDidDispatch = PassthroughSubject<HomeEffect, Never>()
 
     // MARK: - Initialization
 
-    init(reducer: HomeReducerProtocol) {
+    init(
+        reducer: HomeReducerProtocol,
+        effectHandlers: [EffectHandlerProtocol]
+    ) {
         self.reducer = reducer
+        self.effectHandlers = effectHandlers
     }
 }
 
@@ -45,8 +48,13 @@ extension HomeStore: HomeStoreProtocol {
 
     func dispatch(event: HomeEvent) {
         let effects = reducer.reduce(state: &state, event: event)
-        effects.forEach {
-            effectDidDispatch.send($0)
+
+        effectHandlers.forEach { effectHandler in
+            effects.forEach { effect in
+                effectHandler.handle(effect) { event in
+                    self.dispatch(event: event)
+                }
+            }
         }
     }
 }

@@ -12,17 +12,27 @@ final class Repository {
     // MARK: - Dependencies
 
     private let localDataSource: LocalDataSourceProtocol
+    private let locationService: LocationServiceProtocol
 
     // MARK: - Initialization
 
-    init(localDataSource: LocalDataSourceProtocol) {
+    init(
+        localDataSource: LocalDataSourceProtocol,
+        locationService: LocationServiceProtocol
+    ) {
         self.localDataSource = localDataSource
+        self.locationService = locationService
     }
 }
 
 // MARK: - HomeRepositoryProtocol
 
 extension Repository: HomeRepositoryProtocol {
+
+    func getUserLocation(completion: (Result<Coordinate, any Error>) -> Void) {
+        let coordinate = locationService.getDefaultLocation()
+        completion(.success(coordinate))
+    }
 
     func fetchAirports(completion: (Result<[Airport], any Error>) -> Void) {
         localDataSource.fetchAirports { result in

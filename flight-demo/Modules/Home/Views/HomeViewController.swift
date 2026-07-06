@@ -8,13 +8,11 @@
 import SnapKit
 import UIKit
 
-protocol HomeViewModuleOutputProtocol: ModuleOutputProtocol where Event == HomeEvent.UIEvent {}
-
 final class HomeViewController: UIViewController {
 
     // MARK: - Dependencies
 
-    private let presenter: any HomeViewModuleOutputProtocol
+    private let store: HomeStoreProtocol
 
     // MARK: - UI
 
@@ -25,12 +23,12 @@ final class HomeViewController: UIViewController {
     // MARK: - Initialization
 
     init(
-        presenter: any HomeViewModuleOutputProtocol,
+        store: HomeStoreProtocol,
         headerView: HomeHeaderView,
         mapViewController: UIViewController,
         flightListBottomSheet: UIViewController
     ) {
-        self.presenter = presenter
+        self.store = store
         self.headerView = headerView
         self.mapViewController = mapViewController
         self.flightListBottomSheet = flightListBottomSheet
@@ -47,14 +45,14 @@ final class HomeViewController: UIViewController {
         super.viewDidLoad()
 
         setupUI()
-        presenter.dispatch(.common(.onViewDidLoad))
+        store.dispatch(event: .ui(.common(.onViewDidLoad)))
     }
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
 
         let maxHeight = view.frame.height - view.safeAreaInsets.top - 10
-        presenter.dispatch(.common(.onCalculateFlightListMaxHeight(maxHeight)))
+        store.dispatch(event: .ui(.common(.onCalculateFlightListMaxHeight(maxHeight))))
     }
 
     // MARK: - Private

@@ -5,15 +5,14 @@
 //  Created by Ivan Puzanov on 30.06.2026.
 //
 
+import Combine
 import SnapKit
 import UIKit
 
 private enum Constants {
     static let cornerRadius: CGFloat = 30
+    static let shadowOpacity: Float = 0.1
 }
-
-protocol HomeFlightListModuleInputProtocol: ModuleInputProtocol where State == HomeState.FlightListState {}
-protocol HomeFlightListModuleOutputProtocol: ModuleOutputProtocol where Event == HomeEvent.UIEvent {}
 
 final class HomeFlightListView: UIView {
 
@@ -25,7 +24,7 @@ final class HomeFlightListView: UIView {
     // MARK: - Dependencies
 
     weak var bottomSheet: (any BottomSheetProtocol)?
-    private let presenter: any HomeFlightListModuleOutputProtocol
+    private let store: HomeStoreProtocol
     private let configurationFactory: HomeFlightListConfigurationFactoryProtocol
 
     // MARK: - UI
@@ -37,6 +36,7 @@ final class HomeFlightListView: UIView {
 
     // MARK: - Properties
 
+    private var bag: Set<AnyCancellable> = []
     private var mapButtonBottomConstraint: Constraint?
 
     // MARK: - Properties
@@ -58,14 +58,19 @@ final class HomeFlightListView: UIView {
     // MARK: - Initialization
 
     init(
-        presenter: any HomeFlightListModuleOutputProtocol,
+        store: HomeStoreProtocol,
         configurationFactory: HomeFlightListConfigurationFactoryProtocol
     ) {
-        self.presenter = presenter
+        self.store = store
         self.configurationFactory = configurationFactory
         super.init(frame: .zero)
 
+        setupBindings()
         setupUI()
+
+        store.dispatch(event: .ui(.flightList(.onSetup(
+            cornerRadius: Constants.cornerRadius, shadowOpacity: Constants.shadowOpacity)))
+        )
     }
     
     required init?(coder: NSCoder) {
@@ -74,11 +79,22 @@ final class HomeFlightListView: UIView {
 
     // MARK: - Private
 
+    private func setupBindings() {
+        store.stateDidChange
+            .compactMap { [weak store] in
+                store?.state.flightListState
+            }
+            .removeDuplicates()
+            .sink { state in
+                self.apply(state)
+            }.store(in: &bag)
+    }
+
     private func setupUI() {
         addSubviews(grabberView, statusView, tableView, mapButton)
         withBackgroundColor(.Background.elevation1)
         withCornerRadius(Constants.cornerRadius, corners: [.topLeft, .topRight])
-        withShadow()
+        withShadow(opacity: Constants.shadowOpacity)
 
         setupGrabberView()
         setupStatusView()
@@ -132,6 +148,13 @@ final class HomeFlightListView: UIView {
                 .constraint
         }
     }
+
+    private func apply(_ state: HomeState.FlightListState) {
+        configureAppearance(with: state.appearance)
+        updateVisibility(with: state.contentState)
+        renderTableView(from: state.contentState)
+        renderStatusViewIfNeeded(from: state.contentState)
+    }
 }
 
 // MARK: - BottomSheetContentViewProtocol
@@ -145,40 +168,30 @@ extension HomeFlightListView: BottomSheetContentViewProtocol {
     func dispatch(_ event: BottomSheetEvent) {
         switch event {
         case let .onProgressDidChange(progress):
-            presenter.dispatch(.flightList(.onBottomSheetHeightChange(progress: progress)))
+            store.dispatch(event: .ui(.flightList(.onBottomSheetHeightChange(progress: progress))))
         }
     }
 }
 
-// MARK: - FlightListModuleProtocol
+// MARK: - Configuration
 
-extension HomeFlightListView: HomeFlightListModuleInputProtocol {
-
-    func apply(_ state: HomeState.FlightListState) {
-        configureAppearance(with: state.appearance)
-        updateVisibility(with: state.contentState)
-        renderTableView(from: state.contentState)
-        renderStatusViewIfNeeded(from: state.contentState)
-    }
+extension HomeFlightListView {
 
     private func configureAppearance(with appearance: HomeState.FlightListState.Appearance) {
         bottomSheet?.setupDetents(appearance.bottomSheetDetents)
-        layer.shadowOpacity = Float((1 - appearance.bottomSheetProgress) / 10)
-
-        let cornerRadius = min(Constants.cornerRadius, (1 / appearance.bottomSheetProgress))
-        withCornerRadius(cornerRadius)
-
-        configureMapButtonAppearance(progress: appearance.bottomSheetProgress)
+        layer.shadowOpacity = appearance.currentShadowOpacity
+        withCornerRadius(appearance.currentCornerRadius)
+        configureMapButtonAppearance(isHidden: appearance.isMapButtonHidden)
     }
 
-    private func configureMapButtonAppearance(progress: CGFloat) {
+    private func configureMapButtonAppearance(isHidden: Bool) {
         UIView.animate(withDuration: 0.3, delay: 0, options: [.beginFromCurrentState]) {
-            if progress == 1 {
-                self.mapButton.alpha = 1
-                self.mapButtonBottomConstraint?.update(offset: -10)
-            } else {
+            if isHidden {
                 self.mapButton.alpha = 0
                 self.mapButtonBottomConstraint?.update(offset: -1)
+            } else {
+                self.mapButton.alpha = 1
+                self.mapButtonBottomConstraint?.update(offset: -10)
             }
 
             self.layoutIfNeeded()

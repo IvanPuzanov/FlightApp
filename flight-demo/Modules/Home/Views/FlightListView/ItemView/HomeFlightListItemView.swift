@@ -142,6 +142,7 @@ extension HomeFlightListItemView: ConfigurableView {
 
     func prepareForReuse() {
         airlineImageView.image = nil
+        imageResolver.cancel()
     }
 
     private func configureImageView(with imageURL: URL?) {

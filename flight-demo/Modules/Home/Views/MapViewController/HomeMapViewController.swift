@@ -5,27 +5,29 @@
 //  Created by Ivan Puzanov on 28.06.2026.
 //
 
+import Combine
 import MapKit
 import SnapKit
 import UIKit
-
-protocol HomeMapModuleInputProtocol: ModuleInputProtocol where State == HomeState.MapState {}
-protocol HomeMapModuleOutputProtocol: ModuleOutputProtocol where Event == HomeEvent.UIEvent {}
 
 final class HomeMapViewController: UIViewController {
 
     // MARK: - Dependecies
 
-    private let presenter: any HomeMapModuleOutputProtocol
+    private let store: HomeStoreProtocol
 
     // MARK: - UI
 
     private let mapView = MKMapView()
 
+    // MARK: - Properties
+
+    private var bag: Set<AnyCancellable> = []
+
     // MARK: - Initialization
 
-    init(presenter: any HomeMapModuleOutputProtocol) {
-        self.presenter = presenter
+    init(store: HomeStoreProtocol) {
+        self.store = store
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -38,10 +40,22 @@ final class HomeMapViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        setupBindings()
         setupUI()
     }
 
     // MARK: - Private
+
+    private func setupBindings() {
+        store.stateDidChange
+            .compactMap { [weak store] in
+                store?.state.mapState
+            }
+            .removeDuplicates()
+            .sink { state in
+                self.apply(state)
+            }.store(in: &bag)
+    }
 
     private func setupUI() {
         view.addSubviews(mapView)
@@ -69,6 +83,10 @@ final class HomeMapViewController: UIViewController {
 
         mapView.preferredConfiguration = configuration
     }
+
+    private func apply(_ state: HomeState.MapState) {
+        moveToUserRegionIfNeeded(state: state)
+    }
 }
 
 // MARK: - MKMapViewDelegate
@@ -76,17 +94,13 @@ final class HomeMapViewController: UIViewController {
 extension HomeMapViewController: MKMapViewDelegate {
 
     func mapViewDidFinishLoadingMap(_ mapView: MKMapView) {
-        presenter.dispatch(.map(.onMapDidLoad))
+        store.dispatch(event: .ui(.map(.onMapDidLoad)))
     }
 }
 
 // MARK: - HomeViewControllerProtocol
 
-extension HomeMapViewController: HomeMapModuleInputProtocol {
-
-    func apply(_ state: HomeState.MapState) {
-        moveToUserRegionIfNeeded(state: state)
-    }
+extension HomeMapViewController {
 
     private func moveToUserRegionIfNeeded(state: HomeState.MapState) {
         guard
@@ -101,6 +115,6 @@ extension HomeMapViewController: HomeMapModuleInputProtocol {
             span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)
         )
         mapView.setRegion(region, animated: true)
-        presenter.dispatch(.map(.onDefaultRegionSet))
+        store.dispatch(event: .ui(.map(.onDefaultRegionSet)))
     }
 }

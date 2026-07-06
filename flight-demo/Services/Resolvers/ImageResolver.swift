@@ -10,6 +10,7 @@ import UIKit
 
 protocol ImageResolverProtocol: AnyObject {
     func resolveImage(from url: URL, fallback: UIImage?, completion: @escaping (UIImage?) -> Void)
+    func cancel()
 }
 
 final class ImageResolver: ImageResolverProtocol {
@@ -38,6 +39,12 @@ final class ImageResolver: ImageResolverProtocol {
                 .sink { image in
                     completion(image)
                 }.store(in: &bag)
+        }
+    }
+
+    func cancel() {
+        bag.forEach {
+            $0.cancel()
         }
     }
 }

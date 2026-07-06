@@ -5,17 +5,15 @@
 //  Created by Ivan Puzanov on 29.06.2026.
 //
 
+import Combine
 import SnapKit
 import UIKit
-
-protocol HomeHeaderViewModuleInputProtocol: ModuleInputProtocol where State == HomeState.HeaderState {}
-protocol HomeHeaderViewModuleOutputProtocol: ModuleOutputProtocol where Event == HomeEvent.UIEvent {}
 
 final class HomeHeaderView: UIView {
 
     // MARK: - Dependencies
 
-    private let presenter: any HomeHeaderViewModuleOutputProtocol
+    private let store: HomeStoreProtocol
     private let configurationFactory: HomeHeaderViewConfigurationFactoryProtocol
 
     // MARK: - UI
@@ -31,20 +29,21 @@ final class HomeHeaderView: UIView {
     private let subtitleLabel = UILabel()
     private let searchTextField = UITextField()
 
-    // MARK: - Protperties
+    // MARK: - Properties
 
-    private var currentProgress: CGFloat = 0
+    private var bag: Set<AnyCancellable> = []
 
     // MARK: - Initialization
 
     init(
-        presenter: any HomeHeaderViewModuleOutputProtocol,
+        store: HomeStoreProtocol,
         configurationFactory: HomeHeaderViewConfigurationFactoryProtocol
     ) {
-        self.presenter = presenter
+        self.store = store
         self.configurationFactory = configurationFactory
         super.init(frame: .zero)
 
+        setupBindings()
         setupUI()
     }
     
@@ -52,15 +51,18 @@ final class HomeHeaderView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    // MARK: - Lifecycle
-
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-
-        updateBackgroundColor(with: currentProgress)
-    }
-
     // MARK: - Private
+
+    private func setupBindings() {
+        store.stateDidChange
+            .compactMap { [weak store] in
+                store?.state.headerState
+            }
+            .removeDuplicates()
+            .sink { state in
+                self.apply(state)
+            }.store(in: &bag)
+    }
 
     private func setupUI() {
         addSubviews(gradientView, containerView)
@@ -156,8 +158,16 @@ final class HomeHeaderView: UIView {
     }
 
     @objc
-    func handleSearchTextTyping() {
-        presenter.dispatch(.header(.onSearchTextEnter(text: searchTextField.text)))
+    private func handleSearchTextTyping() {
+        store.dispatch(event: .ui(.header(.onSearchTextEnter(text: searchTextField.text))))
+    }
+
+    private func apply(_ state: HomeState.HeaderState) {
+        let configuration = configurationFactory.makeHeaderViewConfiguration(from: state)
+        configure(with: configuration)
+
+        updateBackgroundColor(with: state.bottomSheetProgress)
+        gradientView.offsetStartPoint(y: state.bottomSheetProgress)
     }
 }
 
@@ -165,22 +175,14 @@ final class HomeHeaderView: UIView {
 
 extension HomeHeaderView: UITextFieldDelegate {
 
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        presenter.dispatch(.header(.onSearchTextEndEditing))
-        return textField.resignFirstResponder()
+    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+        store.dispatch(event: .ui(.header(.onSearchStartEditing)))
+        return true
     }
-}
 
-// MARK: - HomeHeaderViewModuleInputProtocol
-
-extension HomeHeaderView: HomeHeaderViewModuleInputProtocol {
-
-    func apply(_ state: HomeState.HeaderState) {
-        let configuration = configurationFactory.makeHeaderViewConfiguration(from: state)
-        currentProgress = state.bottomSheetProgress
-        configure(with: configuration)
-        updateBackgroundColor(with: state.bottomSheetProgress)
-        gradientView.offsetStartPoint(y: state.bottomSheetProgress)
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        store.dispatch(event: .ui(.header(.onSearchTextEndEditing)))
+        return textField.resignFirstResponder()
     }
 }
 
@@ -191,9 +193,9 @@ extension HomeHeaderView: HomeHeaderViewConfigurationFactoryDelegate {
     func trailingIconButtonDidTap(mode: HomeState.HeaderState.Mode) {
         switch mode {
         case .flightInfo:
-            presenter.dispatch(.header(.onMoreTap))
+            store.dispatch(event: .ui(.header(.onFilterTap)))
         case .search:
-            presenter.dispatch(.header(.onFilterTap))
+            store.dispatch(event: .ui(.header(.onMoreTap)))
         }
     }
 }

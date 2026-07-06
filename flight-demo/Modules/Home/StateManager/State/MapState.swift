@@ -15,7 +15,6 @@ extension HomeState {
 }
 
 extension HomeState.MapState {
-
     static var initial: HomeState.MapState {
         HomeState.MapState(isDefaultRegionSet: false)
     }

@@ -47,10 +47,10 @@ extension UIView {
     }
 
     @discardableResult
-    func withShadow(offsetX: CGFloat = 0, offsetY: CGFloat = 0) -> Self {
+    func withShadow(opacity: Float = 0.1, offsetX: CGFloat = 0, offsetY: CGFloat = 0) -> Self {
         layer.shadowColor = UIColor.black.cgColor
         layer.shadowRadius = 10
-        layer.shadowOpacity = 0.1
+        layer.shadowOpacity = opacity
         layer.shadowOffset = CGSize(width: offsetX, height: offsetY)
 
         return self

@@ -1,5 +1,5 @@
 //
-//  LocationManager.swift
+//  LocationService.swift
 //  flight-demo
 //
 //  Created by Ivan Puzanov on 28.06.2026.
@@ -11,16 +11,16 @@ private enum Constants {
     static let defaultCoordinate = Coordinate(latitude: 48.8566, longitude: 2.3522)
 }
 
-enum LocationManagerError: Error {
+enum LocationServiceError: Error {
     case permissionDenied
 }
 
-protocol LocationManagerProtocol: AnyObject {
+protocol LocationServiceProtocol: AnyObject {
     func getDefaultLocation() -> Coordinate
     func getUserCurrentLocation() throws -> Coordinate
 }
 
-final class LocationManager: LocationManagerProtocol {
+final class LocationService: LocationServiceProtocol {
 
     // MARK: - Dependencies
 
@@ -39,7 +39,7 @@ final class LocationManager: LocationManagerProtocol {
         case .notDetermined:
             manager.requestWhenInUseAuthorization()
         case .restricted, .denied:
-            throw LocationManagerError.permissionDenied
+            throw LocationServiceError.permissionDenied
         case .authorizedWhenInUse, .authorizedAlways:
             break
         @unknown default:

@@ -8,10 +8,7 @@
 import Foundation
 
 protocol HomeRepositoryProtocol: AnyObject {
-    func fetchAirports(
-        completion: (Result<[Airport], Error>) -> Void
-    )
-    func fetchFlights(
-        completion: (Result<[Flight], Error>) -> Void
-    )
+    func getUserLocation(completion: (Result<Coordinate, Error>) -> Void)
+    func fetchAirports(completion: (Result<[Airport], Error>) -> Void)
+    func fetchFlights(completion: (Result<[Flight], Error>) -> Void)
 }

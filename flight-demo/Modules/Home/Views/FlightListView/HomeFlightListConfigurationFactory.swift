@@ -135,18 +135,12 @@ final class HomeFlightListConfigurationFactory: HomeFlightListConfigurationFacto
                 labelConfiguration: createStatusLabelConfiguration(from: flight.status),
                 backgroundColor: createColor(from: flight.status).withAlphaComponent(0.1)
             ),
-            originCityLabelConfiguration: LabelConfiguration(
-                text: flight.originCity,
-                font: .systemFont(ofSize: 16)
-            ),
+            originCityLabelConfiguration: LabelConfiguration(text: flight.originCity),
             originIATALabelConfiguration: LabelConfiguration(
                 text: flight.originIata,
                 font: .systemFont(ofSize: 22, weight: .bold)
             ),
-            destinationCityLabelConfiguration: LabelConfiguration(
-                text: flight.destinationCity,
-                font: .systemFont(ofSize: 16)
-            ),
+            destinationCityLabelConfiguration: LabelConfiguration(text: flight.destinationCity),
             destinationIATALabelConfiguration: LabelConfiguration(
                 text: flight.destinationIata,
                 font: .systemFont(ofSize: 22, weight: .bold)

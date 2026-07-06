@@ -8,7 +8,7 @@
 import SnapKit
 import UIKit
 
-protocol BottomSheetContentViewProtocol: UIView & ScrollProvider & ModuleInputProtocol {
+protocol BottomSheetContentViewProtocol: UIView & ScrollProvider {
     var bottomSheet: BottomSheetProtocol? { get set }
 
     func dispatch(_ event: BottomSheetEvent)
@@ -116,6 +116,7 @@ final class BottomSheetViewController<ContentView: BottomSheetContentViewProtoco
         animator?.startAnimation()
         animator?.addCompletion { _ in
             self.updateScrollViewAvailability()
+            self.dispacthEventOnHeightChange()
         }
     }
 

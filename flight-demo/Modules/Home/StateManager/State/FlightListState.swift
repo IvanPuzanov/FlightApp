@@ -12,13 +12,22 @@ extension HomeState {
         var appearance: Appearance
         var parameters: Parameters
         var contentState: ContentState
+        var bottomSheetState: BottomSheetState
     }
 }
 
 extension HomeState.FlightListState {
     struct Appearance: Equatable {
+        let defaultCornerRadius: CGFloat
+        var currentCornerRadius: CGFloat
+
+        let defaultShadowOpacity: Float
+        var currentShadowOpacity: Float
+
         var bottomSheetDetents: [CGFloat]
-        var bottomSheetProgress: CGFloat
+        var currentDetent: CGFloat?
+
+        var isMapButtonHidden: Bool
     }
 
     struct Parameters: Equatable {
@@ -32,6 +41,17 @@ extension HomeState.FlightListState {
         case content([Flight])
     }
 
+    struct BottomSheetState: Equatable {
+        var detents: [BottomSheetDetent]
+        var currentDetent: BottomSheetDetent
+    }
+
+    enum BottomSheetDetent: Equatable {
+        case compact(CGFloat)
+        case regular(CGFloat)
+        case large(CGFloat)
+    }
+
     enum Status {
         case error
         case empty
@@ -42,14 +62,23 @@ extension HomeState.FlightListState {
     static var initial: HomeState.FlightListState {
         HomeState.FlightListState(
             appearance: Appearance(
+                defaultCornerRadius: 0,
+                currentCornerRadius: 0,
+                defaultShadowOpacity: 0,
+                currentShadowOpacity: 0,
                 bottomSheetDetents: [],
-                bottomSheetProgress: 0
+                currentDetent: nil,
+                isMapButtonHidden: true
             ),
             parameters: Parameters(
                 flights: [],
                 searchText: nil
             ),
-            contentState: .loading
+            contentState: .loading,
+            bottomSheetState: BottomSheetState(
+                detents: [],
+                currentDetent: .compact(0)
+            )
         )
     }
 }
