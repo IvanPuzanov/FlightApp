@@ -52,6 +52,7 @@ final class HomeAssembly: HomeAssemblyProtocol {
         )
 
         homeHeaderConfigurationFactroy.delegate = headerView
+        flightListConfigurationFactory.delegate = flightListView
 
         return viewController
     }

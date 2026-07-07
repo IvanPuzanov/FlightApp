@@ -10,6 +10,10 @@ import SnapKit
 import UIKit
 
 private enum Constants {
+    static let defaultDetents: [HomeState.FlightListState.BottomSheetDetent] = [
+        HomeState.FlightListState.BottomSheetDetent(id: .compact, height: 200),
+        HomeState.FlightListState.BottomSheetDetent(id: .compact, height: 520)
+    ]
     static let cornerRadius: CGFloat = 30
     static let shadowOpacity: Float = 0.1
 }
@@ -69,7 +73,9 @@ final class HomeFlightListView: UIView {
         setupUI()
 
         store.dispatch(event: .ui(.flightList(.onSetup(
-            cornerRadius: Constants.cornerRadius, shadowOpacity: Constants.shadowOpacity)))
+            cornerRadius: Constants.cornerRadius,
+            shadowOpacity: Constants.shadowOpacity,
+            detents: Constants.defaultDetents)))
         )
     }
     
@@ -87,6 +93,16 @@ final class HomeFlightListView: UIView {
             .removeDuplicates()
             .sink { state in
                 self.apply(state)
+            }.store(in: &bag)
+
+        store.stateDidChange
+            .compactMap { [weak store] in
+                store?.state.flightListState.bottomSheetState
+            }
+            .removeDuplicates()
+            .sink { [weak self] state in
+                self?.bottomSheet?.setupDetents(state.detents.map { $0.height })
+                self?.bottomSheet?.setDetent(state.currentDetent.height)
             }.store(in: &bag)
     }
 
@@ -128,7 +144,7 @@ final class HomeFlightListView: UIView {
         tableView.backgroundColor = .clear
         tableView.separatorStyle = .none
         tableView.keyboardDismissMode = .onDrag
-        tableView.clipsToBounds = false
+        tableView.contentInset.top = 8
 
         dataSource.defaultRowAnimation = .fade
 
@@ -157,6 +173,15 @@ final class HomeFlightListView: UIView {
     }
 }
 
+// MARK: - HomeFlightListConfigurationFactoryDelegate
+
+extension HomeFlightListView: HomeFlightListConfigurationFactoryDelegate {
+
+    func mapButtonDidTap() {
+        store.dispatch(event: .ui(.flightList(.onMapButtonTap)))
+    }
+}
+
 // MARK: - BottomSheetContentViewProtocol
 
 extension HomeFlightListView: BottomSheetContentViewProtocol {
@@ -169,6 +194,8 @@ extension HomeFlightListView: BottomSheetContentViewProtocol {
         switch event {
         case let .onProgressDidChange(progress):
             store.dispatch(event: .ui(.flightList(.onBottomSheetHeightChange(progress: progress))))
+        case let .onDetentSet(detent):
+            store.dispatch(event: .ui(.flightList(.onDetentSet(detent))))
         }
     }
 }
@@ -178,7 +205,6 @@ extension HomeFlightListView: BottomSheetContentViewProtocol {
 extension HomeFlightListView {
 
     private func configureAppearance(with appearance: HomeState.FlightListState.Appearance) {
-        bottomSheet?.setupDetents(appearance.bottomSheetDetents)
         layer.shadowOpacity = appearance.currentShadowOpacity
         withCornerRadius(appearance.currentCornerRadius)
         configureMapButtonAppearance(isHidden: appearance.isMapButtonHidden)

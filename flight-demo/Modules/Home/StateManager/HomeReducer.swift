@@ -67,7 +67,9 @@ final class HomeReducer: HomeReducerProtocol {
         case .onMoreTap:
             return []
         case .onSearchStartEditing:
-            state.flightListState.appearance.currentDetent = state.flightListState.appearance.bottomSheetDetents.max() ?? 0
+            if let largeDetent = state.flightListState.bottomSheetState.detents.first(where: { $0.id == .large }) {
+                state.flightListState.bottomSheetState.currentDetent = largeDetent
+            }
             return []
         case let .onSearchTextEnter(text):
             state.flightListState.parameters.searchText = text
@@ -84,20 +86,36 @@ final class HomeReducer: HomeReducerProtocol {
         state: inout HomeState
     ) -> [HomeEffect] {
         switch event {
-        case let .onSetup(cornerRadius, shadowOpacity):
+        case let .onSetup(cornerRadius, shadowOpacity, detents):
             state.flightListState.appearance = HomeState.FlightListState.Appearance(
                 defaultCornerRadius: cornerRadius,
                 currentCornerRadius: cornerRadius,
                 defaultShadowOpacity: shadowOpacity,
                 currentShadowOpacity: shadowOpacity,
-                bottomSheetDetents: [200],
-                currentDetent: 200,
                 isMapButtonHidden: true
+            )
+            state.flightListState.bottomSheetState = HomeState.FlightListState.BottomSheetState(
+                detents: detents,
+                currentDetent: HomeState.FlightListState.BottomSheetDetent(
+                    id: .compact,
+                    height: 200
+                )
             )
             return []
         case let .onBottomSheetHeightChange(progress):
-            state.flightListState.appearance.currentDetent = progress == 1 ? nil : state.flightListState.appearance.currentDetent
             updateStateOnBottomSheetHeight(progress: progress, state: &state)
+            return []
+        case let .onDetentSet(height):
+            let previousDetent = state.flightListState.bottomSheetState.currentDetent
+            if let detent = state.flightListState.bottomSheetState.detents.first(where: { $0.height == height }),
+               detent != previousDetent {
+                state.flightListState.bottomSheetState.currentDetent = detent
+            }
+            return []
+        case .onMapButtonTap:
+            if let detent = state.flightListState.bottomSheetState.detents.first(where: { $0.id == .compact }) {
+                state.flightListState.bottomSheetState.currentDetent = detent
+            }
             return []
         }
     }
@@ -108,10 +126,17 @@ final class HomeReducer: HomeReducerProtocol {
     ) -> [HomeEffect] {
         switch event {
         case .onViewDidLoad:
-            state.flightListState.appearance.bottomSheetDetents = [200]
             return [.data(.loadFlights)]
         case let .onCalculateFlightListMaxHeight(maxHeight):
-            state.flightListState.appearance.bottomSheetDetents = [200, 520, maxHeight - 39]
+            let detents = state.flightListState.bottomSheetState.detents
+            let newDetentHeight = maxHeight - 39
+            let largeDetent = HomeState.FlightListState.BottomSheetDetent(id: .large, height: newDetentHeight)
+
+            if detents.contains(where: { $0.id == .large && abs($0.height - newDetentHeight) < 0.5 }) {
+                return []
+            }
+
+            state.flightListState.bottomSheetState.detents = detents + [largeDetent]
             return []
         }
     }
@@ -147,13 +172,22 @@ final class HomeReducer: HomeReducerProtocol {
 
     private func updateStateOnBottomSheetHeight(progress: CGFloat, state: inout HomeState) {
         let bottomSheetProgress = max(0, (progress - 0.95) / (1 - 0.95))
+        let cornerRadius = bottomSheetProgress > 0
+            ? min(state.flightListState.appearance.defaultCornerRadius, 1 / bottomSheetProgress)
+            : state.flightListState.appearance.defaultCornerRadius
+        let shadowOpacity = Float((1 - bottomSheetProgress) / 10)
+        let isMapButtonHidden = bottomSheetProgress != 1
+
+        guard state.headerState.bottomSheetProgress != bottomSheetProgress
+            || state.flightListState.appearance.currentCornerRadius != cornerRadius
+            || state.flightListState.appearance.currentShadowOpacity != shadowOpacity
+            || state.flightListState.appearance.isMapButtonHidden != isMapButtonHidden
+        else { return }
 
         state.headerState.bottomSheetProgress = bottomSheetProgress
-        state.flightListState.appearance.currentCornerRadius = min(
-            state.flightListState.appearance.defaultCornerRadius, (1 / bottomSheetProgress)
-        )
-        state.flightListState.appearance.currentShadowOpacity = Float((1 - bottomSheetProgress) / 10)
-        state.flightListState.appearance.isMapButtonHidden = bottomSheetProgress != 1
+        state.flightListState.appearance.currentCornerRadius = cornerRadius
+        state.flightListState.appearance.currentShadowOpacity = shadowOpacity
+        state.flightListState.appearance.isMapButtonHidden = isMapButtonHidden
     }
 
     private func updateFlightListContentStateIfNeeded(state: inout HomeState.FlightListState) {

@@ -47,8 +47,14 @@ extension HomeEvent.UIEvent {
     }
 
     enum FlightListEvent {
-        case onSetup(cornerRadius: CGFloat, shadowOpacity: Float)
+        case onSetup(
+            cornerRadius: CGFloat,
+            shadowOpacity: Float,
+            detents: [HomeState.FlightListState.BottomSheetDetent]
+        )
         case onBottomSheetHeightChange(progress: CGFloat)
+        case onDetentSet(CGFloat)
+        case onMapButtonTap
     }
 
     enum CommonEvent {

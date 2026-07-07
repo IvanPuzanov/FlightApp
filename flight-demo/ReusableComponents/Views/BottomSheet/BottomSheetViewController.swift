@@ -16,6 +16,7 @@ protocol BottomSheetContentViewProtocol: UIView & ScrollProvider {
 
 protocol BottomSheetProtocol: AnyObject {
     func setupDetents(_ detents: [CGFloat])
+    func setDetent(_ detent: CGFloat)
 }
 
 final class BottomSheetViewController<ContentView: BottomSheetContentViewProtocol>: UIViewController, UIGestureRecognizerDelegate {
@@ -34,6 +35,7 @@ final class BottomSheetViewController<ContentView: BottomSheetContentViewProtoco
     }
     private var maxDetent: CGFloat = 0
     private var heightConstraint: Constraint?
+    private var lastDispatchedProgress: CGFloat?
 
     // MARK: - Initialization
 
@@ -140,6 +142,7 @@ final class BottomSheetViewController<ContentView: BottomSheetContentViewProtoco
         }
 
         applyHeight(targetHeight, animated: true)
+        contentView.dispatch(.onDetentSet(targetHeight))
     }
 
     private func updateScrollViewAvailability() {
@@ -182,8 +185,9 @@ extension BottomSheetViewController: BottomSheetProtocol {
 
         self.detents = detents.sorted()
         self.maxDetent = detents.last ?? 0
-        if let minHeight = detents.min() {
-            applyHeight(minHeight)
-        }
+    }
+
+    func setDetent(_ detent: CGFloat) {
+        applyHeight(detent)
     }
 }

@@ -20,6 +20,10 @@ final class HomeViewController: UIViewController {
     private let mapViewController: UIViewController
     private let flightListBottomSheet: UIViewController
 
+    // MARK: - Properties
+
+    private var shouldSetFlightListMaxHeight: Bool = true
+
     // MARK: - Initialization
 
     init(
@@ -51,8 +55,11 @@ final class HomeViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
 
-        let maxHeight = view.frame.height - view.safeAreaInsets.top - 10
-        store.dispatch(event: .ui(.common(.onCalculateFlightListMaxHeight(maxHeight))))
+        if shouldSetFlightListMaxHeight {
+            let maxHeight = view.frame.height - view.safeAreaInsets.top - 10
+            store.dispatch(event: .ui(.common(.onCalculateFlightListMaxHeight(maxHeight))))
+            shouldSetFlightListMaxHeight = false
+        }
     }
 
     // MARK: - Private

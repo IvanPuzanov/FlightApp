@@ -11,6 +11,10 @@ private enum Constants {
     static let shimmerHeight: CGFloat = 160
 }
 
+protocol HomeFlightListConfigurationFactoryDelegate: AnyObject {
+    func mapButtonDidTap()
+}
+
 protocol HomeFlightListConfigurationFactoryProtocol: AnyObject {
     func createFlightListCellTypes(from state: HomeState.FlightListState.ContentState) -> [HomeFlightListCellType]
     func createStatusViewConfiguration(
@@ -23,6 +27,7 @@ final class HomeFlightListConfigurationFactory: HomeFlightListConfigurationFacto
 
     // MARK: - Properties
 
+    weak var delegate: HomeFlightListConfigurationFactoryDelegate?
     private let shimmerUUIDs = [UUID(), UUID(), UUID(), UUID()]
 
     // MARK: - Public
@@ -78,7 +83,10 @@ final class HomeFlightListConfigurationFactory: HomeFlightListConfigurationFacto
             image: UIImage(systemName: "map.fill"),
             imageTintColor: .white,
             labelConfiguration: LabelConfiguration(text: "Map", textColor: .white),
-            backgroundColor: .black
+            backgroundColor: .black,
+            onTap: { [weak self] in
+                self?.delegate?.mapButtonDidTap()
+            }
         )
     }
 

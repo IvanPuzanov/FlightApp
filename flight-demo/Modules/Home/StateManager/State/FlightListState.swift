@@ -24,9 +24,6 @@ extension HomeState.FlightListState {
         let defaultShadowOpacity: Float
         var currentShadowOpacity: Float
 
-        var bottomSheetDetents: [CGFloat]
-        var currentDetent: CGFloat?
-
         var isMapButtonHidden: Bool
     }
 
@@ -46,10 +43,15 @@ extension HomeState.FlightListState {
         var currentDetent: BottomSheetDetent
     }
 
-    enum BottomSheetDetent: Equatable {
-        case compact(CGFloat)
-        case regular(CGFloat)
-        case large(CGFloat)
+    enum BottomSheetDetentID: Equatable {
+        case compact
+        case regular
+        case large
+    }
+
+    struct BottomSheetDetent: Equatable {
+        let id: BottomSheetDetentID
+        let height: CGFloat
     }
 
     enum Status {
@@ -66,8 +68,6 @@ extension HomeState.FlightListState {
                 currentCornerRadius: 0,
                 defaultShadowOpacity: 0,
                 currentShadowOpacity: 0,
-                bottomSheetDetents: [],
-                currentDetent: nil,
                 isMapButtonHidden: true
             ),
             parameters: Parameters(
@@ -77,7 +77,7 @@ extension HomeState.FlightListState {
             contentState: .loading,
             bottomSheetState: BottomSheetState(
                 detents: [],
-                currentDetent: .compact(0)
+                currentDetent: BottomSheetDetent(id: .compact, height: 0)
             )
         )
     }

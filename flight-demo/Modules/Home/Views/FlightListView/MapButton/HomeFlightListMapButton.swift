@@ -14,6 +14,11 @@ final class HomeFlightListMapButton: UIView {
 
     private let imageView = UIImageView()
     private let label = UILabel()
+    private let tapGesture = UITapGestureRecognizer()
+
+    // MARK: - Properties
+
+    private var onTap: (() -> Void)?
 
     // MARK: - Initialization
 
@@ -42,6 +47,7 @@ final class HomeFlightListMapButton: UIView {
 
         setupImageView()
         setupLabel()
+        setupTapGestureRecognizer()
     }
 
     private func setupImageView() {
@@ -62,6 +68,16 @@ final class HomeFlightListMapButton: UIView {
             $0.trailing.equalToSuperview().inset(14)
         }
     }
+
+    private func setupTapGestureRecognizer() {
+        addGestureRecognizer(tapGesture)
+        tapGesture.addTarget(self, action: #selector(handleOnTap))
+    }
+
+    @objc
+    private func handleOnTap() {
+        onTap?()
+    }
 }
 
 // MARK: - ConfigurableView
@@ -73,5 +89,6 @@ extension HomeFlightListMapButton: ConfigurableView {
         imageView.tintColor = configuration.imageTintColor
         label.configure(with: configuration.labelConfiguration)
         backgroundColor = configuration.backgroundColor
+        onTap = configuration.onTap
     }
 }
