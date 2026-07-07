@@ -184,6 +184,10 @@ extension HomeHeaderView: UITextFieldDelegate {
         store.dispatch(event: .ui(.header(.onSearchTextEndEditing)))
         return textField.resignFirstResponder()
     }
+
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        store.dispatch(event: .ui(.header(.onSearchTextEndEditing)))
+    }
 }
 
 // MARK: - HomeHeaderViewConfigurationFactoryDelegate
