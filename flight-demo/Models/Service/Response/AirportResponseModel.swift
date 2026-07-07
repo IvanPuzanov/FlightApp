@@ -8,5 +8,10 @@
 import Foundation
 
 struct AirportResponseModel: Decodable {
+    let id: Int
     let iata: String
+    let city: String
+    let country: String
+    let lat: Double
+    let lon: Double
 }

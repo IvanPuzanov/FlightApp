@@ -35,7 +35,7 @@ extension HomeEvent {
 extension HomeEvent.UIEvent {
     enum MapEvent {
         case onMapDidLoad
-        case onDefaultRegionSet
+        case onAirportSelect(id: Int)
     }
 
     enum HeaderEvent {

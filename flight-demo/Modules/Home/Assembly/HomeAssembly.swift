@@ -37,7 +37,11 @@ final class HomeAssembly: HomeAssemblyProtocol {
             store: store,
             configurationFactory: homeHeaderConfigurationFactroy
         )
-        let mapViewController = HomeMapViewController(store: store)
+        let factory = HomeMapViewControllerFactory()
+        let mapViewController = HomeMapViewController(
+            store: store,
+            factory: factory
+        )
         let flightListConfigurationFactory = HomeFlightListConfigurationFactory()
         let flightListView = HomeFlightListView(
             store: store,

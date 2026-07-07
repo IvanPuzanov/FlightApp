@@ -48,11 +48,10 @@ final class HomeReducer: HomeReducerProtocol {
     ) -> [HomeEffect] {
         switch event {
         case .onMapDidLoad:
-            return state.mapState.isDefaultRegionSet
-                ? []
-                : [.data(.getDefaultRegionLocation)]
-        case .onDefaultRegionSet:
-            state.mapState.isDefaultRegionSet = true
+            return state.mapState.defaultRegionCoordinate == nil
+                ? [.data(.getDefaultRegionLocation)]
+                : []
+        case let .onAirportSelect(id):
             return []
         }
     }
@@ -126,7 +125,7 @@ final class HomeReducer: HomeReducerProtocol {
     ) -> [HomeEffect] {
         switch event {
         case .onViewDidLoad:
-            return [.data(.loadFlights)]
+            return [.data(.loadFlights), .data(.loadAirports)]
         case let .onCalculateFlightListMaxHeight(maxHeight):
             let detents = state.flightListState.bottomSheetState.detents
             let newDetentHeight = maxHeight - 39
@@ -153,7 +152,8 @@ final class HomeReducer: HomeReducerProtocol {
             return []
         case .onGetLocationFailed:
             return []
-        case .onAirportsLoaded:
+        case let .onAirportsLoaded(airports):
+            state.mapState.airports = airports
             return []
         case .onAirportsFailed:
             return []

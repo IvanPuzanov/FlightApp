@@ -9,13 +9,16 @@ import Foundation
 
 extension HomeState {
     struct MapState: Equatable {
-        var isDefaultRegionSet: Bool
         var defaultRegionCoordinate: Coordinate?
+        var airports: [Airport]
     }
 }
 
 extension HomeState.MapState {
     static var initial: HomeState.MapState {
-        HomeState.MapState(isDefaultRegionSet: false)
+        HomeState.MapState(
+            defaultRegionCoordinate: nil,
+            airports: []
+        )
     }
 }
