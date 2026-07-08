@@ -1,7 +1,13 @@
 import ProjectDescription
 
+let appTarget = "FlightDemoApp"
+let testsTarget = "Tests"
+
 let project = Project(
     name: "FlightDemoApp",
+    options: .options(
+        automaticSchemesOptions: .disabled
+    ),
     packages: [
         .remote(
             url: "https://github.com/SnapKit/SnapKit.git",
@@ -50,6 +56,31 @@ let project = Project(
             settings: .settings(
                 base: ["DEVELOPMENT_TEAM": "T9GV6HD4BD"]
             )
+        )
+    ],
+    schemes: [
+        .scheme(
+            name: appTarget,
+            shared: true,
+            buildAction: .buildAction(targets: [.target(appTarget)]),
+            runAction: .runAction(executable: .target(appTarget)),
+            archiveAction: .archiveAction(configuration: .release),
+            profileAction: .profileAction(configuration: .release, executable: .target(appTarget)),
+            analyzeAction: .analyzeAction(configuration: .debug)
+        ),
+        .scheme(
+            name: testsTarget,
+            shared: true,
+            buildAction: .buildAction(targets: [.target(appTarget), .target(testsTarget)]),
+            testAction: .targets(
+                [.testableTarget(target: .target(testsTarget))],
+                configuration: .debug,
+                options: .options(
+                    coverage: true,
+                    codeCoverageTargets: [.target(appTarget)]
+                )
+            ),
+            analyzeAction: .analyzeAction(configuration: .debug)
         )
     ]
 )

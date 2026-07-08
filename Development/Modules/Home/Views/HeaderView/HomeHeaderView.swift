@@ -32,6 +32,7 @@ final class HomeHeaderView: UIView {
     // MARK: - Properties
 
     private var bag: Set<AnyCancellable> = []
+    private var trailingButtonOnTap: (() -> Void)?
 
     // MARK: - Initialization
 
@@ -112,6 +113,9 @@ final class HomeHeaderView: UIView {
     private func setupTrailingButton() {
         trailingButton.tintColor = .Text.primary
         trailingButton.contentMode = .scaleAspectFit
+        trailingButton.addAction(UIAction(handler: { [weak self] _ in
+            self?.trailingButtonOnTap?()
+        }), for: .touchUpInside)
 
         trailingButton.snp.makeConstraints {
             $0.height.width.equalTo(24)
@@ -258,7 +262,7 @@ extension HomeHeaderView {
         trailingButton.setImage(model.trailingIcon, for: .normal)
         titleLabel.text = model.titleLabelText
         subtitleLabel.text = model.subtitleLabelText
-        configureTrailingButtonAction(onTap: model.onTrailingIconTap)
+        trailingButtonOnTap = model.onTrailingIconTap
     }
 
     private func configureSearch(from model: HomeHeaderViewConfiguration.SearchModel) {
@@ -266,13 +270,6 @@ extension HomeHeaderView {
         trailingButton.setImage(model.trailingIcon, for: .normal)
         searchTextField.text = model.text
         searchTextField.placeholder = model.placeholderText
-        configureTrailingButtonAction(onTap: model.onTrailingIconTap)
-    }
-
-    private func configureTrailingButtonAction(onTap: (() -> Void)?) {
-        let action = UIAction { _ in
-            onTap?()
-        }
-        trailingButton.addAction(action, for: .touchUpInside)
+        trailingButtonOnTap = model.onTrailingIconTap
     }
 }
