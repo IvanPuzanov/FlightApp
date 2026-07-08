@@ -11,6 +11,10 @@ import UIKit
 
 final class AirportMarkerView: MKAnnotationView {
 
+    // MARK: - Reuse Identifier
+
+    static let reuseIdentifier = NSStringFromClass(AirportMarkerView.self)
+
     // MARK: - UI
 
     private let imageView = UIImageView()
@@ -35,23 +39,6 @@ final class AirportMarkerView: MKAnnotationView {
         super.layoutSubviews()
 
         configureCornerRadiusIfNeeded()
-    }
-
-    // MARK: - Public
-
-    func asImage() -> UIImage {
-        let targetSize = systemLayoutSizeFitting(
-            UIView.layoutFittingCompressedSize,
-            withHorizontalFittingPriority: .fittingSizeLevel,
-            verticalFittingPriority: .fittingSizeLevel
-        )
-        bounds = CGRect(origin: .zero, size: targetSize)
-        layoutIfNeeded()
-
-        let renderer = UIGraphicsImageRenderer(bounds: bounds)
-        return renderer.image { rendererContext in
-            layer.render(in: rendererContext.cgContext)
-        }
     }
 
     // MARK: - Private

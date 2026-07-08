@@ -72,8 +72,10 @@ final class HomeMapViewController: UIViewController {
     }
 
     private func setupMapView() {
-        let reuseIdentifier = NSStringFromClass(AirportMarkerView.self)
-        mapView.register(AirportMarkerView.self, forAnnotationViewWithReuseIdentifier: reuseIdentifier)
+        mapView.register(
+            AirportMarkerView.self,
+            forAnnotationViewWithReuseIdentifier: AirportMarkerView.reuseIdentifier
+        )
         mapView.delegate = self
 
         mapView.snp.makeConstraints {
@@ -110,12 +112,7 @@ extension HomeMapViewController: MKMapViewDelegate {
     func mapView(_ mapView: MKMapView, viewFor annotation: any MKAnnotation) -> MKAnnotationView? {
         guard let airportAnnotation = annotation as? AirportAnnotation else { return nil }
 
-        let reuseIdentifier = NSStringFromClass(AirportMarkerView.self)
-        let annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseIdentifier)
-        annotationView?.image = factory.createImage(from: airportAnnotation.configuration)
-        annotationView?.annotation = airportAnnotation
-
-        return annotationView
+        return factory.createAnnotationView(mapView: mapView, annotation: airportAnnotation)
     }
 
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {

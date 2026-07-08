@@ -13,7 +13,7 @@ private enum Constants {
 
 protocol HomeMapViewControllerFactoryProtocol {
     func createAnnotations(from airports: [Airport]) -> [AirportAnnotation]
-    func createImage(from configuration: AirportMarkerViewConfiguration) -> UIImage?
+    func createAnnotationView(mapView: MKMapView, annotation: AirportAnnotation) -> MKAnnotationView?
 }
 
 final class HomeMapViewControllerFactory: HomeMapViewControllerFactoryProtocol {
@@ -34,10 +34,14 @@ final class HomeMapViewControllerFactory: HomeMapViewControllerFactoryProtocol {
         }
     }
 
-    func createImage(from configuration: AirportMarkerViewConfiguration) -> UIImage? {
-        let markerView = AirportMarkerView()
-        markerView.configure(with: configuration)
-        return markerView.asImage()
+    func createAnnotationView(mapView: MKMapView, annotation: AirportAnnotation) -> MKAnnotationView? {
+        let annotationView = mapView.dequeueReusableAnnotationView(
+            withIdentifier: AirportMarkerView.reuseIdentifier
+        )
+        annotationView?.image = createImage(from: annotation.configuration)
+        annotationView?.annotation = annotation
+
+        return annotationView
     }
 
     // MARK: - Private
@@ -58,5 +62,11 @@ final class HomeMapViewControllerFactory: HomeMapViewControllerFactoryProtocol {
                 font: .systemFont(ofSize: 14)
             )
         )
+    }
+
+    private func createImage(from configuration: AirportMarkerViewConfiguration) -> UIImage? {
+        let markerView = AirportMarkerView()
+        markerView.configure(with: configuration)
+        return markerView.asImage()
     }
 }

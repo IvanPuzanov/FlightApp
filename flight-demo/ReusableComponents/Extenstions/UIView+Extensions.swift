@@ -1,11 +1,40 @@
 //
-//  UIView+builder.swift
+//  UIView+addSubviews.swift
 //  flight-demo
 //
 //  Created by Ivan Puzanov on 28.06.2026.
 //
 
 import UIKit
+
+// MARK: - Add Subviews
+
+extension UIView {
+    func addSubviews(_ views: UIView...) {
+        views.forEach { addSubview($0) }
+    }
+}
+
+// MARK: - UIView to UIImage
+
+extension UIView {
+    func asImage() -> UIImage {
+        let targetSize = systemLayoutSizeFitting(
+            UIView.layoutFittingCompressedSize,
+            withHorizontalFittingPriority: .fittingSizeLevel,
+            verticalFittingPriority: .fittingSizeLevel
+        )
+        bounds = CGRect(origin: .zero, size: targetSize)
+        layoutIfNeeded()
+
+        let renderer = UIGraphicsImageRenderer(bounds: bounds)
+        return renderer.image { rendererContext in
+            layer.render(in: rendererContext.cgContext)
+        }
+    }
+}
+
+// MARK: - Builder
 
 extension UIView {
 
