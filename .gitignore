@@ -1,1 +1,8 @@
-Pods
+*.xcodeproj/*
+*.xcworkspace
+
+.tuist-cache/
+Derived/
+Tuist/.build/
+
+xcuserdata/

@@ -4,7 +4,4 @@
    <FileRef
       location = "group:flight-demo.xcodeproj">
    </FileRef>
-   <FileRef
-      location = "group:Pods/Pods.xcodeproj">
-   </FileRef>
 </Workspace>

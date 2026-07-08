@@ -51,7 +51,7 @@ final class HomeReducer: HomeReducerProtocol {
             return state.mapState.defaultRegionCoordinate == nil
                 ? [.data(.getDefaultRegionLocation)]
                 : []
-        case let .onAirportSelect(id):
+        case .onAirportSelect:
             return []
         }
     }
