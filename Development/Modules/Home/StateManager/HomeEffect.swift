@@ -7,12 +7,12 @@
 
 import Foundation
 
-enum HomeEffect {
+enum HomeEffect: Equatable {
     case data(DataEffect)
 }
 
 extension HomeEffect {
-    enum DataEffect {
+    enum DataEffect: Equatable {
         case loadAirports
         case loadFlights
         case getDefaultRegionLocation

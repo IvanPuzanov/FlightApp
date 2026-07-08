@@ -1,7 +1,7 @@
 import ProjectDescription
 
 let project = Project(
-    name: "flight-demo",
+    name: "FlightDemoApp",
     packages: [
         .remote(
             url: "https://github.com/SnapKit/SnapKit.git",
@@ -10,10 +10,10 @@ let project = Project(
     ],
     targets: [
         .target(
-            name: "flight-demo",
+            name: "FlightDemoApp",
             destinations: [.iPhone],
             product: .app,
-            bundleId: "com.ivanpuzanov.flight-demo",
+            bundleId: "com.ivanpuzanov.flight-demo-app",
             deploymentTargets: .iOS("16.6"),
             infoPlist: .extendingDefault(
                 with: [
@@ -26,12 +26,30 @@ let project = Project(
             ),
             buildableFolders: [
                 .folder(
-                    "flight-demo", exceptions: [.exception(excluded: ["Info.plist"])]
+                    "Development", exceptions: [.exception(excluded: ["Info.plist"])]
                 )
             ],
             dependencies: [
-                .package(product: "SnapKit", type: .runtimeEmbedded),
-            ]
+                .package(product: "SnapKit", type: .runtime),
+            ],
+            settings: .settings(
+                base: ["DEVELOPMENT_TEAM": "T9GV6HD4BD"]
+            )
+        ),
+        .target(
+            name: "Tests",
+            destinations: [.iPhone],
+            product: .unitTests,
+            bundleId: "com.ivanpuzanov.flight-demo-app-tests",
+            deploymentTargets: .iOS("16.6"),
+            infoPlist: .default,
+            sources: ["Tests/**/*.swift"],
+            dependencies: [
+                .target(name: "FlightDemoApp"),
+            ],
+            settings: .settings(
+                base: ["DEVELOPMENT_TEAM": "T9GV6HD4BD"]
+            )
         )
     ]
 )
