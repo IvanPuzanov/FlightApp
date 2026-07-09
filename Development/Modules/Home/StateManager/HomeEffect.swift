@@ -9,6 +9,7 @@ import Foundation
 
 enum HomeEffect: Equatable {
     case data(DataEffect)
+    case navigation(Navigation)
 }
 
 extension HomeEffect {
@@ -16,5 +17,9 @@ extension HomeEffect {
         case loadAirports
         case loadFlights
         case getDefaultRegionLocation
+    }
+
+    enum Navigation: Equatable {
+        case openFlightDetails(inputData: FlightDetailsInputData)
     }
 }

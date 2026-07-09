@@ -8,14 +8,14 @@
 import UIKit
 
 protocol HomeAssemblyProtocol: AnyObject {
-    func assemble() -> UIViewController
+    func assemble(output: HomeModuleOutput) -> UIViewController
 }
 
 final class HomeAssembly: HomeAssemblyProtocol {
 
     // MARK: - Public
 
-    func assemble() -> UIViewController {
+    func assemble(output: HomeModuleOutput) -> UIViewController {
         let localStorageService = LocalStorageService()
         let localDataSource = LocalDataSource(localStorageService: localStorageService)
         let locationService = LocationService()
@@ -24,8 +24,9 @@ final class HomeAssembly: HomeAssemblyProtocol {
             locationService: locationService
         )
         let service = HomeService(repository: repository)
-        let effectHandlers = [
-            DataEffectHandler(service: service)
+        let effectHandlers: [EffectHandlerProtocol] = [
+            DataEffectHandler(service: service),
+            NavigationEffectHandler(moduleOutput: output)
         ]
         let reducer = HomeReducer()
         let store = HomeStore(

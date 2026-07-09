@@ -12,6 +12,7 @@ private enum Constants {
 }
 
 protocol HomeFlightListConfigurationFactoryDelegate: AnyObject {
+    func flightDidTap(id: Int)
     func mapButtonDidTap()
 }
 
@@ -152,7 +153,10 @@ final class HomeFlightListConfigurationFactory: HomeFlightListConfigurationFacto
             destinationIATALabelConfiguration: LabelConfiguration(
                 text: flight.destinationIata,
                 font: .systemFont(ofSize: 22, weight: .bold)
-            )
+            ),
+            onTap: { [weak self] in
+                self?.delegate?.flightDidTap(id: flight.id)
+            }
         )
     }
 

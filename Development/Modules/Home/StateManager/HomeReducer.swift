@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol HomeReducerProtocol: AnyObject {
+protocol HomeReducerProtocol: ReducerProtocol {
     func reduce(state: inout HomeState, event: HomeEvent) -> [HomeEffect]
 }
 
@@ -66,9 +66,7 @@ final class HomeReducer: HomeReducerProtocol {
         case .onMoreTap:
             return []
         case .onSearchStartEditing:
-            if let largeDetent = state.flightListState.bottomSheetState.detents.first(where: { $0.id == .large }) {
-                state.flightListState.bottomSheetState.currentDetent = largeDetent
-            }
+            updateFlightListCurrentDetent(id: .large, state: &state.flightListState)
             return []
         case let .onSearchTextEnter(text):
             state.flightListState.parameters.searchText = text
@@ -85,7 +83,7 @@ final class HomeReducer: HomeReducerProtocol {
         state: inout HomeState
     ) -> [HomeEffect] {
         switch event {
-        case let .onSetup(cornerRadius, shadowOpacity, detents):
+        case let .onSetup(cornerRadius, shadowOpacity, detents, currentDetent):
             state.flightListState.appearance = HomeState.FlightListState.Appearance(
                 defaultCornerRadius: cornerRadius,
                 currentCornerRadius: cornerRadius,
@@ -95,26 +93,19 @@ final class HomeReducer: HomeReducerProtocol {
             )
             state.flightListState.bottomSheetState = HomeState.FlightListState.BottomSheetState(
                 detents: detents,
-                currentDetent: HomeState.FlightListState.BottomSheetDetent(
-                    id: .compact,
-                    height: 200
-                )
+                currentDetent: currentDetent
             )
             return []
         case let .onBottomSheetHeightChange(progress):
             updateStateOnBottomSheetHeight(progress: progress, state: &state)
             return []
         case let .onDetentSet(height):
-            let previousDetent = state.flightListState.bottomSheetState.currentDetent
-            if let detent = state.flightListState.bottomSheetState.detents.first(where: { $0.height == height }),
-               detent != previousDetent {
-                state.flightListState.bottomSheetState.currentDetent = detent
-            }
+            updateFlightListCurrentDetent(height: height, state: &state.flightListState)
             return []
+        case let .onFlightTap(id):
+            return handleOnFlightTap(id: id, state: &state.flightListState)
         case .onMapButtonTap:
-            if let detent = state.flightListState.bottomSheetState.detents.first(where: { $0.id == .compact }) {
-                state.flightListState.bottomSheetState.currentDetent = detent
-            }
+            updateFlightListCurrentDetent(id: .compact, state: &state.flightListState)
             return []
         }
     }
@@ -130,10 +121,6 @@ final class HomeReducer: HomeReducerProtocol {
             let detents = state.flightListState.bottomSheetState.detents
             let newDetentHeight = maxHeight - 39
             let largeDetent = HomeState.FlightListState.BottomSheetDetent(id: .large, height: newDetentHeight)
-
-            if detents.contains(where: { $0.id == .large && abs($0.height - newDetentHeight) < 0.5 }) {
-                return []
-            }
 
             state.flightListState.bottomSheetState.detents = detents + [largeDetent]
             return []
@@ -168,7 +155,7 @@ final class HomeReducer: HomeReducerProtocol {
         }
     }
 
-    // MARK: - Private flight list event handling
+    // MARK: - Private Flight List event handling
 
     private func updateStateOnBottomSheetHeight(progress: CGFloat, state: inout HomeState) {
         let bottomSheetProgress = max(0, (progress - 0.95) / (1 - 0.95))
@@ -177,12 +164,6 @@ final class HomeReducer: HomeReducerProtocol {
             : state.flightListState.appearance.defaultCornerRadius
         let shadowOpacity = Float((1 - bottomSheetProgress) / 10)
         let isMapButtonHidden = bottomSheetProgress != 1
-
-        guard state.headerState.bottomSheetProgress != bottomSheetProgress
-            || state.flightListState.appearance.currentCornerRadius != cornerRadius
-            || state.flightListState.appearance.currentShadowOpacity != shadowOpacity
-            || state.flightListState.appearance.isMapButtonHidden != isMapButtonHidden
-        else { return }
 
         state.headerState.bottomSheetProgress = bottomSheetProgress
         state.flightListState.appearance.currentCornerRadius = cornerRadius
@@ -197,12 +178,38 @@ final class HomeReducer: HomeReducerProtocol {
         let filteredFlights = searchText.isEmpty
             ? flights
             : flights.filter {
-                $0.flightNumber.lowercased().contains(searchText)
-                || $0.airline.lowercased().contains(searchText)
+                $0.flightNumber.lowercased().contains(searchText) || $0.airline.lowercased().contains(searchText)
             }
 
         state.contentState = filteredFlights.isEmpty
             ? .status(.empty)
             : .content(filteredFlights)
+    }
+
+    private func handleOnFlightTap(id: Int, state: inout HomeState.FlightListState) -> [HomeEffect] {
+        guard let flight = state.parameters.flights.first(where: { $0.id == id }) else { return [] }
+
+        updateFlightListCurrentDetent(id: .compact, state: &state)
+
+        let inputData = FlightDetailsInputData(flight: flight)
+        return [.navigation(.openFlightDetails(inputData: inputData))]
+    }
+
+    private func updateFlightListCurrentDetent(
+        id: HomeState.FlightListState.BottomSheetDetentID,
+        state: inout HomeState.FlightListState
+    ) {
+        guard let detent = state.bottomSheetState.detents.first(where: { $0.id == id }) else { return }
+
+        state.bottomSheetState.currentDetent = detent
+    }
+
+    private func updateFlightListCurrentDetent(
+        height: CGFloat,
+        state: inout HomeState.FlightListState
+    ) {
+        guard let detent = state.bottomSheetState.detents.first(where: { $0.height == height }) else { return }
+
+        state.bottomSheetState.currentDetent = detent
     }
 }

@@ -116,9 +116,9 @@ final class BottomSheetViewController<ContentView: BottomSheetContentViewProtoco
         }
 
         animator?.startAnimation()
-        animator?.addCompletion { _ in
-            self.updateScrollViewAvailability()
-            self.dispacthEventOnHeightChange()
+        animator?.addCompletion { [weak self] _ in
+            self?.updateScrollViewAvailability()
+            self?.dispacthEventOnHeightChange()
         }
     }
 

@@ -8,6 +8,7 @@
 import Foundation
 
 struct Flight: Equatable {
+    let id: Int
     let flightNumber: String
     let airline: String
     let airlineCode: String
@@ -19,6 +20,7 @@ struct Flight: Equatable {
     let status: FlightStatus
 
     init(from model: FlightResponseModel) {
+        self.id = model.id
         self.flightNumber = model.flightNumber
         self.airline = model.airline
         self.airlineCode = model.airlineCode

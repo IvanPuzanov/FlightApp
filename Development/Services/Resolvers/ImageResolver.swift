@@ -43,8 +43,6 @@ final class ImageResolver: ImageResolverProtocol {
     }
 
     func cancel() {
-        bag.forEach {
-            $0.cancel()
-        }
+        bag.removeAll()
     }
 }

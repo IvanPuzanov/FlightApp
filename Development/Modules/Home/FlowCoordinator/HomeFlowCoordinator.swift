@@ -7,6 +7,10 @@
 
 import UIKit
 
+protocol HomeModuleOutput: AnyObject {
+    func moduleWantsToOpenFlightDetails(inputData: FlightDetailsInputData)
+}
+
 final class HomeFlowCoordinator: FlowCoordinatorProtocol {
 
     // MARK: - Dependencies
@@ -16,6 +20,7 @@ final class HomeFlowCoordinator: FlowCoordinatorProtocol {
     // MARK: - Properties
 
     var navigationController: UINavigationController
+    private var childCoordinators: [FlowCoordinatorProtocol] = []
 
     // MARK: - Initialization
 
@@ -30,9 +35,22 @@ final class HomeFlowCoordinator: FlowCoordinatorProtocol {
     // MARK: - Public
 
     func start(animated: Bool) {
-        let viewController = assembly.assemble()
+        let viewController = assembly.assemble(output: self)
         navigationController.pushViewController(viewController, animated: animated)
     }
 
     func finish() {}
+}
+
+// MARK: - HomeModuleOutput
+
+extension HomeFlowCoordinator: HomeModuleOutput {
+
+    func moduleWantsToOpenFlightDetails(inputData: FlightDetailsInputData) {
+        let flowCoordinator = FlightDetailsFlowCoordinator(
+            inputData: inputData,
+            navigationController: navigationController
+        )
+        flowCoordinator.start(animated: true)
+    }
 }

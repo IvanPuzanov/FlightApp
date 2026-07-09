@@ -57,8 +57,8 @@ final class HomeMapViewController: UIViewController {
                 store?.state.mapState
             }
             .removeDuplicates()
-            .sink { state in
-                self.apply(state)
+            .sink { [weak self] state in
+                self?.apply(state)
             }.store(in: &bag)
     }
 
