@@ -8,5 +8,5 @@
 import Foundation
 
 protocol EffectHandlerProtocol: AnyObject {
-    func handle(_ effect: SearchEffect, completion: @escaping (SearchEvent) -> Void)
+    func handle(_ effect: SearchEffect, completion: @escaping (SearchEvent) -> Void) async
 }

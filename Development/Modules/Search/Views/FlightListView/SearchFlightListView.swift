@@ -90,6 +90,7 @@ final class SearchFlightListView: UIView {
                 store?.state.flightListState
             }
             .removeDuplicates()
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 self?.apply(state)
             }.store(in: &bag)
@@ -99,6 +100,7 @@ final class SearchFlightListView: UIView {
                 store?.state.flightListState.bottomSheetState
             }
             .removeDuplicates()
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 self?.bottomSheet?.setupDetents(state.detents.map { $0.height })
                 self?.bottomSheet?.setDetent(state.currentDetent.height)
@@ -257,7 +259,7 @@ extension SearchFlightListView: SearchFlightListConfigurationFactoryDelegate {
         store.dispatch(event: .ui(.flightList(.onMapButtonTap)))
     }
 
-    func flightDidTap(id: Int) {
+    func flightDidTap(id: String) {
         store.dispatch(event: .ui(.flightList(.onFlightTap(id: id))))
     }
 }

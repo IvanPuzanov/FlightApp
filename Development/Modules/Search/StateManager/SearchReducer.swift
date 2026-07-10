@@ -186,7 +186,7 @@ final class SearchReducer: SearchReducerProtocol {
             : .content(filteredFlights)
     }
 
-    private func handleOnFlightTap(id: Int, state: inout SearchState.FlightListState) -> [SearchEffect] {
+    private func handleOnFlightTap(id: String, state: inout SearchState.FlightListState) -> [SearchEffect] {
         guard let flight = state.parameters.flights.first(where: { $0.id == id }) else { return [] }
 
         updateFlightListCurrentDetent(id: .compact, state: &state)

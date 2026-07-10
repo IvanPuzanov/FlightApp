@@ -8,7 +8,7 @@
 import Foundation
 
 struct Flight: Equatable {
-    let id: Int
+    let id: String
     let flightNumber: String
     let airline: String
     let airlineCode: String

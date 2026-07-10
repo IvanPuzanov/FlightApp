@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol ResponseCacheProtocol {
+protocol ResponseCacheProtocol: AnyObject {
     func set(_ data: Data, for key: String)
     func get(for key: String) -> Data?
 }

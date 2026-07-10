@@ -60,6 +60,7 @@ final class SearchHeaderView: UIView {
                 store?.state.headerState
             }
             .removeDuplicates()
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 self?.apply(state)
             }.store(in: &bag)

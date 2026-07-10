@@ -11,16 +11,16 @@ final class Repository {
 
     // MARK: - Dependencies
 
-    private let localDataSource: LocalDataSourceProtocol
+    private let remoteDataSource: RemoteDataSourceProtocol
     private let locationService: LocationServiceProtocol
 
     // MARK: - Initialization
 
     init(
-        localDataSource: LocalDataSourceProtocol,
+        remoteDataSource: RemoteDataSourceProtocol,
         locationService: LocationServiceProtocol
     ) {
-        self.localDataSource = localDataSource
+        self.remoteDataSource = remoteDataSource
         self.locationService = locationService
     }
 }
@@ -34,27 +34,25 @@ extension Repository: SearchRepositoryProtocol {
         completion(.success(coordinate))
     }
 
-    func fetchAirports(completion: (Result<[Airport], any Error>) -> Void) {
-        localDataSource.fetchAirports { result in
-            switch result {
-            case let .success(responseModels):
-                let airports = responseModels.map { Airport(from: $0) }
-                completion(.success(airports))
-            case let .failure(error):
-                completion(.failure(error))
-            }
+    func fetchAirports() async throws -> [Airport] {
+        let result = try await remoteDataSource.fetchAirports()
+
+        switch result {
+        case let .success(responseModel):
+            return responseModel.map { Airport(from: $0) }
+        case let .failure(error):
+            throw error
         }
     }
 
-    func fetchFlights(completion: (Result<[Flight], any Error>) -> Void) {
-        localDataSource.fetchFlight { result in
-            switch result {
-            case let .success(responseModels):
-                let flights = responseModels.map { Flight(from: $0) }
-                completion(.success(flights))
-            case let .failure(error):
-                completion(.failure(error))
-            }
+    func fetchFlights() async throws -> [Flight] {
+        let result = try await remoteDataSource.fetchFlights()
+
+        switch result {
+        case let .success(responseModel):
+            return responseModel.map { Flight(from: $0) }
+        case let .failure(error):
+            throw error
         }
     }
 }
