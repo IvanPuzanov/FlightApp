@@ -25,9 +25,9 @@ final class Repository {
     }
 }
 
-// MARK: - HomeRepositoryProtocol
+// MARK: - SearchRepositoryProtocol
 
-extension Repository: HomeRepositoryProtocol {
+extension Repository: SearchRepositoryProtocol {
 
     func getUserLocation(completion: (Result<Coordinate, any Error>) -> Void) {
         let coordinate = locationService.getDefaultLocation()

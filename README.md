@@ -28,16 +28,16 @@ The app follows a **layered, unidirectional data flow** inspired by Elm / Redux.
 sequenceDiagram
     actor User
     participant View as View (Header / Map / FlightList)
-    participant Store as HomeStore
-    participant Reducer as HomeReducer
+    participant Store as SearchStore
+    participant Reducer as SearchReducer
     participant Handler as DataEffectHandler
-    participant Service as HomeService
+    participant Service as SearchService
     participant Repo as Repository
 
     User->>View: tap / scroll / search
-    View->>Store: dispatch(HomeEvent)
+    View->>Store: dispatch(SearchEvent)
     Store->>Reducer: reduce(state, event)
-    Reducer-->>Store: updated state + [HomeEffect]
+    Reducer-->>Store: updated state + [SearchEffect]
     Store->>View: stateDidChange
 
     loop for each effect
@@ -57,20 +57,20 @@ sequenceDiagram
 
 | Layer | Responsibility | Key types |
 |---|---|---|
-| **App** | App lifecycle, navigation bootstrap | `AppDelegate`, `HomeFlowCoordinator` |
-| **Presentation** | UI rendering, user input → events | `HomeViewController`, `HomeHeaderView`, `HomeMapViewController`, `HomeFlightListView` |
-| **State** | Single source of truth, pure state transitions | `HomeStore`, `HomeReducer`, `HomeEvent`, `HomeEffect`, `HomeState` |
-| **Domain** | Business logic, async API surface | `HomeService` |
+| **App** | App lifecycle, navigation bootstrap | `AppDelegate`, `SearchFlowCoordinator` |
+| **Presentation** | UI rendering, user input → events | `SearchViewController`, `SearchHeaderView`, `SearchMapViewController`, `SearchFlightListView` |
+| **State** | Single source of truth, pure state transitions | `SearchStore`, `SearchReducer`, `SearchEvent`, `SearchEffect`, `SearchState` |
+| **Domain** | Business logic, async API surface | `SearchService` |
 | **Data** | Data access, mapping DTO → domain models | `Repository`, `LocalDataSource`, `LocationService` |
 
 ### Design Patterns
 
 - **Store + Reducer + Effects** — predictable state updates; reducer is pure and easily testable
-- **Coordinator** — navigation is decoupled from view controllers (`HomeFlowCoordinator`)
-- **Assembly** — dependency graph is wired in one place (`HomeAssembly`)
-- **Repository** — abstracts data sources behind `HomeRepositoryProtocol`
+- **Coordinator** — navigation is decoupled from view controllers (`SearchFlowCoordinator`)
+- **Assembly** — dependency graph is wired in one place (`SearchAssembly`)
+- **Repository** — abstracts data sources behind `SearchRepositoryProtocol`
 - **ConfigurableView** — views are driven by `Equatable` configuration structs instead of imperative property setters
-- **Configuration Factory** — maps `HomeState` slices into view configurations, keeping views thin
+- **Configuration Factory** — maps `SearchState` slices into view configurations, keeping views thin
 
 ## Requirements
 

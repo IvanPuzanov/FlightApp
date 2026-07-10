@@ -27,21 +27,21 @@ final class AppFlowCoordinator: FlowCoordinatorProtocol {
     func start(animated: Bool) {
         window.rootViewController = navigationController
         window.makeKeyAndVisible()
-        startHome(animated: animated)
+        startSearch(animated: animated)
     }
 
     func finish() {}
 
     // MARK: - Private
 
-    private func startHome(animated: Bool) {
-        let homeAssembly = HomeAssembly()
-        let homeFlowCoordinator = HomeFlowCoordinator(
-            assembly: homeAssembly,
+    private func startSearch(animated: Bool) {
+        let searchAssembly = SearchAssembly()
+        let searchFlowCoordinator = SearchFlowCoordinator(
+            assembly: searchAssembly,
             navigationController: navigationController
         )
-        homeFlowCoordinator.start(animated: animated)
+        searchFlowCoordinator.start(animated: animated)
 
-        childCoordinators.append(homeFlowCoordinator)
+        childCoordinators.append(searchFlowCoordinator)
     }
 }
