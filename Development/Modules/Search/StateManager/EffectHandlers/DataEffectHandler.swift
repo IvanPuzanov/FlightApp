@@ -60,7 +60,7 @@ final class DataEffectHandler: EffectHandlerProtocol {
         switch result {
         case let .success(airports):
             completion(.data(.onAirportsLoaded(airports)))
-        case let .failure(error):
+        case .failure:
             completion(.data(.onAirportsFailed))
         }
     }
@@ -71,7 +71,7 @@ final class DataEffectHandler: EffectHandlerProtocol {
         switch result {
         case let .success(flights):
             completion(.data(.onFlightsLoaded(flights)))
-        case let .failure(error):
+        case .failure:
             completion(.data(.onFlightsFailed))
         }
     }

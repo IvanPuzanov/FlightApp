@@ -74,13 +74,11 @@ let project = Project(
             name: testsTarget,
             shared: true,
             buildAction: .buildAction(targets: [.target(appTarget), .target(testsTarget)]),
-            testAction: .targets(
-                [.testableTarget(target: .target(testsTarget))],
-                configuration: .debug,
-                options: .options(
-                    coverage: true,
-                    codeCoverageTargets: [.target(appTarget)]
-                )
+            testAction: .testPlans(
+                [
+                    .relativeToManifest("TestPlans/UnitTests.xctestplan")
+                ],
+                configuration: .debug
             ),
             analyzeAction: .analyzeAction(configuration: .debug)
         )

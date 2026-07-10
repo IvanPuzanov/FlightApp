@@ -1,0 +1,37 @@
+{
+  "configurations" : [
+    {
+      "id" : "AE393EAE-9500-9F50-9980-592890D1FC98",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : true,
+    "codeCoverageTargets" : [
+      {
+        "containerPath" : "container:FlightDemoApp.xcodeproj",
+        "identifier" : "2849286BAC69E10B766D19BB",
+        "name" : "FlightDemoApp"
+      }
+    ],
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:FlightDemoApp.xcodeproj",
+      "identifier" : "2849286BAC69E10B766D19BB",
+      "name" : "FlightDemoApp"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:FlightDemoApp.xcodeproj",
+        "identifier" : "B0BD4D7B7F7AA8A5C0A21D55",
+        "name" : "Tests"
+      }
+    }
+  ],
+  "version" : 1
+}
