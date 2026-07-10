@@ -23,7 +23,9 @@ let project = Project(
             deploymentTargets: .iOS("16.6"),
             infoPlist: .extendingDefault(
                 with: [
-                    "UILaunchStoryboardName": "LaunchScreen",
+                    "UILaunchScreen": [
+                        "UIColorName": "systemBackgroundColor"
+                    ],
                     "UIApplicationSupportsIndirectInputEvents": true,
                     "UISupportedInterfaceOrientations": [
                         "UIInterfaceOrientationPortrait"

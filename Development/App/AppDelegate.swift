@@ -11,33 +11,19 @@ import UIKit
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-    var homeFlowCoordinator: HomeFlowCoordinator?
-    var navigationController: UINavigationController?
+    var appCoordinator: FlowCoordinatorProtocol?
 
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
-        navigationController = UINavigationController()
-        window = UIWindow(frame: UIScreen.main.bounds)
-        window?.rootViewController = navigationController
-        window?.makeKeyAndVisible()
-        startHome()
+        let window = UIWindow(frame: UIScreen.main.bounds)
+        self.window = window
+
+        appCoordinator = AppFlowCoordinator(window: window)
+        appCoordinator?.start(animated: true)
 
         return true
-    }
-
-    // MARK: - Private
-
-    private func startHome() {
-        guard let navigationController else { return }
-
-        let homeAssembly = HomeAssembly()
-        homeFlowCoordinator = HomeFlowCoordinator(
-            assembly: homeAssembly,
-            navigationController: navigationController
-        )
-        homeFlowCoordinator?.start(animated: true)
     }
 }
 

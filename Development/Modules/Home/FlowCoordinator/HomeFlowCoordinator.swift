@@ -51,6 +51,7 @@ extension HomeFlowCoordinator: HomeModuleOutput {
             inputData: inputData,
             navigationController: navigationController
         )
+        childCoordinators.append(flowCoordinator)
         flowCoordinator.start(animated: true)
     }
 }
