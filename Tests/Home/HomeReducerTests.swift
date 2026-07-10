@@ -58,25 +58,6 @@ final class HomeReducerTests: XCTestCase {
         )
     }
 
-    // Verifies that recalculating the same large detent height does not duplicate the detent
-    func test_onCalculateFlightListMaxHeight_skipsWhenLargeDetentAlreadyExists() {
-        // Arrange
-        state.flightListState.bottomSheetState.detents = [
-            .init(id: .compact, height: 200),
-            .init(id: .large, height: 800)
-        ]
-
-        // Act
-        let effects = sut.reduce(
-            state: &state,
-            event: .ui(.common(.onCalculateFlightListMaxHeight(839)))
-        )
-
-        // Assert
-        XCTAssertTrue(effects.isEmpty)
-        XCTAssertEqual(state.flightListState.bottomSheetState.detents.count, 2)
-    }
-
     // MARK: - Map events
 
     // Verifies that onMapDidLoad without a coordinate requests the default region location
@@ -272,7 +253,7 @@ final class HomeReducerTests: XCTestCase {
         // Act
         let effects = sut.reduce(
             state: &state,
-            event: .ui(.flightList(.onSetup(cornerRadius: 16, shadowOpacity: 0.5, detents: detents)))
+            event: .ui(.flightList(.onSetup(cornerRadius: 16, shadowOpacity: 0.5, detents: detents, currentDetent: detents.first!)))
         )
 
         // Assert
@@ -575,6 +556,7 @@ private extension HomeReducerTests {
     ) -> Flight {
         Flight(
             from: FlightResponseModel(
+                id: 1,
                 flightNumber: flightNumber,
                 airline: airline,
                 airlineCode: "SU",

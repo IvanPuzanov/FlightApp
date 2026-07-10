@@ -55,11 +55,7 @@ final class HomeViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
 
-        if shouldSetFlightListMaxHeight {
-            let maxHeight = view.frame.height - view.safeAreaInsets.top - 10
-            store.dispatch(event: .ui(.common(.onCalculateFlightListMaxHeight(maxHeight))))
-            shouldSetFlightListMaxHeight = false
-        }
+        sendMaxHeightEventIfNeeded()
     }
 
     // MARK: - Private
@@ -95,5 +91,13 @@ final class HomeViewController: UIViewController {
         headerView.snp.makeConstraints {
             $0.leading.trailing.top.equalToSuperview()
         }
+    }
+
+    private func sendMaxHeightEventIfNeeded() {
+        guard shouldSetFlightListMaxHeight else { return }
+
+        let maxHeight = view.frame.height - view.safeAreaInsets.top - 10
+        store.dispatch(event: .ui(.common(.onCalculateFlightListMaxHeight(maxHeight))))
+        shouldSetFlightListMaxHeight = false
     }
 }
