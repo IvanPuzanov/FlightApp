@@ -28,6 +28,12 @@ final class HomeFlightListItemView: UIView {
     private let destinationAirportCityLabel = UILabel()
     private let destinationAirportIATALabel = UILabel()
 
+    private let tapGestureRecognizer = UITapGestureRecognizer()
+
+    // MARK: - Properties
+
+    private var onTap: (() -> Void)?
+
     // MARK: - Initialization
 
     override init(frame: CGRect) {
@@ -54,6 +60,7 @@ final class HomeFlightListItemView: UIView {
         setupOriginAirportCityLabel()
         setupDestinationAirportIATALabel()
         setupDestinationAirportCityLabel()
+        setupTapGestureRecognizer()
     }
 
     private func setupView() {
@@ -123,6 +130,16 @@ final class HomeFlightListItemView: UIView {
             $0.top.greaterThanOrEqualTo(airlineImageView.snp.bottom).offset(40)
         }
     }
+
+    private func setupTapGestureRecognizer() {
+        addGestureRecognizer(tapGestureRecognizer)
+        tapGestureRecognizer.addTarget(self, action: #selector(handleTap))
+    }
+
+    @objc
+    private func handleTap() {
+        onTap?()
+    }
 }
 
 // MARK: - ConfigurableView
@@ -138,6 +155,7 @@ extension HomeFlightListItemView: ConfigurableView {
         originAirportIATALabel.configure(with: configuration.originIATALabelConfiguration)
         destinationAirportCityLabel.configure(with: configuration.destinationCityLabelConfiguration)
         destinationAirportIATALabel.configure(with: configuration.destinationIATALabelConfiguration)
+        onTap = configuration.onTap
     }
 
     func prepareForReuse() {
@@ -151,8 +169,8 @@ extension HomeFlightListItemView: ConfigurableView {
         imageResolver.resolveImage(
             from: imageURL,
             fallback: UIImage(systemName: "airplane.departure")
-        ) { image in
-            self.airlineImageView.image = image
+        ) { [weak self] image in
+            self?.airlineImageView.image = image
         }
     }
 }

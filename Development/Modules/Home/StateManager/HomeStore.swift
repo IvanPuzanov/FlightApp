@@ -18,7 +18,7 @@ final class HomeStore {
 
     // MARK: - Dependencies
 
-    private let reducer: HomeReducerProtocol
+    private let reducer: any HomeReducerProtocol
     private let effectHandlers: [EffectHandlerProtocol]
 
     // MARK: - Public properties
@@ -34,7 +34,7 @@ final class HomeStore {
     // MARK: - Initialization
 
     init(
-        reducer: HomeReducerProtocol,
+        reducer: any HomeReducerProtocol,
         effectHandlers: [EffectHandlerProtocol]
     ) {
         self.reducer = reducer
@@ -51,8 +51,8 @@ extension HomeStore: HomeStoreProtocol {
 
         effectHandlers.forEach { effectHandler in
             effects.forEach { effect in
-                effectHandler.handle(effect) { event in
-                    self.dispatch(event: event)
+                effectHandler.handle(effect) { [weak self] event in
+                    self?.dispatch(event: event)
                 }
             }
         }

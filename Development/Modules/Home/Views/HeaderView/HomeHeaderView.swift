@@ -60,8 +60,8 @@ final class HomeHeaderView: UIView {
                 store?.state.headerState
             }
             .removeDuplicates()
-            .sink { state in
-                self.apply(state)
+            .sink { [weak self] state in
+                self?.apply(state)
             }.store(in: &bag)
     }
 

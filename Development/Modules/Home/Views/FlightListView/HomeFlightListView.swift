@@ -10,10 +10,8 @@ import SnapKit
 import UIKit
 
 private enum Constants {
-    static let defaultDetents: [HomeState.FlightListState.BottomSheetDetent] = [
-        HomeState.FlightListState.BottomSheetDetent(id: .compact, height: 200),
-        HomeState.FlightListState.BottomSheetDetent(id: .compact, height: 520)
-    ]
+    static let compactDetent = HomeState.FlightListState.BottomSheetDetent(id: .compact, height: 200)
+    static let regularDetent = HomeState.FlightListState.BottomSheetDetent(id: .regular, height: 520)
     static let cornerRadius: CGFloat = 30
     static let shadowOpacity: Float = 0.1
 }
@@ -46,8 +44,8 @@ final class HomeFlightListView: UIView {
     // MARK: - Properties
 
     private var cellTypes: [String: HomeFlightListCellType] = [:]
-    private lazy var dataSource = DataSource(tableView: tableView) { tableView, _, identifier in
-        guard let cellType = self.cellTypes[identifier] else { return nil }
+    private lazy var dataSource = DataSource(tableView: tableView) { [weak self] tableView, _, identifier in
+        guard let self, let cellType = self.cellTypes[identifier] else { return nil }
 
         switch cellType {
         case let .shimmer(cellConfiguration):
@@ -75,10 +73,11 @@ final class HomeFlightListView: UIView {
         store.dispatch(event: .ui(.flightList(.onSetup(
             cornerRadius: Constants.cornerRadius,
             shadowOpacity: Constants.shadowOpacity,
-            detents: Constants.defaultDetents)))
+            detents: [Constants.compactDetent, Constants.regularDetent],
+            currentDetent: Constants.compactDetent)))
         )
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -91,8 +90,8 @@ final class HomeFlightListView: UIView {
                 store?.state.flightListState
             }
             .removeDuplicates()
-            .sink { state in
-                self.apply(state)
+            .sink { [weak self] state in
+                self?.apply(state)
             }.store(in: &bag)
 
         store.stateDidChange
@@ -173,15 +172,6 @@ final class HomeFlightListView: UIView {
     }
 }
 
-// MARK: - HomeFlightListConfigurationFactoryDelegate
-
-extension HomeFlightListView: HomeFlightListConfigurationFactoryDelegate {
-
-    func mapButtonDidTap() {
-        store.dispatch(event: .ui(.flightList(.onMapButtonTap)))
-    }
-}
-
 // MARK: - BottomSheetContentViewProtocol
 
 extension HomeFlightListView: BottomSheetContentViewProtocol {
@@ -256,5 +246,18 @@ extension HomeFlightListView {
             let configuration = configurationFactory.createStatusViewConfiguration(from: status)
             statusView.configure(with: configuration)
         }
+    }
+}
+
+// MARK: - HomeFlightListConfigurationFactoryDelegate
+
+extension HomeFlightListView: HomeFlightListConfigurationFactoryDelegate {
+
+    func mapButtonDidTap() {
+        store.dispatch(event: .ui(.flightList(.onMapButtonTap)))
+    }
+
+    func flightDidTap(id: Int) {
+        store.dispatch(event: .ui(.flightList(.onFlightTap(id: id))))
     }
 }

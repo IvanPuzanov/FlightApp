@@ -17,4 +17,5 @@ struct HomeFlightListItemViewConfiguration: Equatable {
     let originIATALabelConfiguration: LabelConfiguration
     let destinationCityLabelConfiguration: LabelConfiguration
     let destinationIATALabelConfiguration: LabelConfiguration
+    @Equated var onTap: (() -> Void)?
 }

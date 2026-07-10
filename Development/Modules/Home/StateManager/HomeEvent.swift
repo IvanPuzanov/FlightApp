@@ -50,10 +50,12 @@ extension HomeEvent.UIEvent {
         case onSetup(
             cornerRadius: CGFloat,
             shadowOpacity: Float,
-            detents: [HomeState.FlightListState.BottomSheetDetent]
+            detents: [HomeState.FlightListState.BottomSheetDetent],
+            currentDetent: HomeState.FlightListState.BottomSheetDetent
         )
         case onBottomSheetHeightChange(progress: CGFloat)
         case onDetentSet(CGFloat)
+        case onFlightTap(id: Int)
         case onMapButtonTap
     }
 

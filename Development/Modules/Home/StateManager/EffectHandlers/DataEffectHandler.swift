@@ -33,6 +33,8 @@ final class DataEffectHandler: EffectHandlerProtocol {
         switch effect {
         case let .data(dataEffect):
             handleDataEffect(dataEffect, completion: completion)
+        case .navigation:
+            break
         }
     }
 

@@ -8,6 +8,7 @@
 import Foundation
 
 struct FlightResponseModel: Decodable {
+    let id: Int
     let flightNumber: String
     let airline: String
     let airlineCode: String
