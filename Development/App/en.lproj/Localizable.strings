@@ -1,0 +1,15 @@
+"search.placeholder" = "Search flight or airline";
+
+"status.load_error.title" = "Load error";
+"status.load_error.subtitle" = "Error occurred during loading";
+
+"status.empty.title" = "No flights";
+"status.empty.subtitle" = "There are no flights";
+
+"map.button" = "Map";
+
+"flight.status.boarding" = "Boarding";
+"flight.status.in_air" = "In Air";
+"flight.status.delayed" = "Delayed";
+"flight.status.landed" = "Landed";
+"flight.status.cancelled" = "Cancelled";

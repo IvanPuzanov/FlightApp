@@ -1,0 +1,15 @@
+"search.placeholder" = "Buscar vuelo o aerolínea";
+
+"status.load_error.title" = "Error de carga";
+"status.load_error.subtitle" = "Ocurrió un error al cargar";
+
+"status.empty.title" = "Sin vuelos";
+"status.empty.subtitle" = "No hay vuelos";
+
+"map.button" = "Mapa";
+
+"flight.status.boarding" = "Embarque";
+"flight.status.in_air" = "En vuelo";
+"flight.status.delayed" = "Retrasado";
+"flight.status.landed" = "Aterrizado";
+"flight.status.cancelled" = "Cancelado";

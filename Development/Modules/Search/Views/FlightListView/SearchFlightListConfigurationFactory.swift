@@ -56,12 +56,12 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
         switch status {
         case .error:
             image = UIImage(systemName: "airplane.departure")
-            title = "Load error"
-            subtitle = "Error occured during loading"
+            title = Strings.Status.LoadError.title
+            subtitle = Strings.Status.LoadError.subtitle
         case .empty:
             image = UIImage(systemName: "tray.fill")
-            title = "No flights"
-            subtitle = "There are no flights"
+            title = Strings.Status.Empty.title
+            subtitle = Strings.Status.Empty.subtitle
         }
 
         return StatusViewConfiguration(
@@ -83,7 +83,7 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
         SearchFlightListMapButtonConfiguration(
             image: UIImage(systemName: "map.fill"),
             imageTintColor: .white,
-            labelConfiguration: LabelConfiguration(text: "Map", textColor: .white),
+            labelConfiguration: LabelConfiguration(text: Strings.Map.button, textColor: .white),
             backgroundColor: .black,
             onTap: { [weak self] in
                 self?.delegate?.mapButtonDidTap()
@@ -165,15 +165,15 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
 
         switch status {
         case .boarding:
-            text = "Boarding"
+            text = Strings.Flight.Status.boarding
         case .inAir:
-            text = "In Air"
+            text = Strings.Flight.Status.inAir
         case .delayed:
-            text = "Delayed"
+            text = Strings.Flight.Status.delayed
         case .landed:
-            text = "Landed"
+            text = Strings.Flight.Status.landed
         case .cancelled:
-            text = "Cancelled"
+            text = Strings.Flight.Status.cancelled
         }
 
         return LabelConfiguration(text: text, font: .systemFont(ofSize: 14))
