@@ -1,0 +1,15 @@
+"search.placeholder" = "Поиск рейса или авиакомпании";
+
+"status.load_error.title" = "Ошибка загрузки";
+"status.load_error.subtitle" = "Произошла ошибка при загрузке";
+
+"status.empty.title" = "Нет рейсов";
+"status.empty.subtitle" = "Рейсы не найдены";
+
+"map.button" = "Карта";
+
+"flight.status.boarding" = "Посадка";
+"flight.status.in_air" = "В полёте";
+"flight.status.delayed" = "Задержан";
+"flight.status.landed" = "Приземлился";
+"flight.status.cancelled" = "Отменён";

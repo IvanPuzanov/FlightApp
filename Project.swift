@@ -6,7 +6,9 @@ let testsTarget = "Tests"
 let project = Project(
     name: "FlightDemoApp",
     options: .options(
-        automaticSchemesOptions: .disabled
+        automaticSchemesOptions: .disabled,
+        defaultKnownRegions: ["Base", "en", "ru", "es"],
+        developmentRegion: "en"
     ),
     packages: [
         .remote(
@@ -82,5 +84,9 @@ let project = Project(
             ),
             analyzeAction: .analyzeAction(configuration: .debug)
         )
+    ],
+    resourceSynthesizers: [
+        .assets(),
+        .strings(),
     ]
 )

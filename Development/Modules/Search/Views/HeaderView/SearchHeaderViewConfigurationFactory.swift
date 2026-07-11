@@ -85,7 +85,7 @@ final class SearchHeaderConfigurationFactory: SearchHeaderViewConfigurationFacto
             SearchHeaderViewConfiguration.SearchModel(
                 leadingIcon: Constants.searchLeadingIcon,
                 text: text,
-                placeholderText: "Search flight or airline",
+                placeholderText: Strings.Search.placeholder,
                 trailingIcon: Constants.searchTrailingIcon,
                 onTrailingIconTap: onTrailingIconTap
             )
