@@ -82,6 +82,14 @@ final class SearchFlightListView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
+    // MARK: - Lifecycle
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+
+        setBottomInsetIfNeeeded()
+    }
+
     // MARK: - Private
 
     private func setupBindings() {
@@ -166,6 +174,13 @@ final class SearchFlightListView: UIView {
         }
     }
 
+    private func setBottomInsetIfNeeeded() {
+        guard tableView.contentInset.bottom == .zero else { return }
+
+        let bottomInset = safeAreaInsets.bottom + mapButton.bounds.height + 10
+        tableView.contentInset.bottom = bottomInset
+    }
+
     private func apply(_ state: SearchState.FlightListState) {
         configureAppearance(with: state.appearance)
         updateVisibility(with: state.contentState)
@@ -198,7 +213,7 @@ extension SearchFlightListView {
 
     private func configureAppearance(with appearance: SearchState.FlightListState.Appearance) {
         layer.shadowOpacity = appearance.currentShadowOpacity
-        withCornerRadius(appearance.currentCornerRadius)
+        withCornerRadius(appearance.currentCornerRadius, corners: [.topLeft, .topRight])
         configureMapButtonAppearance(isHidden: appearance.isMapButtonHidden)
     }
 
