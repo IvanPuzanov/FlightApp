@@ -55,7 +55,7 @@ extension SearchEvent.UIEvent {
         )
         case onBottomSheetHeightChange(progress: CGFloat)
         case onDetentSet(CGFloat)
-        case onFlightTap(id: Int)
+        case onFlightTap(id: String)
         case onMapButtonTap
     }
 

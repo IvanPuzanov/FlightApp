@@ -72,7 +72,7 @@ final class SearchReducerTests: XCTestCase {
     // Verifies that onMapDidLoad with an existing coordinate produces no effects
     func test_onMapDidLoad_withCoordinate_doesNotRequestLocation() {
         // Arrange
-        state.mapState.defaultRegionCoordinate = Coordinate(latitude: 55.75, longitude: 37.62)
+        state.mapState.defaultRegionCoordinate = Coordinate.fake()
 
         // Act
         let effects = sut.reduce(state: &state, event: .ui(.map(.onMapDidLoad)))
@@ -158,8 +158,8 @@ final class SearchReducerTests: XCTestCase {
     // Verifies that onSearchTextEnter stores the text and filters flights by flight number
     func test_onSearchTextEnter_filtersFlightsByFlightNumber() {
         // Arrange
-        let matchingFlight = makeFlight(flightNumber: "SU100", airline: "Aeroflot")
-        let otherFlight = makeFlight(flightNumber: "DP200", airline: "Pobeda")
+        let matchingFlight = Flight.fake(id: "flight-1", flightNumber: "SU100", airline: "Aeroflot")
+        let otherFlight = Flight.fake(id: "flight-2", flightNumber: "DP200", airline: "Pobeda")
         state.flightListState.parameters.flights = [matchingFlight, otherFlight]
 
         // Act
@@ -177,8 +177,8 @@ final class SearchReducerTests: XCTestCase {
     // Verifies that onSearchTextEnter filters flights by airline name
     func test_onSearchTextEnter_filtersFlightsByAirline() {
         // Arrange
-        let matchingFlight = makeFlight(flightNumber: "SU100", airline: "Aeroflot")
-        let otherFlight = makeFlight(flightNumber: "DP200", airline: "Pobeda")
+        let matchingFlight = Flight.fake(id: "flight-1", flightNumber: "SU100", airline: "Aeroflot")
+        let otherFlight = Flight.fake(id: "flight-2", flightNumber: "DP200", airline: "Pobeda")
         state.flightListState.parameters.flights = [matchingFlight, otherFlight]
 
         // Act
@@ -196,8 +196,8 @@ final class SearchReducerTests: XCTestCase {
     func test_onSearchTextEnter_withNilShowsAllFlights() {
         // Arrange
         let flights = [
-            makeFlight(flightNumber: "SU100"),
-            makeFlight(flightNumber: "DP200")
+            Flight.fake(id: "flight-1", flightNumber: "SU100"),
+            Flight.fake(id: "flight-2", flightNumber: "DP200")
         ]
         state.flightListState.parameters.flights = flights
         state.flightListState.parameters.searchText = "SU"
@@ -217,7 +217,7 @@ final class SearchReducerTests: XCTestCase {
     // Verifies that onSearchTextEnter with no matches sets the list to empty status
     func test_onSearchTextEnter_withNoMatches_setsEmptyStatus() {
         // Arrange
-        state.flightListState.parameters.flights = [makeFlight(flightNumber: "SU100")]
+        state.flightListState.parameters.flights = [Flight.fake(flightNumber: "SU100")]
 
         // Act
         let effects = sut.reduce(
@@ -435,12 +435,55 @@ final class SearchReducerTests: XCTestCase {
         XCTAssertEqual(state, stateBefore)
     }
 
+    // Verifies that onFlightTap opens flight details and collapses the bottom sheet
+    func test_onFlightTap_opensFlightDetailsAndCollapsesBottomSheet() {
+        // Arrange
+        let detents = makeDetents()
+        let selectedFlight = Flight.fake(id: "flight-1", flightNumber: "SU100")
+        state.flightListState.bottomSheetState.detents = detents
+        state.flightListState.bottomSheetState.currentDetent = detents[2]
+        state.flightListState.parameters.flights = [selectedFlight]
+
+        // Act
+        let effects = sut.reduce(
+            state: &state,
+            event: .ui(.flightList(.onFlightTap(id: "flight-1")))
+        )
+
+        // Assert
+        XCTAssertEqual(
+            effects,
+            [.navigation(.openFlightDetails(inputData: FlightDetailsInputData.fake(flight: selectedFlight)))]
+        )
+        XCTAssertEqual(state.flightListState.bottomSheetState.currentDetent, detents[0])
+    }
+
+    // Verifies that onFlightTap with an unknown id does not change state or produce effects
+    func test_onFlightTap_withUnknownId_doesNothing() {
+        // Arrange
+        let detents = makeDetents()
+        state.flightListState.bottomSheetState.detents = detents
+        state.flightListState.bottomSheetState.currentDetent = detents[2]
+        state.flightListState.parameters.flights = [Flight.fake(id: "flight-1")]
+        let stateBefore = state
+
+        // Act
+        let effects = sut.reduce(
+            state: &state,
+            event: .ui(.flightList(.onFlightTap(id: "unknown-flight")))
+        )
+
+        // Assert
+        XCTAssertTrue(effects.isEmpty)
+        XCTAssertEqual(state, stateBefore)
+    }
+
     // MARK: - Data events
 
     // Verifies that onGetLocation stores the map region coordinate
     func test_onGetLocation_setsDefaultRegionCoordinate() {
         // Arrange
-        let coordinate = Coordinate(latitude: 59.93, longitude: 30.31)
+        let coordinate = Coordinate.fake(latitude: 59.93, longitude: 30.31)
 
         // Act
         let effects = sut.reduce(state: &state, event: .data(.onGetLocation(coordinate)))
@@ -466,7 +509,7 @@ final class SearchReducerTests: XCTestCase {
     // Verifies that onAirportsLoaded stores the airports list
     func test_onAirportsLoaded_setsAirports() {
         // Arrange
-        let airports = [makeAirport(id: 1), makeAirport(id: 2)]
+        let airports = [Airport.fake(id: 1), Airport.fake(id: 2)]
 
         // Act
         let effects = sut.reduce(state: &state, event: .data(.onAirportsLoaded(airports)))
@@ -492,7 +535,10 @@ final class SearchReducerTests: XCTestCase {
     // Verifies that onFlightsLoaded stores flights and shows content
     func test_onFlightsLoaded_setsFlightsAndContentState() {
         // Arrange
-        let flights = [makeFlight(flightNumber: "SU100"), makeFlight(flightNumber: "DP200")]
+        let flights = [
+            Flight.fake(id: "flight-1", flightNumber: "SU100"),
+            Flight.fake(id: "flight-2", flightNumber: "DP200")
+        ]
 
         // Act
         let effects = sut.reduce(state: &state, event: .data(.onFlightsLoaded(flights)))
@@ -507,7 +553,10 @@ final class SearchReducerTests: XCTestCase {
     func test_onFlightsLoaded_appliesExistingSearchFilter() {
         // Arrange
         state.flightListState.parameters.searchText = "DP"
-        let flights = [makeFlight(flightNumber: "SU100"), makeFlight(flightNumber: "DP200")]
+        let flights = [
+            Flight.fake(id: "flight-1", flightNumber: "SU100"),
+            Flight.fake(id: "flight-2", flightNumber: "DP200")
+        ]
 
         // Act
         let effects = sut.reduce(state: &state, event: .data(.onFlightsLoaded(flights)))
@@ -534,7 +583,7 @@ final class SearchReducerTests: XCTestCase {
     // Verifies that onFlightsFailed clears flights and shows an error
     func test_onFlightsFailed_clearsFlightsAndSetsErrorStatus() {
         // Arrange
-        state.flightListState.parameters.flights = [makeFlight()]
+        state.flightListState.parameters.flights = [Flight.fake()]
 
         // Act
         let effects = sut.reduce(state: &state, event: .data(.onFlightsFailed))
@@ -549,39 +598,6 @@ final class SearchReducerTests: XCTestCase {
 // MARK: - Helpers
 
 private extension SearchReducerTests {
-
-    func makeFlight(
-        flightNumber: String = "SU100",
-        airline: String = "Aeroflot"
-    ) -> Flight {
-        Flight(
-            from: FlightResponseModel(
-                id: 1,
-                flightNumber: flightNumber,
-                airline: airline,
-                airlineCode: "SU",
-                aircraft: "A320",
-                originCity: "Moscow",
-                originIata: "SVO",
-                destinationCity: "Saint Petersburg",
-                destinationIata: "LED",
-                status: .boarding
-            )
-        )
-    }
-
-    func makeAirport(id: Int) -> Airport {
-        Airport(
-            from: AirportResponseModel(
-                id: id,
-                iata: "SVO",
-                city: "Moscow",
-                country: "Russia",
-                lat: 55.97,
-                lon: 37.41
-            )
-        )
-    }
 
     func makeDetents() -> [SearchState.FlightListState.BottomSheetDetent] {
         [

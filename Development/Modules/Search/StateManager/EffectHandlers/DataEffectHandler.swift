@@ -29,10 +29,10 @@ final class DataEffectHandler: EffectHandlerProtocol {
     func handle(
         _ effect: SearchEffect,
         completion: @escaping (SearchEvent) -> Void
-    ) {
+    ) async {
         switch effect {
         case let .data(dataEffect):
-            handleDataEffect(dataEffect, completion: completion)
+            await handleDataEffect(dataEffect, completion: completion)
         case .navigation:
             break
         }
@@ -43,39 +43,37 @@ final class DataEffectHandler: EffectHandlerProtocol {
     private func handleDataEffect(
         _ effect: SearchEffect.DataEffect,
         completion: @escaping (SearchEvent) -> Void
-    ) {
+    ) async {
         switch effect {
         case .loadAirports:
-            processLoadAirports(completion: completion)
+            await processLoadAirports(completion: completion)
         case .loadFlights:
-            processLoadFlights(completion: completion)
+            await processLoadFlights(completion: completion)
         case .getDefaultRegionLocation:
             processGetLocation(completion: completion)
         }
     }
 
-    private func processLoadAirports(completion: @escaping (SearchEvent) -> Void) {
-        service.loadAirports()
-            .receive(on: DispatchQueue.main)
-            .sink { resultCompletion in
-                guard case .failure = resultCompletion else { return }
+    private func processLoadAirports(completion: @escaping (SearchEvent) -> Void) async {
+        let result = await service.loadAirports()
 
-                completion(.data(.onAirportsFailed))
-            } receiveValue: { airports in
-                completion(.data(.onAirportsLoaded(airports)))
-            }.store(in: &bag)
+        switch result {
+        case let .success(airports):
+            completion(.data(.onAirportsLoaded(airports)))
+        case .failure:
+            completion(.data(.onAirportsFailed))
+        }
     }
 
-    private func processLoadFlights(completion: @escaping (SearchEvent) -> Void) {
-        service.loadFlights()
-            .receive(on: DispatchQueue.main)
-            .sink { resultCompletion in
-                guard case .failure = resultCompletion else { return }
+    private func processLoadFlights(completion: @escaping (SearchEvent) -> Void) async {
+        let result = await service.loadFlights()
 
-                completion(.data(.onFlightsFailed))
-            } receiveValue: { flights in
-                completion(.data(.onFlightsLoaded(flights)))
-            }.store(in: &bag)
+        switch result {
+        case let .success(flights):
+            completion(.data(.onFlightsLoaded(flights)))
+        case .failure:
+            completion(.data(.onFlightsFailed))
+        }
     }
 
     private func processGetLocation(completion: @escaping (SearchEvent) -> Void) {

@@ -12,6 +12,6 @@ struct AirportResponseModel: Decodable {
     let iata: String
     let city: String
     let country: String
-    let lat: Double
-    let lon: Double
+    let latitude: Double
+    let longitude: Double
 }

@@ -12,7 +12,7 @@ private enum Constants {
 }
 
 protocol SearchFlightListConfigurationFactoryDelegate: AnyObject {
-    func flightDidTap(id: Int)
+    func flightDidTap(id: String)
     func mapButtonDidTap()
 }
 

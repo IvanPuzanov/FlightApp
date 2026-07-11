@@ -57,6 +57,7 @@ final class SearchMapViewController: UIViewController {
                 store?.state.mapState
             }
             .removeDuplicates()
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 self?.apply(state)
             }.store(in: &bag)

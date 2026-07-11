@@ -20,8 +20,8 @@ struct Airport: Equatable {
         self.city = model.city
         self.country = model.country
         self.location = CLLocationCoordinate2D(
-            latitude: CLLocationDegrees(model.lat),
-            longitude: CLLocationDegrees(model.lon)
+            latitude: CLLocationDegrees(model.latitude),
+            longitude: CLLocationDegrees(model.longitude)
         )
     }
 }

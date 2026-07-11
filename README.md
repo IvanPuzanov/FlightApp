@@ -90,15 +90,18 @@ Build and run the `FlightDemoApp` scheme in Xcode.
 
 ## Tests
 
+Unit tests run via the `Tests` scheme and the `UnitTests` test plan ([`TestPlans/UnitTests.xctestplan`](TestPlans/UnitTests.xctestplan)).
+
 ```bash
 tuist generate
 xcodebuild test \
   -workspace FlightDemoApp.xcworkspace \
-  -scheme FlightDemoApp \
+  -scheme Tests \
+  -testPlan UnitTests \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
 ```
 
-Or press `Cmd+U` in Xcode.
+Or select the `Tests` scheme in Xcode and press `Cmd+U`.
 
 ## Notes
 

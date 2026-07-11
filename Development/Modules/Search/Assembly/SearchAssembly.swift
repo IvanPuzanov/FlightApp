@@ -16,11 +16,16 @@ final class SearchAssembly: SearchAssemblyProtocol {
     // MARK: - Public
 
     func assemble(output: SearchModuleOutput) -> UIViewController {
-        let localStorageService = LocalStorageService()
-        let localDataSource = LocalDataSource(localStorageService: localStorageService)
+        let networkService = NetworkService()
+        let remoteDataSource = RemoteDataSource(
+            baseURL: URL(
+                string: "https://raw.githubusercontent.com/IvanPuzanov/FlightAppMockAPI/main"
+            )!,
+            networkService: networkService
+        )
         let locationService = LocationService()
         let repository = Repository(
-            localDataSource: localDataSource,
+            remoteDataSource: remoteDataSource,
             locationService: locationService
         )
         let service = SearchService(repository: repository)

@@ -51,8 +51,10 @@ extension SearchStore: SearchStoreProtocol {
 
         effectHandlers.forEach { effectHandler in
             effects.forEach { effect in
-                effectHandler.handle(effect) { [weak self] event in
-                    self?.dispatch(event: event)
+                Task { [weak self] in
+                    await effectHandler.handle(effect) { event in
+                        self?.dispatch(event: event)
+                    }
                 }
             }
         }

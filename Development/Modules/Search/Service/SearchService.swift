@@ -9,8 +9,8 @@ import Combine
 
 protocol SearchServiceProtocol: AnyObject {
     func getDefaultLocation() -> AnyPublisher<Coordinate, Error>
-    func loadAirports() -> AnyPublisher<[Airport], Error>
-    func loadFlights() -> AnyPublisher<[Flight], Error>
+    func loadAirports() async -> Result<[Airport], Error>
+    func loadFlights() async -> Result<[Flight], Error>
 }
 
 final class SearchService: SearchServiceProtocol {
@@ -33,15 +33,21 @@ final class SearchService: SearchServiceProtocol {
         }.eraseToAnyPublisher()
     }
 
-    func loadAirports() -> AnyPublisher<[Airport], Error> {
-        Future { [weak repository] promise in
-            repository?.fetchAirports(completion: promise)
-        }.eraseToAnyPublisher()
+    func loadAirports() async -> Result<[Airport], any Error> {
+        do {
+            let airports = try await repository.fetchAirports()
+            return .success(airports)
+        } catch {
+            return .failure(error)
+        }
     }
 
-    func loadFlights() -> AnyPublisher<[Flight], Error> {
-        Future { [weak repository] promise in
-            repository?.fetchFlights(completion: promise)
-        }.eraseToAnyPublisher()
+    func loadFlights() async -> Result<[Flight], any Error> {
+        do {
+            let flights = try await repository.fetchFlights()
+            return .success(flights)
+        } catch {
+            return .failure(error)
+        }
     }
 }

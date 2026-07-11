@@ -9,6 +9,6 @@ import Foundation
 
 protocol SearchRepositoryProtocol: AnyObject {
     func getUserLocation(completion: (Result<Coordinate, Error>) -> Void)
-    func fetchAirports(completion: (Result<[Airport], Error>) -> Void)
-    func fetchFlights(completion: (Result<[Flight], Error>) -> Void)
+    func fetchAirports() async throws -> [Airport]
+    func fetchFlights() async throws -> [Flight]
 }
