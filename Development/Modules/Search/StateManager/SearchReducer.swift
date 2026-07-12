@@ -7,6 +7,7 @@
 
 import Foundation
 
+@MainActor
 protocol SearchReducerProtocol: ReducerProtocol {
     func reduce(state: inout SearchState, event: SearchEvent) -> [SearchEffect]
 }

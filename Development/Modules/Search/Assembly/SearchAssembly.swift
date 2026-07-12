@@ -7,6 +7,7 @@
 
 import UIKit
 
+@MainActor
 protocol SearchAssemblyProtocol: AnyObject {
     func assemble(output: SearchModuleOutput) -> UIViewController
 }
@@ -19,9 +20,7 @@ final class SearchAssembly: SearchAssemblyProtocol {
         let urlSession = URLSession(configuration: .default)
         let networkService = NetworkService(urlSession: urlSession)
         let remoteDataSource = RemoteDataSource(
-            baseURL: URL(
-                string: "https://raw.githubusercontent.com/IvanPuzanov/FlightAppMockAPI/main"
-            )!,
+            apiConfiguration: .production,
             networkService: networkService
         )
         let locationService = LocationService()

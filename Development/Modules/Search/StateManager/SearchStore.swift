@@ -7,6 +7,7 @@
 
 import Combine
 
+@MainActor
 protocol SearchStoreProtocol: AnyObject {
     var state: SearchState { get }
     var stateDidChange: ObservableObjectPublisher { get }

@@ -8,6 +8,7 @@
 import XCTest
 @testable import FlightDemoApp
 
+@MainActor
 final class SearchReducerTests: XCTestCase {
 
     // MARK: - Properties
