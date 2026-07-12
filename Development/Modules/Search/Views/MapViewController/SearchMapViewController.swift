@@ -97,6 +97,7 @@ final class SearchMapViewController: UIViewController {
     private func apply(_ state: SearchState.MapState) {
         moveToUserRegionIfNeeded(state: state)
 
+        mapView.removeAnnotations(mapView.annotations)
         let airportAnnotations = factory.createAnnotations(from: state.airports)
         mapView.addAnnotations(airportAnnotations)
     }
