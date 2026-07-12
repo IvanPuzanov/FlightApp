@@ -35,6 +35,7 @@ extension SearchEvent {
 extension SearchEvent.UIEvent {
     enum MapEvent {
         case onMapDidLoad
+        case onDefaultRegionSet
         case onAirportSelect(id: Int)
     }
 

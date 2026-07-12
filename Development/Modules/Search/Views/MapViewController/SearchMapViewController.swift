@@ -130,12 +130,18 @@ extension SearchMapViewController: MKMapViewDelegate {
 extension SearchMapViewController {
 
     private func moveToUserRegionIfNeeded(state: SearchState.MapState) {
-        guard let location = state.defaultRegionCoordinate else { return }
+        guard
+            !state.isDefaultRegionSetted,
+            let location = state.defaultRegionCoordinate
+        else {
+            return
+        }
 
         let region = MKCoordinateRegion(
             center: location.toCLLocationCoordinate2D,
             span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)
         )
         mapView.setRegion(region, animated: true)
+        store.dispatch(event: .ui(.map(.onDefaultRegionSet)))
     }
 }
