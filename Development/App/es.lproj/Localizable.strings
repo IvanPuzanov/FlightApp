@@ -7,9 +7,3 @@
 "status.empty.subtitle" = "No hay vuelos";
 
 "map.button" = "Mapa";
-
-"flight.status.boarding" = "Embarque";
-"flight.status.in_air" = "En vuelo";
-"flight.status.delayed" = "Retrasado";
-"flight.status.landed" = "Aterrizado";
-"flight.status.cancelled" = "Cancelado";

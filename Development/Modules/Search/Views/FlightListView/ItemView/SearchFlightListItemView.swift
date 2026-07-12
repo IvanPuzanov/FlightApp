@@ -16,19 +16,19 @@ final class SearchFlightListItemView: UIView {
 
     // MARK: - UI
 
+    private let priceBadge = BadgeView()
     private let airlineImageView = UIImageView()
-    private let airlineLabel = UILabel()
-    private let flightNumberLabel = UILabel()
+    private let baggageStackView = UIStackView()
 
-    private let statusBadgeView = BadgeView()
+    private let originLabelsStackView = UIStackView()
+    private let originIataLabel = UILabel()
+    private let originCityLabel = UILabel()
 
-    private let originAirportCityLabel = UILabel()
-    private let originAirportIATALabel = UILabel()
+    private let destinationLabelsStackView = UIStackView()
+    private let destinationIataLabel = UILabel()
+    private let destinationCityLabel = UILabel()
 
-    private let destinationAirportCityLabel = UILabel()
-    private let destinationAirportIATALabel = UILabel()
-
-    private let tapGestureRecognizer = UITapGestureRecognizer()
+    private let tapGestureRecognizer =  UITapGestureRecognizer()
 
     // MARK: - Properties
 
@@ -49,17 +49,16 @@ final class SearchFlightListItemView: UIView {
     // MARK: - Private
 
     private func setupUI() {
-        addSubviews(airlineImageView, statusBadgeView, airlineLabel, flightNumberLabel, originAirportCityLabel, originAirportIATALabel, destinationAirportCityLabel, destinationAirportIATALabel)
+        addSubviews(priceBadge, airlineImageView, baggageStackView, originLabelsStackView, destinationLabelsStackView)
+        originLabelsStackView.addArrangedSubviews(originIataLabel, originCityLabel)
+        destinationLabelsStackView.addArrangedSubviews(destinationIataLabel, destinationCityLabel)
 
         setupView()
+        setupPriceBadgeView()
         setupAirlineImageView()
-        setupStatusBadgeView()
-        setupAirlineLabel()
-        setupFlightNumberLabel()
-        setupOriginAirportIATALabel()
-        setupOriginAirportCityLabel()
-        setupDestinationAirportIATALabel()
-        setupDestinationAirportCityLabel()
+        setupBaggageStackView()
+        setupOriginLabelsStackView()
+        setupDestinationLabelStackView()
         setupTapGestureRecognizer()
     }
 
@@ -69,65 +68,48 @@ final class SearchFlightListItemView: UIView {
         withShadow()
     }
 
-    private func setupAirlineImageView() {
-        airlineImageView.contentMode = .scaleAspectFill
-        airlineImageView.tintColor = .Text.primary
-        airlineImageView.clipsToBounds = true
-        airlineImageView.withCornerRadius(19.5)
-        airlineImageView.withBackgroundColor(.quaternarySystemFill)
-
-        airlineImageView.snp.makeConstraints {
-            $0.width.height.equalTo(39)
+    private func setupPriceBadgeView() {
+        priceBadge.snp.makeConstraints {
             $0.leading.top.equalToSuperview().inset(16)
         }
     }
 
-    private func setupStatusBadgeView() {
-        statusBadgeView.snp.makeConstraints {
-            $0.top.trailing.equalToSuperview().inset(16)
+    private func setupAirlineImageView() {
+        airlineImageView.layer.cornerRadius = 15
+        airlineImageView.clipsToBounds = true
+
+        airlineImageView.snp.makeConstraints {
+            $0.trailing.top.equalToSuperview().inset(16)
+            $0.size.equalTo(30)
         }
     }
 
-    private func setupAirlineLabel() {
-        airlineLabel.snp.makeConstraints {
-            $0.trailing.lessThanOrEqualTo(statusBadgeView.snp.leading).offset(-12)
-            $0.leading.equalTo(airlineImageView.snp.trailing).offset(12)
-            $0.bottom.equalTo(airlineImageView.snp.centerY).offset(-1)
+    private func setupBaggageStackView() {
+        baggageStackView.snp.makeConstraints {
+            $0.top.equalTo(airlineImageView.snp.bottom).offset(5)
+            $0.leading.trailing.equalToSuperview().inset(16)
         }
     }
 
-    private func setupFlightNumberLabel() {
-        flightNumberLabel.snp.makeConstraints {
-            $0.top.equalTo(airlineImageView.snp.centerY).offset(1)
-            $0.leading.equalTo(airlineImageView.snp.trailing).offset(12)
-        }
-    }
+    private func setupOriginLabelsStackView() {
+        originLabelsStackView.axis = .vertical
+        originLabelsStackView.setCustomSpacing(2, after: originIataLabel)
+        originLabelsStackView.setCustomSpacing(5, after: originCityLabel)
 
-    private func setupOriginAirportIATALabel() {
-        originAirportIATALabel.snp.makeConstraints {
+        originLabelsStackView.snp.makeConstraints {
+            $0.top.equalTo(baggageStackView.snp.bottom).offset(14)
             $0.leading.bottom.equalToSuperview().inset(16)
         }
     }
 
-    private func setupOriginAirportCityLabel() {
-        originAirportCityLabel.snp.makeConstraints {
-            $0.leading.equalTo(originAirportIATALabel)
-            $0.bottom.equalTo(originAirportIATALabel.snp.top).offset(-4)
-            $0.top.greaterThanOrEqualTo(airlineImageView.snp.bottom).offset(40)
-        }
-    }
+    private func setupDestinationLabelStackView() {
+        destinationLabelsStackView.axis = .vertical
+        destinationLabelsStackView.setCustomSpacing(2, after: destinationIataLabel)
+        destinationLabelsStackView.setCustomSpacing(5, after: destinationCityLabel)
 
-    private func setupDestinationAirportIATALabel() {
-        destinationAirportIATALabel.snp.makeConstraints {
+        destinationLabelsStackView.snp.makeConstraints {
+            $0.top.equalTo(baggageStackView.snp.bottom).offset(14)
             $0.trailing.bottom.equalToSuperview().inset(16)
-        }
-    }
-
-    private func setupDestinationAirportCityLabel() {
-        destinationAirportCityLabel.snp.makeConstraints {
-            $0.trailing.equalTo(destinationAirportIATALabel)
-            $0.bottom.equalTo(destinationAirportIATALabel.snp.top).offset(-4)
-            $0.top.greaterThanOrEqualTo(airlineImageView.snp.bottom).offset(40)
         }
     }
 
@@ -147,14 +129,12 @@ final class SearchFlightListItemView: UIView {
 extension SearchFlightListItemView: ConfigurableView {
 
     func configure(with configuration: SearchFlightListItemViewConfiguration) {
-        configureImageView(with: configuration.airlineImageUrl)
-        statusBadgeView.configure(with: configuration.statusBadgeViewConfiguration)
-        airlineLabel.configure(with: configuration.airlineLabelConfiguration)
-        flightNumberLabel.configure(with: configuration.flightNumberLabelConfiguration)
-        originAirportCityLabel.configure(with: configuration.originCityLabelConfiguration)
-        originAirportIATALabel.configure(with: configuration.originIATALabelConfiguration)
-        destinationAirportCityLabel.configure(with: configuration.destinationCityLabelConfiguration)
-        destinationAirportIATALabel.configure(with: configuration.destinationIATALabelConfiguration)
+        priceBadge.configure(with: configuration.priceBadgeViewConfiguration)
+        configureAirlineImageView(with: configuration.airlineImageUrl)
+        originIataLabel.configure(with: configuration.originIataLabelConfiguration)
+        originCityLabel.configure(with: configuration.originCityLabelConfiguration)
+        destinationIataLabel.configure(with: configuration.destinationIataLabelConfiguration)
+        destinationCityLabel.configure(with: configuration.destinationCityLabelConfiguration)
         onTap = configuration.onTap
     }
 
@@ -163,7 +143,7 @@ extension SearchFlightListItemView: ConfigurableView {
         imageResolver.cancel()
     }
 
-    private func configureImageView(with imageURL: URL?) {
+    private func configureAirlineImageView(with imageURL: URL?) {
         guard let imageURL else { return }
 
         imageResolver.resolveImage(

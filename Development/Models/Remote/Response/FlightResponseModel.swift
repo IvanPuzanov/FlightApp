@@ -9,23 +9,54 @@ import Foundation
 
 struct FlightResponseModel: Decodable {
     let id: String
-    let flightNumber: String
-    let airline: String
-    let airlineCode: String
-    let aircraft: String
-    let originCity: String
-    let originIata: String
-    let destinationCity: String
-    let destinationIata: String
-    let status: FlightStatus
+    let airline: AirlineResponseModel
+    let origin: AirportResponseModel
+    let destination: AirportResponseModel
+    let departureDateTime: String
+    let arrivalDateTime: String
+    let price: Decimal
+    let currency: String
+    let baggage: BaggageResponseModel
+    let layovers: [LayoverResponseModel]
+    let status: StatusResponseModel?
 }
 
 extension FlightResponseModel {
-    enum FlightStatus: String, Decodable {
-        case boarding
-        case inAir = "in_air"
-        case delayed
-        case landed
-        case cancelled
+    struct AirlineResponseModel: Decodable {
+        let code: String
+        let name: String
+        let logo: String?
+    }
+
+    struct AirportResponseModel: Decodable {
+        let iata: String
+        let city: String
+        let country: String
+    }
+
+    struct BaggageResponseModel: Decodable {
+        let cabinBaggageKg: Int
+        let cabinBaggagePieces: Int
+        let checkedBaggageKg: Int
+        let checkedBaggagePieces: Int
+    }
+
+    struct LayoverResponseModel: Decodable {
+        let airport: FlightResponseModel.AirportResponseModel
+        let airline: FlightResponseModel.AirlineResponseModel
+        let departureDateTime: String
+    }
+
+    enum StatusResponseModel: String, Decodable {
+        case regular
+        case recommended
+        case bestPrice = "best_price"
+        case fastest
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            let rawValue = try container.decode(String.self)
+            self = StatusResponseModel(rawValue: rawValue) ?? .regular
+        }
     }
 }

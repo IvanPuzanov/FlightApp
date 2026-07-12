@@ -9,13 +9,11 @@ import UIKit
 
 struct SearchFlightListItemViewConfiguration: Equatable {
     let id: String
+    let priceBadgeViewConfiguration: BadgeViewConfiguration
     let airlineImageUrl: URL?
-    let airlineLabelConfiguration: LabelConfiguration
-    let flightNumberLabelConfiguration: LabelConfiguration
-    let statusBadgeViewConfiguration: BadgeViewConfiguration
+    let originIataLabelConfiguration: LabelConfiguration
     let originCityLabelConfiguration: LabelConfiguration
-    let originIATALabelConfiguration: LabelConfiguration
+    let destinationIataLabelConfiguration: LabelConfiguration
     let destinationCityLabelConfiguration: LabelConfiguration
-    let destinationIATALabelConfiguration: LabelConfiguration
     @Equated var onTap: (() -> Void)?
 }

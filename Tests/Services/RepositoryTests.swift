@@ -32,7 +32,7 @@ final class RepositoryTests: XCTestCase {
     // MARK: - Fetch airports
 
     // Verifies that fetchAirports maps remote response models to domain airports
-    func test_fetchAirports_success_mapsResponseModelsToAirports() async throws {
+    func test_fetchAirports_success_mapsResponseModelsToAirports() async {
         // Arrange
         remoteDataSource.stubbedFetchAirportsResult = .success([
             AirportResponseModel.fake(id: 1),
@@ -40,109 +40,93 @@ final class RepositoryTests: XCTestCase {
         ])
 
         // Act
-        let airports = try await sut.fetchAirports()
+        let result = await sut.fetchAirports()
 
         // Assert
         XCTAssertTrue(remoteDataSource.invokedFetchAirports)
         XCTAssertEqual(remoteDataSource.invokedFetchAirportsCallsCount, 1)
-        XCTAssertEqual(airports.count, 2)
-        XCTAssertEqual(airports[0].id, 1)
-        XCTAssertEqual(airports[0].iata, "SVO")
-        XCTAssertEqual(airports[1].id, 2)
+
+        switch result {
+        case let .success(airports):
+            XCTAssertEqual(airports.count, 2)
+            XCTAssertEqual(airports[0].id, 1)
+            XCTAssertEqual(airports[0].iata, "SVO")
+            XCTAssertEqual(airports[1].id, 2)
+        case .failure:
+            XCTFail("Expected successful airports result")
+        }
     }
 
-    // Verifies that fetchAirports throws when remote data source returns failure
-    func test_fetchAirports_remoteFailure_throwsError() async {
+    // Verifies that fetchAirports returns failure when remote data source fails
+    func test_fetchAirports_remoteFailure_returnsFailure() async {
         // Arrange
         let expectedError = NSError(domain: "test", code: 1)
         remoteDataSource.stubbedFetchAirportsResult = .failure(expectedError)
 
         // Act
-        do {
-            _ = try await sut.fetchAirports()
-            XCTFail("Expected fetchAirports to throw")
-        } catch {
-            // Assert
-            XCTAssertEqual((error as NSError).code, expectedError.code)
-            XCTAssertTrue(remoteDataSource.invokedFetchAirports)
-            XCTAssertEqual(remoteDataSource.invokedFetchAirportsCallsCount, 1)
-        }
-    }
+        let result = await sut.fetchAirports()
 
-    // Verifies that fetchAirports propagates thrown errors from remote data source
-    func test_fetchAirports_remoteThrows_propagatesError() async {
-        // Arrange
-        let expectedError = NSError(domain: "test", code: 2)
-        remoteDataSource.stubbedFetchAirportsError = expectedError
+        // Assert
+        XCTAssertTrue(remoteDataSource.invokedFetchAirports)
+        XCTAssertEqual(remoteDataSource.invokedFetchAirportsCallsCount, 1)
 
-        // Act
-        do {
-            _ = try await sut.fetchAirports()
-            XCTFail("Expected fetchAirports to throw")
-        } catch {
-            // Assert
+        switch result {
+        case .success:
+            XCTFail("Expected failure result")
+        case let .failure(error):
             XCTAssertEqual((error as NSError).code, expectedError.code)
-            XCTAssertTrue(remoteDataSource.invokedFetchAirports)
-            XCTAssertEqual(remoteDataSource.invokedFetchAirportsCallsCount, 1)
         }
     }
 
     // MARK: - Fetch flights
 
     // Verifies that fetchFlights maps remote response models to domain flights
-    func test_fetchFlights_success_mapsResponseModelsToFlights() async throws {
+    func test_fetchFlights_success_mapsResponseModelsToFlights() async {
         // Arrange
         remoteDataSource.stubbedFetchFlightsResult = .success([
-            FlightResponseModel.fake(id: "flight-1", flightNumber: "SU100"),
-            FlightResponseModel.fake(id: "flight-2", flightNumber: "DP200")
+            FlightResponseModel.fake(id: "flight-1", airlineName: "Aeroflot"),
+            FlightResponseModel.fake(id: "flight-2", airlineName: "Pobeda")
         ])
 
         // Act
-        let flights = try await sut.fetchFlights()
+        let result = await sut.fetchFlights()
 
         // Assert
         XCTAssertTrue(remoteDataSource.invokedFetchFlights)
         XCTAssertEqual(remoteDataSource.invokedFetchFlightsCallsCount, 1)
-        XCTAssertEqual(flights.count, 2)
-        XCTAssertEqual(flights[0].id, "flight-1")
-        XCTAssertEqual(flights[0].flightNumber, "SU100")
-        XCTAssertEqual(flights[1].id, "flight-2")
-        XCTAssertEqual(flights[1].flightNumber, "DP200")
+
+        switch result {
+        case let .success(flights):
+            XCTAssertEqual(flights.count, 2)
+            XCTAssertEqual(flights[0].id, "flight-1")
+            XCTAssertEqual(flights[0].airline.name, "Aeroflot")
+            XCTAssertEqual(flights[0].baggage.cabinBaggageKg, 8)
+            XCTAssertEqual(flights[0].status, .regular)
+            XCTAssertEqual(flights[1].id, "flight-2")
+            XCTAssertEqual(flights[1].airline.name, "Pobeda")
+        case .failure:
+            XCTFail("Expected successful flights result")
+        }
     }
 
-    // Verifies that fetchFlights throws when remote data source returns failure
-    func test_fetchFlights_remoteFailure_throwsError() async {
+    // Verifies that fetchFlights returns failure when remote data source fails
+    func test_fetchFlights_remoteFailure_returnsFailure() async {
         // Arrange
         let expectedError = NSError(domain: "test", code: 3)
         remoteDataSource.stubbedFetchFlightsResult = .failure(expectedError)
 
         // Act
-        do {
-            _ = try await sut.fetchFlights()
-            XCTFail("Expected fetchFlights to throw")
-        } catch {
-            // Assert
-            XCTAssertEqual((error as NSError).code, expectedError.code)
-            XCTAssertTrue(remoteDataSource.invokedFetchFlights)
-            XCTAssertEqual(remoteDataSource.invokedFetchFlightsCallsCount, 1)
-        }
-    }
+        let result = await sut.fetchFlights()
 
-    // Verifies that fetchFlights propagates thrown errors from remote data source
-    func test_fetchFlights_remoteThrows_propagatesError() async {
-        // Arrange
-        let expectedError = NSError(domain: "test", code: 4)
-        remoteDataSource.stubbedFetchFlightsError = expectedError
+        // Assert
+        XCTAssertTrue(remoteDataSource.invokedFetchFlights)
+        XCTAssertEqual(remoteDataSource.invokedFetchFlightsCallsCount, 1)
 
-        // Act
-        do {
-            _ = try await sut.fetchFlights()
-            XCTFail("Expected fetchFlights to throw")
-        } catch {
-            // Assert
+        switch result {
+        case .success:
+            XCTFail("Expected failure result")
+        case let .failure(error):
             XCTAssertEqual((error as NSError).code, expectedError.code)
-            XCTAssertTrue(remoteDataSource.invokedFetchFlights)
-            XCTAssertEqual(remoteDataSource.invokedFetchFlightsCallsCount, 1)
         }
     }
 

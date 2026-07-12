@@ -126,33 +126,33 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
         from flight: Flight
     ) -> SearchFlightListItemViewConfiguration {
         SearchFlightListItemViewConfiguration(
-            id: flight.flightNumber,
-            airlineImageUrl: URL(
-                string: "https://images.kiwi.com/airlines/128/\(flight.airlineCode).png"
+            id: flight.id,
+            priceBadgeViewConfiguration: BadgeViewConfiguration(
+                imageConfiguration: flight.status == .bestPrice
+                    ? BadgeViewConfiguration.ImageConfiguration(image: UIImage(systemName: "flame.fill"), tintColor: .white)
+                    : nil,
+                labelConfiguration: LabelConfiguration(
+                    text: formatPriceText(for: flight),
+                    textColor: createPriceTextColor(from: flight.status),
+                    font: .boldSystemFont(ofSize: 18)
+                ),
+                insets: .custom(top: 5, bottom: 4, left: 10, right: 10),
+                backgroundColor: createPriceBadgeBackgroundColor(from: flight.status)
             ),
-            airlineLabelConfiguration: LabelConfiguration(
-                text: flight.airline,
-                font: .systemFont(ofSize: 16, weight: .bold)
-            ),
-            flightNumberLabelConfiguration: LabelConfiguration(
-                text: flight.flightNumber,
-                font: .systemFont(ofSize: 14)
-            ),
-            statusBadgeViewConfiguration: BadgeViewConfiguration(
-                image: UIImage(systemName: "circle.fill"),
-                imageTintColor: createColor(from: flight.status),
-                labelConfiguration: createStatusLabelConfiguration(from: flight.status),
-                backgroundColor: createColor(from: flight.status).withAlphaComponent(0.1)
-            ),
-            originCityLabelConfiguration: LabelConfiguration(text: flight.originCity),
-            originIATALabelConfiguration: LabelConfiguration(
-                text: flight.originIata,
+            airlineImageUrl: URL(string: flight.airline.logo ?? ""),
+            originIataLabelConfiguration: LabelConfiguration(
+                text: flight.origin.iata,
                 font: .systemFont(ofSize: 22, weight: .bold)
             ),
-            destinationCityLabelConfiguration: LabelConfiguration(text: flight.destinationCity),
-            destinationIATALabelConfiguration: LabelConfiguration(
-                text: flight.destinationIata,
+            originCityLabelConfiguration: LabelConfiguration(text: flight.origin.city),
+            destinationIataLabelConfiguration: LabelConfiguration(
+                text: flight.destination.iata,
+                textAlignment: .right,
                 font: .systemFont(ofSize: 22, weight: .bold)
+            ),
+            destinationCityLabelConfiguration: LabelConfiguration(
+                text: flight.destination.city,
+                textAlignment: .right
             ),
             onTap: { [weak self] in
                 self?.delegate?.flightDidTap(id: flight.id)
@@ -160,37 +160,29 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
         )
     }
 
-    private func createStatusLabelConfiguration(from status: Flight.FlightStatus) -> LabelConfiguration {
-        let text: String
-
-        switch status {
-        case .boarding:
-            text = Strings.Flight.Status.boarding
-        case .inAir:
-            text = Strings.Flight.Status.inAir
-        case .delayed:
-            text = Strings.Flight.Status.delayed
-        case .landed:
-            text = Strings.Flight.Status.landed
-        case .cancelled:
-            text = Strings.Flight.Status.cancelled
-        }
-
-        return LabelConfiguration(text: text, font: .systemFont(ofSize: 14))
+    private func formatPriceText(for flight: Flight) -> String {
+        flight.price.formatted(.currency(code: flight.currency))
     }
 
-    private func createColor(from flightStatus: Flight.FlightStatus) -> UIColor {
+    private func createPriceTextColor(from flightStatus: Flight.Status?) -> UIColor {
         switch flightStatus {
-        case .boarding:
-            return .systemBlue
-        case .inAir:
-            return .systemGreen
-        case .delayed:
-            return .systemOrange
-        case .landed:
+        case .regular, .none:
+            return .Text.primary
+        case .bestPrice, .fastest, .recommended:
+            return .white
+        }
+    }
+
+    private func createPriceBadgeBackgroundColor(from flightStatus: Flight.Status?) -> UIColor {
+        switch flightStatus {
+        case .regular, .none:
             return .secondarySystemFill
-        case .cancelled:
+        case .recommended:
+            return .systemBlue
+        case .bestPrice:
             return .systemRed
+        case .fastest:
+            return .systemOrange
         }
     }
 }

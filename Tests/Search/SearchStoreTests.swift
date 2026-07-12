@@ -38,7 +38,7 @@ final class SearchStoreTests: XCTestCase {
     // Verifies that onViewDidLoad loads flights into store state
     func test_dispatch_onViewDidLoad_loadsFlightsIntoState() async {
         // Arrange
-        let flights = [Flight.fake(id: "flight-1", flightNumber: "SU100")]
+        let flights = [Flight.fake(id: "flight-1")]
         service.stubbedLoadFlightsResult = .success(flights)
 
         // Act
@@ -122,7 +122,7 @@ final class SearchStoreTests: XCTestCase {
     // Verifies that onFlightTap triggers navigation output with selected flight
     func test_dispatch_onFlightTap_triggersNavigationOutput() async {
         // Arrange
-        let selectedFlight = Flight.fake(id: "flight-1", flightNumber: "SU100")
+        let selectedFlight = Flight.fake(id: "flight-1")
         let detents = [
             SearchState.FlightListState.BottomSheetDetent(id: .compact, height: 200),
             SearchState.FlightListState.BottomSheetDetent(id: .large, height: 600)

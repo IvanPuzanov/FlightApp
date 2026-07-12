@@ -12,27 +12,29 @@ extension Flight {
 
     static func fake(
         id: String = "flight-1",
-        flightNumber: String = "SU100",
-        airline: String = "Aeroflot",
         airlineCode: String = "SU",
-        aircraft: String = "A320",
+        airlineName: String = "Aeroflot",
         originCity: String = "Moscow",
         originIata: String = "SVO",
         destinationCity: String = "Saint Petersburg",
         destinationIata: String = "LED",
-        status: FlightResponseModel.FlightStatus = .boarding
+        price: Decimal = 100,
+        currency: String = "EUR",
+        baggage: FlightResponseModel.BaggageResponseModel = .fake(),
+        status: FlightResponseModel.StatusResponseModel? = .regular
     ) -> Flight {
         Flight(
             from: .fake(
                 id: id,
-                flightNumber: flightNumber,
-                airline: airline,
                 airlineCode: airlineCode,
-                aircraft: aircraft,
+                airlineName: airlineName,
                 originCity: originCity,
                 originIata: originIata,
                 destinationCity: destinationCity,
                 destinationIata: destinationIata,
+                price: price,
+                currency: currency,
+                baggage: baggage,
                 status: status
             )
         )

@@ -155,36 +155,52 @@ final class SearchReducerTests: XCTestCase {
         XCTAssertEqual(state.flightListState.bottomSheetState.currentDetent, compactDetent)
     }
 
-    // Verifies that onSearchTextEnter stores the text and filters flights by flight number
-    func test_onSearchTextEnter_filtersFlightsByFlightNumber() {
+    // Verifies that onSearchTextEnter stores the text and filters flights by destination city
+    func test_onSearchTextEnter_filtersFlightsByDestinationCity() {
         // Arrange
-        let matchingFlight = Flight.fake(id: "flight-1", flightNumber: "SU100", airline: "Aeroflot")
-        let otherFlight = Flight.fake(id: "flight-2", flightNumber: "DP200", airline: "Pobeda")
+        let matchingFlight = Flight.fake(
+            id: "flight-1",
+            destinationCity: "Saint Petersburg",
+            destinationIata: "LED"
+        )
+        let otherFlight = Flight.fake(
+            id: "flight-2",
+            destinationCity: "London",
+            destinationIata: "LHR"
+        )
         state.flightListState.parameters.flights = [matchingFlight, otherFlight]
 
         // Act
         let effects = sut.reduce(
             state: &state,
-            event: .ui(.header(.onSearchTextEnter(text: "su1")))
+            event: .ui(.header(.onSearchTextEnter(text: "petersburg")))
         )
 
         // Assert
         XCTAssertTrue(effects.isEmpty)
-        XCTAssertEqual(state.flightListState.parameters.searchText, "su1")
+        XCTAssertEqual(state.flightListState.parameters.searchText, "petersburg")
         assertContentState(state.flightListState.contentState, equals: [matchingFlight])
     }
 
-    // Verifies that onSearchTextEnter filters flights by airline name
-    func test_onSearchTextEnter_filtersFlightsByAirline() {
+    // Verifies that onSearchTextEnter filters flights by another destination city
+    func test_onSearchTextEnter_filtersFlightsByAnotherDestinationCity() {
         // Arrange
-        let matchingFlight = Flight.fake(id: "flight-1", flightNumber: "SU100", airline: "Aeroflot")
-        let otherFlight = Flight.fake(id: "flight-2", flightNumber: "DP200", airline: "Pobeda")
+        let matchingFlight = Flight.fake(
+            id: "flight-1",
+            destinationCity: "Saint Petersburg",
+            destinationIata: "LED"
+        )
+        let otherFlight = Flight.fake(
+            id: "flight-2",
+            destinationCity: "London",
+            destinationIata: "LHR"
+        )
         state.flightListState.parameters.flights = [matchingFlight, otherFlight]
 
         // Act
         let effects = sut.reduce(
             state: &state,
-            event: .ui(.header(.onSearchTextEnter(text: "pobeda")))
+            event: .ui(.header(.onSearchTextEnter(text: "london")))
         )
 
         // Assert
@@ -196,8 +212,8 @@ final class SearchReducerTests: XCTestCase {
     func test_onSearchTextEnter_withNilShowsAllFlights() {
         // Arrange
         let flights = [
-            Flight.fake(id: "flight-1", flightNumber: "SU100"),
-            Flight.fake(id: "flight-2", flightNumber: "DP200")
+            Flight.fake(id: "flight-1"),
+            Flight.fake(id: "flight-2")
         ]
         state.flightListState.parameters.flights = flights
         state.flightListState.parameters.searchText = "SU"
@@ -217,7 +233,7 @@ final class SearchReducerTests: XCTestCase {
     // Verifies that onSearchTextEnter with no matches sets the list to empty status
     func test_onSearchTextEnter_withNoMatches_setsEmptyStatus() {
         // Arrange
-        state.flightListState.parameters.flights = [Flight.fake(flightNumber: "SU100")]
+        state.flightListState.parameters.flights = [Flight.fake(id: "flight-1")]
 
         // Act
         let effects = sut.reduce(
@@ -439,7 +455,7 @@ final class SearchReducerTests: XCTestCase {
     func test_onFlightTap_opensFlightDetailsAndCollapsesBottomSheet() {
         // Arrange
         let detents = makeDetents()
-        let selectedFlight = Flight.fake(id: "flight-1", flightNumber: "SU100")
+        let selectedFlight = Flight.fake(id: "flight-1")
         state.flightListState.bottomSheetState.detents = detents
         state.flightListState.bottomSheetState.currentDetent = detents[2]
         state.flightListState.parameters.flights = [selectedFlight]
@@ -536,8 +552,8 @@ final class SearchReducerTests: XCTestCase {
     func test_onFlightsLoaded_setsFlightsAndContentState() {
         // Arrange
         let flights = [
-            Flight.fake(id: "flight-1", flightNumber: "SU100"),
-            Flight.fake(id: "flight-2", flightNumber: "DP200")
+            Flight.fake(id: "flight-1"),
+            Flight.fake(id: "flight-2")
         ]
 
         // Act
@@ -552,10 +568,18 @@ final class SearchReducerTests: XCTestCase {
     // Verifies that onFlightsLoaded applies an existing search filter
     func test_onFlightsLoaded_appliesExistingSearchFilter() {
         // Arrange
-        state.flightListState.parameters.searchText = "DP"
+        state.flightListState.parameters.searchText = "london"
         let flights = [
-            Flight.fake(id: "flight-1", flightNumber: "SU100"),
-            Flight.fake(id: "flight-2", flightNumber: "DP200")
+            Flight.fake(
+                id: "flight-1",
+                destinationCity: "Saint Petersburg",
+                destinationIata: "LED"
+            ),
+            Flight.fake(
+                id: "flight-2",
+                destinationCity: "London",
+                destinationIata: "LHR"
+            )
         ]
 
         // Act

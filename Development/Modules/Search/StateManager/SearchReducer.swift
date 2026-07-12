@@ -177,9 +177,7 @@ final class SearchReducer: SearchReducerProtocol {
 
         let filteredFlights = searchText.isEmpty
             ? flights
-            : flights.filter {
-                $0.flightNumber.lowercased().contains(searchText) || $0.airline.lowercased().contains(searchText)
-            }
+            : flights.filter { $0.destination.city.lowercased().contains(searchText) }
 
         state.contentState = filteredFlights.isEmpty
             ? .status(.empty)

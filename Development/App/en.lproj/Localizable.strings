@@ -7,9 +7,3 @@
 "status.empty.subtitle" = "There are no flights";
 
 "map.button" = "Map";
-
-"flight.status.boarding" = "Boarding";
-"flight.status.in_air" = "In Air";
-"flight.status.delayed" = "Delayed";
-"flight.status.landed" = "Landed";
-"flight.status.cancelled" = "Cancelled";

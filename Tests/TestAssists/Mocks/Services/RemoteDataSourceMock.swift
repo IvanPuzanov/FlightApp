@@ -15,15 +15,10 @@ final class RemoteDataSourceMock: RemoteDataSourceProtocol {
     var invokedFetchAirports = false
     var invokedFetchAirportsCallsCount = 0
     var stubbedFetchAirportsResult: Result<[AirportResponseModel], Error> = .success([])
-    var stubbedFetchAirportsError: Error?
 
-    func fetchAirports() async throws -> Result<[AirportResponseModel], any Error> {
+    func fetchAirports() async -> Result<[AirportResponseModel], any Error> {
         invokedFetchAirports = true
         invokedFetchAirportsCallsCount += 1
-
-        if let stubbedFetchAirportsError {
-            throw stubbedFetchAirportsError
-        }
 
         return stubbedFetchAirportsResult
     }
@@ -33,15 +28,10 @@ final class RemoteDataSourceMock: RemoteDataSourceProtocol {
     var invokedFetchFlights = false
     var invokedFetchFlightsCallsCount = 0
     var stubbedFetchFlightsResult: Result<[FlightResponseModel], Error> = .success([])
-    var stubbedFetchFlightsError: Error?
 
-    func fetchFlights() async throws -> Result<[FlightResponseModel], any Error> {
+    func fetchFlights() async -> Result<[FlightResponseModel], any Error> {
         invokedFetchFlights = true
         invokedFetchFlightsCallsCount += 1
-
-        if let stubbedFetchFlightsError {
-            throw stubbedFetchFlightsError
-        }
 
         return stubbedFetchFlightsResult
     }
