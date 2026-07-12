@@ -51,6 +51,9 @@ final class SearchReducer: SearchReducerProtocol {
             return state.mapState.defaultRegionCoordinate == nil
                 ? [.data(.getDefaultRegionLocation)]
                 : []
+        case .onDefaultRegionSet:
+            state.mapState.isDefaultRegionSetted = true
+            return []
         case .onAirportSelect:
             return []
         }

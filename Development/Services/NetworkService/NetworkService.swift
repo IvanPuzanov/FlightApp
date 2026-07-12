@@ -16,6 +16,16 @@ protocol NetworkServiceProtocol: AnyObject {
 
 final class NetworkService: NetworkServiceProtocol {
 
+    // MARK: - Properties
+
+    private let urlSession: URLSession
+
+    // MARK: - Initialization
+
+    init(urlSession: URLSession) {
+        self.urlSession = urlSession
+    }
+
     // MARK: - Public
 
     func sendRequest<ResponseModel: Decodable>(
@@ -28,7 +38,7 @@ final class NetworkService: NetworkServiceProtocol {
 
         do {
             let decoder = JSONDecoder()
-            let (data, _) = try await URLSession.shared.data(for: urlRequest)
+            let (data, _) = try await urlSession.data(for: urlRequest)
             let decodedData = try decoder.decode(ResponseModel.self, from: data)
 
             return .success(decodedData)

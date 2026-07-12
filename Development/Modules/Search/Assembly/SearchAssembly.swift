@@ -16,7 +16,8 @@ final class SearchAssembly: SearchAssemblyProtocol {
     // MARK: - Public
 
     func assemble(output: SearchModuleOutput) -> UIViewController {
-        let networkService = NetworkService()
+        let urlSession = URLSession(configuration: .default)
+        let networkService = NetworkService(urlSession: urlSession)
         let remoteDataSource = RemoteDataSource(
             baseURL: URL(
                 string: "https://raw.githubusercontent.com/IvanPuzanov/FlightAppMockAPI/main"

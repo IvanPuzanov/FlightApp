@@ -9,6 +9,7 @@ import Foundation
 
 extension SearchState {
     struct MapState: Equatable {
+        var isDefaultRegionSetted: Bool
         var defaultRegionCoordinate: Coordinate?
         var airports: [Airport]
     }
@@ -17,6 +18,7 @@ extension SearchState {
 extension SearchState.MapState {
     static var initial: SearchState.MapState {
         SearchState.MapState(
+            isDefaultRegionSetted: false,
             defaultRegionCoordinate: nil,
             airports: []
         )
