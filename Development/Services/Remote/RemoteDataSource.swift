@@ -20,15 +20,16 @@ final class RemoteDataSource: RemoteDataSourceProtocol {
 
     // MARK: - Properties
 
-    private let baseURL: URL
+    private let apiConfiguration: APIConfiguration
+    private lazy var baseURL = apiConfiguration.baseURL
 
     // MARK: - Initialization
 
     init(
-        baseURL: URL,
+        apiConfiguration: APIConfiguration,
         networkService: NetworkServiceProtocol
     ) {
-        self.baseURL = baseURL
+        self.apiConfiguration = apiConfiguration
         self.networkService = networkService
     }
 

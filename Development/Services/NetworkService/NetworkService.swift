@@ -32,7 +32,7 @@ final class NetworkService: NetworkServiceProtocol {
         request: APIRequest,
         responseModel: ResponseModel.Type
     ) async -> Result<ResponseModel, Error> {
-        guard let urlRequest = request.completeURLRequest() else {
+        guard let urlRequest = request.urlRequest() else {
             return .failure(NSError())
         }
 

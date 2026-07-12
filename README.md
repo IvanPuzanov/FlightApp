@@ -16,7 +16,7 @@ iOS demo app for browsing flights on an interactive map. Built with UIKit, [Clea
 | Layer | Technologies |
 |---|---|
 | UI | UIKit, MapKit, SnapKit |
-| State | Custom Store + Reducer, Combine |
+| State | Custom Store + Reducer, Combine (UI bindings) |
 | Networking | URLSession, async/await |
 | Architecture | Clean Architecture, Coordinator, Assembly (DI), Repository |
 | Tooling | Tuist 4.22, XCTest, Fastlane |
@@ -27,51 +27,51 @@ The project follows **Clean Architecture**: dependencies point inward, and inner
 
 ### Clean Architecture Layers
 
-Rings are nested from the inside out — outer layers depend on inner ones, never the reverse:
+Dependency flow for the Search feature — each arrow points inward:
 
 ```mermaid
 flowchart TB
-    subgraph L4["Frameworks & Drivers"]
-        direction LR
-        Remote["RemoteDataSource"]
-        Network["NetworkService"]
-        DTO["FlightResponseModel · AirportResponseModel"]
-
-        subgraph L3["Interface Adapters"]
-            direction LR
-            Repo["Repository"]
-            Views["Views · ViewControllers"]
-            Store["SearchStore · Reducer"]
-            Handler["DataEffectHandler"]
-
-            subgraph L2["Use Cases"]
-                direction TB
-                Service["SearchService"]
-                RepoProto["«SearchRepositoryProtocol»"]
-
-                subgraph L1["Entities"]
-                    direction LR
-                    Flight["Flight"]
-                    Airport["Airport"]
-                    Coordinate["Coordinate"]
-                end
-            end
-        end
+    subgraph presentation ["Presentation (Interface Adapters)"]
+        Views["Views · ViewControllers"]
+        Store["SearchStore · Reducer"]
+        Handler["DataEffectHandler"]
     end
 
-    Remote --> Network
-    Network --> DTO
-    Repo --> Remote
-    Repo -.implements.-> RepoProto
+    subgraph application ["Use Cases"]
+        Service["SearchService"]
+    end
+
+    subgraph domain ["Entities"]
+        Flight["Flight"]
+        Airport["Airport"]
+        Coordinate["Coordinate"]
+    end
+
+    subgraph data ["Data (Interface Adapters)"]
+        RepoProto["«SearchRepositoryProtocol»"]
+        Repo["Repository"]
+    end
+
+    subgraph infrastructure ["Frameworks & Drivers"]
+        Remote["RemoteDataSource"]
+        Network["NetworkService"]
+        APIConfig["APIConfiguration"]
+        DTO["FlightResponseModel · AirportResponseModel"]
+    end
+
+    Views --> Store
+    Store --> Handler
     Handler --> Service
     Service --> RepoProto
-    Repo -->|maps DTO| Flight
-    Repo -->|maps DTO| Airport
-
-    style L1 fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    style L2 fill:#fff8e1,stroke:#f9a825,stroke-width:2px
-    style L3 fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
-    style L4 fill:#fce4ec,stroke:#ad1457,stroke-width:2px
+    Repo -.implements.-> RepoProto
+    Repo --> Remote
+    Remote --> Network
+    Network --> DTO
+    Repo -->|maps DTO → Entity| Flight
+    Repo -->|maps DTO → Entity| Airport
+    Service --> Flight
+    Service --> Airport
+    Service --> Coordinate
 ```
 
 | Clean Architecture ring | Project location | Key types |
@@ -79,7 +79,7 @@ flowchart TB
 | **Entities** | `Development/Models/Domain/` | `Flight`, `Airport`, `Coordinate` |
 | **Use Cases** | `Development/Modules/Search/Service/` | `SearchService`, `SearchServiceProtocol` |
 | **Interface Adapters** | `Development/Services/Repository/`, `Development/Modules/Search/` | `Repository`, `SearchStore`, `SearchReducer`, views |
-| **Frameworks & Drivers** | `Development/Services/Remote/`, `Development/Services/NetworkService/` | `RemoteDataSource`, `NetworkService`, `*ResponseModel` |
+| **Frameworks & Drivers** | `Development/Services/Remote/`, `Development/Services/NetworkService/`, `Development/Services/Configuration/` | `RemoteDataSource`, `NetworkService`, `APIConfiguration`, `*ResponseModel` |
 
 The **dependency rule** is enforced through protocols: `SearchService` depends on `SearchRepositoryProtocol`, not on `Repository` or `RemoteDataSource`. Domain entities never import UIKit or URLSession.
 
@@ -138,6 +138,8 @@ The same pattern applies to airports: `AirportResponseModel` (with `latitude` / 
 
 ### Unidirectional Data Flow
 
+Side effects and data loading use `async/await` end to end — from the effect handler through the use case, repository, and network layer:
+
 ```mermaid
 sequenceDiagram
     actor User
@@ -147,6 +149,8 @@ sequenceDiagram
     participant Handler as DataEffectHandler
     participant Service as SearchService
     participant Repo as Repository
+    participant Remote as RemoteDataSource
+    participant Network as NetworkService
 
     User->>View: tap / scroll / search
     View->>Store: dispatch(SearchEvent)
@@ -155,11 +159,15 @@ sequenceDiagram
     Store->>View: stateDidChange
 
     loop for each effect
-        Store->>Handler: handle(effect)
-        Handler->>Service: loadFlights / loadAirports / getLocation
-        Service->>Repo: fetch*
-        Repo-->>Service: Result
-        Service-->>Handler: AnyPublisher
+        Store->>Handler: await handle(effect)
+        Handler->>Service: await loadFlights / loadAirports
+        Service->>Repo: await fetch*
+        Repo->>Remote: await fetch*
+        Remote->>Network: await sendRequest
+        Network-->>Remote: Result
+        Remote-->>Repo: Result
+        Repo-->>Service: Result of Entities
+        Service-->>Handler: Result of Entities
         Handler->>Store: dispatch(DataEvent)
         Store->>Reducer: reduce(state, event)
         Reducer-->>Store: updated state

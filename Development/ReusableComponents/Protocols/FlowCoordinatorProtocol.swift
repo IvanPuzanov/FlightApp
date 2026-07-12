@@ -7,6 +7,7 @@
 
 import UIKit
 
+@MainActor
 protocol FlowCoordinatorProtocol: AnyObject {
     var navigationController: UINavigationController { get }
 

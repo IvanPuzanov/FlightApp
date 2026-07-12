@@ -9,6 +9,7 @@ import Combine
 import XCTest
 @testable import FlightDemoApp
 
+@MainActor
 final class SearchStoreTests: XCTestCase {
 
     // MARK: - Properties
