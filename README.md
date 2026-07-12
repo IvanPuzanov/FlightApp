@@ -19,7 +19,7 @@ iOS demo app for browsing flights on an interactive map. Built with UIKit, [Clea
 | State | Custom Store + Reducer, Combine |
 | Networking | URLSession, async/await |
 | Architecture | Clean Architecture, Coordinator, Assembly (DI), Repository |
-| Tooling | Tuist 4.22, XCTest |
+| Tooling | Tuist 4.22, XCTest, Fastlane |
 
 ## Architecture
 
@@ -191,17 +191,47 @@ Within the Search module, UI state is managed with a Store + Reducer pattern:
 
 - Xcode 16+
 - [Tuist](https://docs.tuist.dev/guides/quick-start/install-tuist) 4.22.0 (see [`.tuist-version`](.tuist-version))
+- Ruby + [Bundler](https://bundler.io) (for Fastlane)
 
 ## Getting Started
 
 ```bash
 git clone git@github.com:IvanPuzanov/FlightApp.git
 cd FlightApp
+bundle install
 tuist generate
 open FlightDemoApp.xcworkspace
 ```
 
 Build and run the `FlightDemoApp` scheme in Xcode.
+
+## Fastlane
+
+[Fastlane](https://fastlane.tools) automates build and test commands. Configuration lives in [`fastlane/Fastfile`](fastlane/Fastfile). Every lane runs `tuist generate` first, so the workspace is always up to date.
+
+| Lane | Description |
+|---|---|
+| `generate` | Generate the Xcode workspace via Tuist |
+| `build` | Compile the app for the iOS Simulator (build verification) |
+| `test` | Run unit tests from a test plan (default: `UnitTests`) |
+
+```bash
+# Build verification
+bundle exec fastlane build
+
+# Run unit tests on the default simulator (iPhone 16 Pro)
+bundle exec fastlane test
+
+# Run a specific test plan on a specific device
+bundle exec fastlane test testplan:UnitTests device:"iPhone 17 Pro"
+
+# Clean build
+bundle exec fastlane build clean:true
+```
+
+Lane options can also be passed via environment variables: `DEVICE`, `TEST_PLAN`.
+
+Fastlane artifacts (`report.xml`, `test_output/`, etc.) are gitignored and cleaned up automatically after `test` runs.
 
 ## Notes
 
