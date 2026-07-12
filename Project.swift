@@ -78,7 +78,7 @@ let project = Project(
             buildAction: .buildAction(targets: [.target(appTarget), .target(testsTarget)]),
             testAction: .testPlans(
                 [
-                    .relativeToManifest("TestPlans/UnitTests.xctestplan")
+                    .relativeToManifest("Tests/TestPlans/UnitTests.xctestplan")
                 ],
                 configuration: .debug
             ),
