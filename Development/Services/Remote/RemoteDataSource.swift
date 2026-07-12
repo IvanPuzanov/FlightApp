@@ -8,8 +8,8 @@
 import Foundation
 
 protocol RemoteDataSourceProtocol: AnyObject {
-    func fetchAirports() async throws -> Result<[AirportResponseModel], Error>
-    func fetchFlights() async throws -> Result<[FlightResponseModel], Error>
+    func fetchAirports() async -> Result<[AirportResponseModel], Error>
+    func fetchFlights() async -> Result<[FlightResponseModel], Error>
 }
 
 final class RemoteDataSource: RemoteDataSourceProtocol {
@@ -34,9 +34,9 @@ final class RemoteDataSource: RemoteDataSourceProtocol {
 
     // MARK: - Public
 
-    func fetchAirports() async throws -> Result<[AirportResponseModel], any Error> {
+    func fetchAirports() async -> Result<[AirportResponseModel], any Error> {
         let request = RemoteTarget.fetchAirports(baseURL: baseURL)
-        let result = try await networkService.sendRequest(
+        let result = await networkService.sendRequest(
             request: request,
             responseModel: [AirportResponseModel].self
         )
@@ -44,9 +44,9 @@ final class RemoteDataSource: RemoteDataSourceProtocol {
         return result
     }
 
-    func fetchFlights() async throws -> Result<[FlightResponseModel], Error> {
+    func fetchFlights() async -> Result<[FlightResponseModel], Error> {
         let request = RemoteTarget.fetchFlights(baseURL: baseURL)
-        let result = try await networkService.sendRequest(
+        let result = await networkService.sendRequest(
             request: request,
             responseModel: [FlightResponseModel].self
         )

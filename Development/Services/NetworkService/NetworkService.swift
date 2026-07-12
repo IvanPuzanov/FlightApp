@@ -11,42 +11,29 @@ protocol NetworkServiceProtocol: AnyObject {
     func sendRequest<ResponseModel: Decodable>(
         request: APIRequest,
         responseModel: ResponseModel.Type
-    ) async throws -> Result<ResponseModel, Error>
+    ) async -> Result<ResponseModel, Error>
 }
 
 final class NetworkService: NetworkServiceProtocol {
-
-    // MARK: - Dependencies
-
-    private let cacher: ResponseCacheProtocol = ResponseCache.shared
 
     // MARK: - Public
 
     func sendRequest<ResponseModel: Decodable>(
         request: APIRequest,
         responseModel: ResponseModel.Type
-    ) async throws -> Result<ResponseModel, Error> {
-        guard let urlRequest = request.completeURLRequest() else { throw NSError() }
-
-        let decoder = JSONDecoder()
-        let data: Data
-
-        if let dataFromCache = getDataFromCache(urlRequest: urlRequest) {
-            data = dataFromCache
-        } else {
-            data = try await URLSession.shared.data(for: urlRequest).0
+    ) async -> Result<ResponseModel, Error> {
+        guard let urlRequest = request.completeURLRequest() else {
+            return .failure(NSError())
         }
 
-        let decodedData = try decoder.decode(ResponseModel.self, from: data)
+        do {
+            let decoder = JSONDecoder()
+            let (data, _) = try await URLSession.shared.data(for: urlRequest)
+            let decodedData = try decoder.decode(ResponseModel.self, from: data)
 
-        return .success(decodedData)
-    }
-
-    // MARK: - Private
-
-    private func getDataFromCache(urlRequest: URLRequest) -> Data? {
-        guard let urlString = urlRequest.url?.absoluteString else { return nil }
-
-        return cacher.get(for: urlString)
+            return .success(decodedData)
+        } catch {
+            return .failure(error)
+        }
     }
 }

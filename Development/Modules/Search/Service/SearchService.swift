@@ -33,21 +33,13 @@ final class SearchService: SearchServiceProtocol {
         }.eraseToAnyPublisher()
     }
 
-    func loadAirports() async -> Result<[Airport], any Error> {
-        do {
-            let airports = try await repository.fetchAirports()
-            return .success(airports)
-        } catch {
-            return .failure(error)
-        }
+    func loadAirports() async -> Result<[Airport], Error> {
+        let airportsResult = await repository.fetchAirports()
+        return airportsResult
     }
 
-    func loadFlights() async -> Result<[Flight], any Error> {
-        do {
-            let flights = try await repository.fetchFlights()
-            return .success(flights)
-        } catch {
-            return .failure(error)
-        }
+    func loadFlights() async -> Result<[Flight], Error> {
+        let flightsResult = await repository.fetchFlights()
+        return flightsResult
     }
 }

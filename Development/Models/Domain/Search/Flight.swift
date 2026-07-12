@@ -9,51 +9,99 @@ import Foundation
 
 struct Flight: Equatable {
     let id: String
-    let flightNumber: String
-    let airline: String
-    let airlineCode: String
-    let aircraft: String
-    let originCity: String
-    let originIata: String
-    let destinationCity: String
-    let destinationIata: String
-    let status: FlightStatus
+    let airline: Airline
+    let origin: Airport
+    let destination: Airport
+    let departureDateTime: String
+    let arrivalDateTime: String
+    let price: Decimal
+    let currency: String
+    let baggage: Baggage
+    let layovers: [Layover]
+    let status: Status?
 
     init(from model: FlightResponseModel) {
         self.id = model.id
-        self.flightNumber = model.flightNumber
-        self.airline = model.airline
-        self.airlineCode = model.airlineCode
-        self.aircraft = model.aircraft
-        self.originCity = model.originCity
-        self.originIata = model.originIata
-        self.destinationCity = model.destinationCity
-        self.destinationIata = model.destinationIata
-        self.status = FlightStatus(from: model.status)
+        self.airline = Airline(from: model.airline)
+        self.origin = Airport(from: model.origin)
+        self.destination = Airport(from: model.destination)
+        self.departureDateTime = model.departureDateTime
+        self.arrivalDateTime = model.arrivalDateTime
+        self.price = model.price
+        self.currency = model.currency
+        self.baggage = Baggage(from: model.baggage)
+        self.layovers = model.layovers.map { Layover(from: $0) }
+        self.status = model.status.flatMap { Status(from: $0) }
     }
 }
 
 extension Flight {
+    struct Airline: Equatable {
+        let code: String
+        let name: String
+        let logo: String?
 
-    enum FlightStatus {
-        case boarding
-        case inAir
-        case delayed
-        case landed
-        case cancelled
+        init(from model: FlightResponseModel.AirlineResponseModel) {
+            self.code = model.code
+            self.name = model.name
+            self.logo = model.logo
+        }
+    }
 
-        init(from modelStatus: FlightResponseModel.FlightStatus) {
-            switch modelStatus {
-            case .boarding:
-                self = .boarding
-            case .inAir:
-                self = .inAir
-            case .delayed:
-                self = .delayed
-            case .landed:
-                self = .landed
-            case .cancelled:
-                self = .cancelled
+    struct Airport: Equatable {
+        let iata: String
+        let city: String
+        let country: String
+
+        init(from model: FlightResponseModel.AirportResponseModel) {
+            self.iata = model.iata
+            self.city = model.city
+            self.country = model.country
+        }
+    }
+
+    struct Baggage: Equatable {
+        let cabinBaggageKg: Int
+        let cabinBaggagePieces: Int
+        let checkedBaggageKg: Int
+        let checkedBaggagePieces: Int
+
+        init(from model: FlightResponseModel.BaggageResponseModel) {
+            self.cabinBaggageKg = model.cabinBaggageKg
+            self.cabinBaggagePieces = model.cabinBaggagePieces
+            self.checkedBaggageKg = model.checkedBaggageKg
+            self.checkedBaggagePieces = model.checkedBaggagePieces
+        }
+    }
+
+    struct Layover: Equatable {
+        let airport: Airport
+        let airline: Airline
+        let departureDateTime: String
+
+        init(from model: FlightResponseModel.LayoverResponseModel) {
+            self.airport = Airport(from: model.airport)
+            self.airline = Airline(from: model.airline)
+            self.departureDateTime = model.departureDateTime
+        }
+    }
+
+    enum Status: Equatable {
+        case regular
+        case recommended
+        case bestPrice
+        case fastest
+
+        init(from model: FlightResponseModel.StatusResponseModel) {
+            switch model {
+            case .regular:
+                self = .regular
+            case .recommended:
+                self = .recommended
+            case .bestPrice:
+                self = .bestPrice
+            case .fastest:
+                self = .fastest
             }
         }
     }

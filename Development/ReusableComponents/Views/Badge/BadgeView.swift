@@ -47,10 +47,12 @@ final class BadgeView: UIView {
     }
 
     private func setupContainerView() {
-        containerView.spacing = 10
+        containerView.spacing = 4
         containerView.snp.makeConstraints {
-            $0.top.bottom.equalToSuperview().inset(4)
-            $0.leading.trailing.equalToSuperview().inset(8)
+            $0.top.equalToSuperview().inset(4)
+            $0.bottom.equalToSuperview().inset(4)
+            $0.leading.equalToSuperview().inset(8)
+            $0.trailing.equalToSuperview().inset(8)
         }
     }
 
@@ -68,10 +70,36 @@ final class BadgeView: UIView {
 extension BadgeView: ConfigurableView {
 
     func configure(with configuration: BadgeViewConfiguration) {
-        imageView.image = configuration.image
-        imageView.isHidden = configuration.image == nil
-        imageView.tintColor = configuration.imageTintColor
+        configureImageView(with: configuration.imageConfiguration)
         titleLabel.configure(with: configuration.labelConfiguration)
+        configureInsets(configuration.insets)
         backgroundColor = configuration.backgroundColor
+    }
+
+    private func configureImageView(with configuration: BadgeViewConfiguration.ImageConfiguration?) {
+        if let configuration {
+            imageView.isHidden = false
+            imageView.image = configuration.image
+            imageView.tintColor = configuration.tintColor
+        } else {
+            imageView.isHidden = true
+        }
+    }
+
+    private func configureInsets(_ insets: Insets) {
+        containerView.snp.updateConstraints {
+            switch insets {
+            case let .eachSide(inset):
+                $0.top.bottom.leading.trailing.equalToSuperview().inset(inset)
+            case let .custom(top, bottom, left, right):
+                containerView.snp.updateConstraints {
+                    $0.top.equalToSuperview().inset(top)
+                    $0.bottom.equalToSuperview().inset(bottom)
+                    $0.leading.equalToSuperview().inset(left)
+                    $0.trailing.equalToSuperview().inset(right)
+                }
+            }
+        }
+
     }
 }

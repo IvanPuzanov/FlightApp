@@ -34,25 +34,27 @@ extension Repository: SearchRepositoryProtocol {
         completion(.success(coordinate))
     }
 
-    func fetchAirports() async throws -> [Airport] {
-        let result = try await remoteDataSource.fetchAirports()
+    func fetchAirports() async -> Result<[Airport], Error> {
+        let result = await remoteDataSource.fetchAirports()
 
         switch result {
         case let .success(responseModel):
-            return responseModel.map { Airport(from: $0) }
+            let airports = responseModel.map { Airport(from: $0) }
+            return .success(airports)
         case let .failure(error):
-            throw error
+            return .failure(error)
         }
     }
 
-    func fetchFlights() async throws -> [Flight] {
-        let result = try await remoteDataSource.fetchFlights()
+    func fetchFlights() async -> Result<[Flight], Error> {
+        let result = await remoteDataSource.fetchFlights()
 
         switch result {
         case let .success(responseModel):
-            return responseModel.map { Flight(from: $0) }
+            let flights = responseModel.map { Flight(from: $0) }
+            return .success(flights)
         case let .failure(error):
-            throw error
+            return .failure(error)
         }
     }
 }
