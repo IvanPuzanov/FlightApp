@@ -77,9 +77,9 @@ extension BadgeView: ConfigurableView {
     }
 
     private func configureImageView(with configuration: BadgeViewConfiguration.ImageConfiguration?) {
-        if let configuration {
+        if let configuration, let image = configuration.image {
             imageView.isHidden = false
-            imageView.image = configuration.image
+            imageView.image = image
             imageView.tintColor = configuration.tintColor
         } else {
             imageView.isHidden = true

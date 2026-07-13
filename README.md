@@ -4,7 +4,7 @@ iOS demo app for browsing flights on an interactive map. Built with UIKit, [Clea
 
 ## Preview
 
-<img src="docs/preview.png" alt="Flight Demo — search screen" width="280" />
+<img src="github/preview.png" alt="Flight Demo — search screen" width="280" />
 
 ## Features
 
