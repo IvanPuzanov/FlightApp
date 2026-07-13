@@ -11,13 +11,9 @@ private enum Constants {
     static let defaultCoordinate = Coordinate(latitude: 48.8566, longitude: 2.3522)
 }
 
-enum LocationServiceError: Error {
-    case permissionDenied
-}
-
 protocol LocationServiceProtocol: AnyObject {
     func getDefaultLocation() -> Coordinate
-    func getUserCurrentLocation() throws -> Coordinate
+    func getUserCurrentLocation() -> Result<Coordinate, Error>
 }
 
 final class LocationService: LocationServiceProtocol {
@@ -32,20 +28,20 @@ final class LocationService: LocationServiceProtocol {
         return Constants.defaultCoordinate
     }
 
-    func getUserCurrentLocation() throws -> Coordinate {
+    func getUserCurrentLocation() -> Result<Coordinate, Error> {
         let status = manager.authorizationStatus
 
         switch status {
         case .notDetermined:
             manager.requestWhenInUseAuthorization()
         case .restricted, .denied:
-            throw LocationServiceError.permissionDenied
+            return .failure(NSError())
         case .authorizedWhenInUse, .authorizedAlways:
             break
         @unknown default:
             break
         }
 
-        return Coordinate(latitude: 55.7520, longitude: 37.6175)
+        return .success(Constants.defaultCoordinate)
     }
 }
