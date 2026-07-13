@@ -11,6 +11,8 @@ struct SearchFlightListItemViewConfiguration: Equatable {
     let id: String
     let priceBadgeViewConfiguration: BadgeViewConfiguration
     let airlineImageUrl: URL?
+    let baggageBadgeViewConfiguration: BadgeViewConfiguration?
+    let carryOnBadgeViewConfiguration: BadgeViewConfiguration?
     let originIataLabelConfiguration: LabelConfiguration
     let originCityLabelConfiguration: LabelConfiguration
     let destinationIataLabelConfiguration: LabelConfiguration

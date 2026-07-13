@@ -18,7 +18,10 @@ final class SearchFlightListItemView: UIView {
 
     private let priceBadge = BadgeView()
     private let airlineImageView = UIImageView()
+
     private let baggageStackView = UIStackView()
+    private let baggageBadgeView = BadgeView()
+    private let carryOnBadgeView = BadgeView()
 
     private let originLabelsStackView = UIStackView()
     private let originIataLabel = UILabel()
@@ -50,6 +53,7 @@ final class SearchFlightListItemView: UIView {
 
     private func setupUI() {
         addSubviews(priceBadge, airlineImageView, baggageStackView, originLabelsStackView, destinationLabelsStackView)
+        baggageStackView.addArrangedSubviews(baggageBadgeView, carryOnBadgeView)
         originLabelsStackView.addArrangedSubviews(originIataLabel, originCityLabel)
         destinationLabelsStackView.addArrangedSubviews(destinationIataLabel, destinationCityLabel)
 
@@ -85,9 +89,11 @@ final class SearchFlightListItemView: UIView {
     }
 
     private func setupBaggageStackView() {
+        baggageStackView.spacing = 8
         baggageStackView.snp.makeConstraints {
             $0.top.equalTo(airlineImageView.snp.bottom).offset(5)
-            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.leading.equalToSuperview().inset(16)
+            $0.trailing.lessThanOrEqualToSuperview().inset(16)
         }
     }
 
@@ -131,6 +137,14 @@ extension SearchFlightListItemView: ConfigurableView {
     func configure(with configuration: SearchFlightListItemViewConfiguration) {
         priceBadge.configure(with: configuration.priceBadgeViewConfiguration)
         configureAirlineImageView(with: configuration.airlineImageUrl)
+        configureBaggageBadgeView(
+            baggageBadgeView,
+            configuration: configuration.baggageBadgeViewConfiguration
+        )
+        configureBaggageBadgeView(
+            carryOnBadgeView,
+            configuration: configuration.carryOnBadgeViewConfiguration
+        )
         originIataLabel.configure(with: configuration.originIataLabelConfiguration)
         originCityLabel.configure(with: configuration.originCityLabelConfiguration)
         destinationIataLabel.configure(with: configuration.destinationIataLabelConfiguration)
@@ -151,6 +165,15 @@ extension SearchFlightListItemView: ConfigurableView {
             fallback: UIImage(systemName: "airplane.departure")
         ) { [weak self] image in
             self?.airlineImageView.image = image
+        }
+    }
+
+    private func configureBaggageBadgeView(_ badgeView: BadgeView, configuration: BadgeViewConfiguration?) {
+        if let configuration {
+            badgeView.isHidden = false
+            badgeView.configure(with: configuration)
+        } else {
+            badgeView.isHidden = true
         }
     }
 }

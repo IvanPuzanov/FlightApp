@@ -8,7 +8,7 @@
 import UIKit
 
 private enum Constants {
-    static let shimmerHeight: CGFloat = 160
+    static let shimmerHeight: CGFloat = 169
 }
 
 protocol SearchFlightListConfigurationFactoryDelegate: AnyObject {
@@ -125,21 +125,31 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
     private func createSearchFlightListItemViewConfiguration(
         from flight: Flight
     ) -> SearchFlightListItemViewConfiguration {
-        SearchFlightListItemViewConfiguration(
+        let priceBadgeContent = createPriceBadgeContent(from: flight.status)
+
+        return SearchFlightListItemViewConfiguration(
             id: flight.id,
             priceBadgeViewConfiguration: BadgeViewConfiguration(
-                imageConfiguration: flight.status == .bestPrice
-                    ? BadgeViewConfiguration.ImageConfiguration(image: UIImage(systemName: "flame.fill"), tintColor: .white)
-                    : nil,
+                imageConfiguration: BadgeViewConfiguration.ImageConfiguration(
+                    image: priceBadgeContent.icon, tintColor: .white
+                ),
                 labelConfiguration: LabelConfiguration(
                     text: formatPriceText(for: flight),
                     textColor: createPriceTextColor(from: flight.status),
                     font: .boldSystemFont(ofSize: 18)
                 ),
                 insets: .custom(top: 5, bottom: 4, left: 10, right: 10),
-                backgroundColor: createPriceBadgeBackgroundColor(from: flight.status)
+                backgroundColor: priceBadgeContent.color
             ),
             airlineImageUrl: URL(string: flight.airline.logo ?? ""),
+            baggageBadgeViewConfiguration: createBaggageBageViewConfiguration(
+                kilos: flight.baggage.checkedBaggageKg,
+                isCarryOn: false
+            ),
+            carryOnBadgeViewConfiguration: createBaggageBageViewConfiguration(
+                kilos: flight.baggage.cabinBaggageKg,
+                isCarryOn: true
+            ),
             originIataLabelConfiguration: LabelConfiguration(
                 text: flight.origin.iata,
                 font: .systemFont(ofSize: 22, weight: .bold)
@@ -173,16 +183,46 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
         }
     }
 
-    private func createPriceBadgeBackgroundColor(from flightStatus: Flight.Status?) -> UIColor {
+    private func createPriceBadgeContent(
+        from flightStatus: Flight.Status?
+    ) -> (icon: UIImage?, color: UIColor) {
         switch flightStatus {
         case .regular, .none:
-            return .secondarySystemFill
+            return (icon: nil, color: .secondarySystemFill)
         case .recommended:
-            return .systemBlue
+            return (icon: UIImage(systemName: "checkmark.seal.fill"), color: .systemBlue)
         case .bestPrice:
-            return .systemRed
+            return (icon: UIImage(systemName: "flame.fill"), color: .systemRed)
         case .fastest:
-            return .systemOrange
+            return (icon: UIImage(systemName: "hare.fill"), color: .systemOrange)
         }
+    }
+
+    private func createBaggageBageViewConfiguration(
+        kilos: Int,
+        isCarryOn: Bool
+    ) -> BadgeViewConfiguration? {
+        let text: String
+
+        if kilos > 0 {
+            text = "\(kilos) Kg"
+        } else {
+            text = "No baggage"
+        }
+
+        return BadgeViewConfiguration(
+            imageConfiguration: BadgeViewConfiguration.ImageConfiguration(
+                image: isCarryOn
+                    ? UIImage(systemName: "handbag.fill")
+                    : UIImage(systemName: "suitcase.fill"),
+                tintColor: .label
+            ),
+            labelConfiguration: LabelConfiguration(
+                text: text,
+                font: .systemFont(ofSize: 14)
+            ),
+            insets: .custom(top: 4, bottom: 4, left: 10, right: 10),
+            backgroundColor: .quaternarySystemFill
+        )
     }
 }

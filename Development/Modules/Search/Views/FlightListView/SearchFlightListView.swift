@@ -10,7 +10,7 @@ import SnapKit
 import UIKit
 
 private enum Constants {
-    static let compactDetent = SearchState.FlightListState.BottomSheetDetent(id: .compact, height: 200)
+    static let compactDetent = SearchState.FlightListState.BottomSheetDetent(id: .compact, height: 220)
     static let regularDetent = SearchState.FlightListState.BottomSheetDetent(id: .regular, height: 520)
     static let cornerRadius: CGFloat = 30
     static let shadowOpacity: Float = 0.1
