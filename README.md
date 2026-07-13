@@ -2,6 +2,10 @@
 
 iOS demo app for browsing flights on an interactive map. Built with UIKit, [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html), and a unidirectional data flow on the presentation layer. The Xcode project is generated with [Tuist](https://tuist.dev) from `Project.swift` and is not committed to the repository.
 
+## Preview
+
+<img src="docs/preview.png" alt="Flight Demo — search screen" width="280" />
+
 ## Features
 
 - **Interactive map** — airport markers on MapKit with custom annotation views
