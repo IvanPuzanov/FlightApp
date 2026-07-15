@@ -29,14 +29,14 @@ final class LocationServiceMock: LocationServiceProtocol {
     var stubbedGetUserCurrentLocationResult = Coordinate.fake(latitude: 48.8566, longitude: 2.3522)
     var stubbedGetUserCurrentLocationError: Error?
 
-    func getUserCurrentLocation() throws -> Coordinate {
+    func getUserCurrentLocation() -> Result<Coordinate, Error> {
         invokedGetUserCurrentLocation = true
         invokedGetUserCurrentLocationCallsCount += 1
 
         if let stubbedGetUserCurrentLocationError {
-            throw stubbedGetUserCurrentLocationError
+            return .failure(stubbedGetUserCurrentLocationError)
         }
 
-        return stubbedGetUserCurrentLocationResult
+        return .success(stubbedGetUserCurrentLocationResult)
     }
 }

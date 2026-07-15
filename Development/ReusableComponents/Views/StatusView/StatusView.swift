@@ -16,6 +16,11 @@ final class StatusView: UIView {
     private let imageView = UIImageView()
     private let titleLabel = UILabel()
     private let subtitleLabel = UILabel()
+    private let actionButton = UIButton()
+
+    // MARK: - Properties
+
+    private var onButtonTap: (() -> Void)?
 
     // MARK: - Initialization
 
@@ -33,17 +38,18 @@ final class StatusView: UIView {
 
     private func setupUI() {
         addSubview(containerView)
-        containerView.addArrangedSubviews(imageView, titleLabel, subtitleLabel)
+        containerView.addArrangedSubviews(imageView, titleLabel, subtitleLabel, actionButton)
 
         setupContainerView()
         setupImageView()
+        setupActionButton()
     }
 
     private func setupContainerView() {
         containerView.axis = .vertical
-        containerView.alignment = .center
         containerView.setCustomSpacing(20, after: imageView)
         containerView.setCustomSpacing(4, after: titleLabel)
+        containerView.setCustomSpacing(20, after: subtitleLabel)
 
         containerView.snp.makeConstraints {
             $0.height.lessThanOrEqualToSuperview()
@@ -53,10 +59,25 @@ final class StatusView: UIView {
     }
 
     private func setupImageView() {
-        imageView.contentMode = .scaleAspectFill
-
         imageView.snp.makeConstraints {
             $0.width.height.equalTo(80)
+        }
+    }
+
+    private func setupActionButton() {
+        actionButton.addAction(
+            UIAction { [weak self] _ in
+                self?.onButtonTap?()
+            },
+            for: .touchUpInside
+        )
+
+        actionButton
+            .withCornerRadius(18)
+            .withBackgroundColor(.quaternarySystemFill)
+
+        actionButton.snp.makeConstraints {
+            $0.height.equalTo(50)
         }
     }
 }
@@ -66,9 +87,21 @@ final class StatusView: UIView {
 extension StatusView: ConfigurableView {
 
     func configure(with configuration: StatusViewConfiguration) {
-        imageView.image = configuration.image
-        imageView.tintColor = configuration.imageColor
+        imageView.configure(with: configuration.imageViewConfiguration)
         titleLabel.configure(with: configuration.titleLabelConfiguration)
         subtitleLabel.configure(with: configuration.subtitleLabelConfiguration)
+        configureActionButton(with: configuration.actionButtonConfiguration)
+    }
+
+    private func configureActionButton(
+        with configuration: StatusViewConfiguration.ButtonConfiguration?
+    ) {
+        if let configuration {
+            onButtonTap = configuration.onTap
+            actionButton.setTitle(configuration.text, for: .normal)
+            actionButton.isHidden = false
+        } else {
+            actionButton.isHidden = true
+        }
     }
 }

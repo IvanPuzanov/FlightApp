@@ -29,7 +29,6 @@ extension SearchState.FlightListState {
 
     struct Parameters: Equatable {
         var flights: [Flight]
-        var searchText: String?
     }
 
     enum ContentState: Equatable {
@@ -70,10 +69,7 @@ extension SearchState.FlightListState {
                 currentShadowOpacity: 0,
                 isMapButtonHidden: true
             ),
-            parameters: Parameters(
-                flights: [],
-                searchText: nil
-            ),
+            parameters: Parameters(flights: []),
             contentState: .loading,
             bottomSheetState: BottomSheetState(
                 detents: [],

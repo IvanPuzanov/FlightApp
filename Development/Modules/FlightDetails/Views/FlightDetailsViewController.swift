@@ -20,6 +20,8 @@ final class FlightDetailsViewController: UIViewController {
     // MARK: - Public
 
     private func setupUI() {
+        view.backgroundColor = .systemBackground
+
         setupAsBottomSheet()
     }
 

@@ -16,6 +16,7 @@ private enum Constants {
 }
 
 protocol SearchHeaderViewConfigurationFactoryDelegate: AnyObject {
+    func leadingIconButtonDidTap(mode: SearchState.HeaderState.Mode)
     func trailingIconButtonDidTap(mode: SearchState.HeaderState.Mode)
 }
 
@@ -42,6 +43,9 @@ final class SearchHeaderConfigurationFactory: SearchHeaderViewConfigurationFacto
                 mode: createHeaderViewFlightInfoMode(
                     number: number,
                     description: description,
+                    onLeadingIconTap: { [weak self] in
+                        self?.delegate?.leadingIconButtonDidTap(mode: state.mode)
+                    },
                     onTrailingIconTap: { [weak self] in
                         self?.delegate?.trailingIconButtonDidTap(mode: state.mode)
                     }
@@ -64,6 +68,7 @@ final class SearchHeaderConfigurationFactory: SearchHeaderViewConfigurationFacto
     private func createHeaderViewFlightInfoMode(
         number: String,
         description: String,
+        onLeadingIconTap: (() -> Void)?,
         onTrailingIconTap: (() -> Void)?
     ) -> SearchHeaderViewConfiguration.Mode {
         .flightInfo(
@@ -71,8 +76,8 @@ final class SearchHeaderConfigurationFactory: SearchHeaderViewConfigurationFacto
                 leadingIcon: Constants.flightInfoLeadingIcon,
                 titleLabelText: number,
                 subtitleLabelText: description,
-                trailingIcon: Constants.flightInfoTrailingIcon,
-                onTrailingIconTap: onTrailingIconTap
+                trailingIcon: nil,
+                onLeadingIconTap: onLeadingIconTap,
             )
         )
     }
@@ -86,8 +91,7 @@ final class SearchHeaderConfigurationFactory: SearchHeaderViewConfigurationFacto
                 leadingIcon: Constants.searchLeadingIcon,
                 text: text,
                 placeholderText: Strings.Search.placeholder,
-                trailingIcon: Constants.searchTrailingIcon,
-                onTrailingIconTap: onTrailingIconTap
+                trailingIcon: Constants.searchTrailingIcon
             )
         )
     }

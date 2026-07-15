@@ -11,8 +11,10 @@ final class FlightDetailsFlowCoordinator: FlowCoordinatorProtocol {
 
     // MARK: - Properties
 
-    private let inputData: FlightDetailsInputData
     let navigationController: UINavigationController
+
+    private let inputData: FlightDetailsInputData
+    private var rootViewController: UIViewController?
 
     // MARK: - Initialization
 
@@ -29,10 +31,13 @@ final class FlightDetailsFlowCoordinator: FlowCoordinatorProtocol {
     func start(animated: Bool) {
         let assembly = FlightDetailsAssembly()
         let viewController = assembly.assemble(inputData: inputData)
+        rootViewController = viewController
 
         navigationController.topViewController?.present(viewController, animated: true)
     }
     
-    func finish() {}
+    func finish() {
+        rootViewController?.dismiss(animated: true)
+    }
 
 }

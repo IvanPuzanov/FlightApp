@@ -7,3 +7,5 @@
 "status.empty.subtitle" = "Рейсы не найдены";
 
 "map.button" = "Карта";
+
+"retry" = "Повторить";

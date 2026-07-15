@@ -12,7 +12,8 @@ private enum Constants {
 }
 
 protocol SearchFlightListConfigurationFactoryDelegate: AnyObject {
-    func flightDidTap(id: String)
+    func flightDidTap(id: String, from: String, to: String)
+    func retryButtonDidTap()
     func mapButtonDidTap()
 }
 
@@ -65,16 +66,27 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
         }
 
         return StatusViewConfiguration(
-            image: image ?? UIImage(),
-            imageColor: .systemGray,
+            imageViewConfiguration: ImageViewConfiguration(
+                image: image ?? UIImage(),
+                tintColor: .systemGray,
+                contentMode: .scaleAspectFit
+            ),
             titleLabelConfiguration: LabelConfiguration(
                 text: title,
+                textAlignment: .center,
                 font: .systemFont(ofSize: 20, weight: .bold)
             ),
             subtitleLabelConfiguration: LabelConfiguration(
                 text: subtitle,
                 textColor: .secondaryLabel,
+                textAlignment: .center,
                 font: .systemFont(ofSize: 16)
+            ),
+            actionButtonConfiguration: StatusViewConfiguration.ButtonConfiguration(
+                text: Strings.retry,
+                onTap: { [weak self] in
+                    self?.delegate?.retryButtonDidTap()
+                }
             )
         )
     }
@@ -130,8 +142,10 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
         return SearchFlightListItemViewConfiguration(
             id: flight.id,
             priceBadgeViewConfiguration: BadgeViewConfiguration(
-                imageConfiguration: BadgeViewConfiguration.ImageConfiguration(
-                    image: priceBadgeContent.icon, tintColor: .white
+                imageViewConfiguration: ImageViewConfiguration(
+                    image: priceBadgeContent.icon,
+                    tintColor: .white,
+                    contentMode: .scaleAspectFill
                 ),
                 labelConfiguration: LabelConfiguration(
                     text: formatPriceText(for: flight),
@@ -165,7 +179,11 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
                 textAlignment: .right
             ),
             onTap: { [weak self] in
-                self?.delegate?.flightDidTap(id: flight.id)
+                self?.delegate?.flightDidTap(
+                    id: flight.id,
+                    from: flight.origin.iata,
+                    to: flight.destination.iata
+                )
             }
         )
     }
@@ -211,11 +229,12 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
         }
 
         return BadgeViewConfiguration(
-            imageConfiguration: BadgeViewConfiguration.ImageConfiguration(
+            imageViewConfiguration: ImageViewConfiguration(
                 image: isCarryOn
                     ? UIImage(systemName: "handbag.fill")
                     : UIImage(systemName: "suitcase.fill"),
-                tintColor: .label
+                tintColor: .label,
+                contentMode: .scaleAspectFill
             ),
             labelConfiguration: LabelConfiguration(
                 text: text,

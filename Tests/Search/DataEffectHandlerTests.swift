@@ -35,7 +35,7 @@ final class DataEffectHandlerTests: XCTestCase {
         let expectation = expectation(description: "onFlightsLoaded")
 
         // Act
-        await sut.handle(.data(.loadFlights)) { event in
+        await sut.handle(.loadFlights) { event in
             // Assert
             guard case let .data(.onFlightsLoaded(receivedFlights)) = event else {
                 return XCTFail("Expected onFlightsLoaded, got \(event)")
@@ -56,7 +56,7 @@ final class DataEffectHandlerTests: XCTestCase {
         let expectation = expectation(description: "onFlightsFailed")
 
         // Act
-        await sut.handle(.data(.loadFlights)) { event in
+        await sut.handle(.loadFlights) { event in
             // Assert
             guard case .data(.onFlightsFailed) = event else {
                 return XCTFail("Expected onFlightsFailed, got \(event)")
@@ -79,7 +79,7 @@ final class DataEffectHandlerTests: XCTestCase {
         let expectation = expectation(description: "onAirportsLoaded")
 
         // Act
-        await sut.handle(.data(.loadAirports)) { event in
+        await sut.handle(.loadAirports) { event in
             // Assert
             guard case let .data(.onAirportsLoaded(receivedAirports)) = event else {
                 return XCTFail("Expected onAirportsLoaded, got \(event)")
@@ -100,7 +100,7 @@ final class DataEffectHandlerTests: XCTestCase {
         let expectation = expectation(description: "onAirportsFailed")
 
         // Act
-        await sut.handle(.data(.loadAirports)) { event in
+        await sut.handle(.loadAirports) { event in
             // Assert
             guard case .data(.onAirportsFailed) = event else {
                 return XCTFail("Expected onAirportsFailed, got \(event)")
@@ -125,7 +125,7 @@ final class DataEffectHandlerTests: XCTestCase {
         let expectation = expectation(description: "onGetLocation")
 
         // Act
-        await sut.handle(.data(.getDefaultRegionLocation)) { event in
+        await sut.handle(.getDefaultRegionLocation) { event in
             // Assert
             guard case let .data(.onGetLocation(receivedCoordinate)) = event else {
                 return XCTFail("Expected onGetLocation, got \(event)")
@@ -147,7 +147,7 @@ final class DataEffectHandlerTests: XCTestCase {
         let expectation = expectation(description: "onGetLocationFailed")
 
         // Act
-        await sut.handle(.data(.getDefaultRegionLocation)) { event in
+        await sut.handle(.getDefaultRegionLocation) { event in
             // Assert
             guard case .data(.onGetLocationFailed) = event else {
                 return XCTFail("Expected onGetLocationFailed, got \(event)")
@@ -160,24 +160,4 @@ final class DataEffectHandlerTests: XCTestCase {
         XCTAssertEqual(service.invokedGetDefaultLocationCallsCount, 1)
     }
 
-    // MARK: - Navigation
-
-    // Verifies that navigation effects are ignored by the data effect handler
-    func test_navigationEffect_doesNothing() async {
-        // Arrange
-        let flight = Flight.fake()
-        let inputData = FlightDetailsInputData.fake(flight: flight)
-        var completionCallCount = 0
-
-        // Act
-        await sut.handle(.navigation(.openFlightDetails(inputData: inputData))) { _ in
-            completionCallCount += 1
-        }
-
-        // Assert
-        XCTAssertEqual(completionCallCount, 0)
-        XCTAssertFalse(service.invokedLoadFlights)
-        XCTAssertFalse(service.invokedLoadAirports)
-        XCTAssertFalse(service.invokedGetDefaultLocation)
-    }
 }

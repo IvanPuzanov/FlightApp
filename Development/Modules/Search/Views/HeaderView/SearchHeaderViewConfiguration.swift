@@ -21,7 +21,8 @@ extension SearchHeaderViewConfiguration {
         let leadingIcon: UIImage
         let titleLabelText: String
         let subtitleLabelText: String
-        let trailingIcon: UIImage
+        let trailingIcon: UIImage?
+        @Equated var onLeadingIconTap: (() -> Void)?
         @Equated var onTrailingIconTap: (() -> Void)?
     }
 

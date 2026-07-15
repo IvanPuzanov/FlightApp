@@ -8,7 +8,14 @@
 import Combine
 import Foundation
 
-final class DataEffectHandler: EffectHandlerProtocol {
+protocol DataEffectHandlerProtocol: AnyObject {
+    func handle(
+        _ effect: SearchEffect.DataEffect,
+        completion: @escaping (SearchEvent) -> Void
+    ) async
+}
+
+final class DataEffectHandler: DataEffectHandlerProtocol {
 
     // MARK: - Dependencies
 
@@ -27,20 +34,6 @@ final class DataEffectHandler: EffectHandlerProtocol {
     // MARK: - Public
 
     func handle(
-        _ effect: SearchEffect,
-        completion: @escaping (SearchEvent) -> Void
-    ) async {
-        switch effect {
-        case let .data(dataEffect):
-            await handleDataEffect(dataEffect, completion: completion)
-        case .navigation:
-            break
-        }
-    }
-
-    // MARK: - Private
-
-    private func handleDataEffect(
         _ effect: SearchEffect.DataEffect,
         completion: @escaping (SearchEvent) -> Void
     ) async {
@@ -53,6 +46,8 @@ final class DataEffectHandler: EffectHandlerProtocol {
             processGetLocation(completion: completion)
         }
     }
+
+    // MARK: - Private
 
     private func processLoadAirports(completion: @escaping (SearchEvent) -> Void) async {
         let result = await service.loadAirports()

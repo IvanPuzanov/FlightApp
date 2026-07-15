@@ -9,6 +9,7 @@ import UIKit
 
 protocol SearchModuleOutput: AnyObject {
     func moduleWantsToOpenFlightDetails(inputData: FlightDetailsInputData)
+    func moduleWantsToCloseFlightDetails()
 }
 
 final class SearchFlowCoordinator: FlowCoordinatorProtocol {
@@ -53,5 +54,9 @@ extension SearchFlowCoordinator: SearchModuleOutput {
         )
         childCoordinators.append(flowCoordinator)
         flowCoordinator.start(animated: true)
+    }
+
+    func moduleWantsToCloseFlightDetails() {
+        childCoordinators.forEach { $0.finish() }
     }
 }

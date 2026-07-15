@@ -20,7 +20,8 @@ final class SearchStore {
     // MARK: - Dependencies
 
     private let reducer: any SearchReducerProtocol
-    private let effectHandlers: [EffectHandlerProtocol]
+    private let dataEffectHandler: DataEffectHandlerProtocol
+    private let navigationEffectHandler: NavigationEffectHandlerProtocol
 
     // MARK: - Public properties
 
@@ -36,10 +37,12 @@ final class SearchStore {
 
     init(
         reducer: any SearchReducerProtocol,
-        effectHandlers: [EffectHandlerProtocol]
+        dataEffectHandler: DataEffectHandlerProtocol,
+        navigationEffectHandler: NavigationEffectHandlerProtocol
     ) {
         self.reducer = reducer
-        self.effectHandlers = effectHandlers
+        self.dataEffectHandler = dataEffectHandler
+        self.navigationEffectHandler = navigationEffectHandler
     }
 }
 
@@ -50,10 +53,28 @@ extension SearchStore: SearchStoreProtocol {
     func dispatch(event: SearchEvent) {
         let effects = reducer.reduce(state: &state, event: event)
 
-        effectHandlers.forEach { effectHandler in
-            effects.forEach { effect in
+        for effect in effects {
+            Task { [self] in
+                await self.handleEffect(effect)
+            }
+        }
+    }
+
+    @MainActor
+    private func handleEffect(_ effect: SearchEffect) async {
+        switch effect {
+        case let .data(dataEffect):
+            await dataEffectHandler.handle(dataEffect) { [weak self] event in
                 Task { [weak self] in
-                    await effectHandler.handle(effect) { event in
+                    await MainActor.run {
+                        self?.dispatch(event: event)
+                    }
+                }
+            }
+        case let .navigation(navigationEffect):
+            navigationEffectHandler.handle(navigationEffect) { [weak self] event in
+                Task { [weak self] in
+                    await MainActor.run {
                         self?.dispatch(event: event)
                     }
                 }

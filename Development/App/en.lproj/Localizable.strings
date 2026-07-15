@@ -7,3 +7,5 @@
 "status.empty.subtitle" = "There are no flights";
 
 "map.button" = "Map";
+
+"retry" = "Retry";

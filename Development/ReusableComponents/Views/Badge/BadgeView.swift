@@ -70,17 +70,16 @@ final class BadgeView: UIView {
 extension BadgeView: ConfigurableView {
 
     func configure(with configuration: BadgeViewConfiguration) {
-        configureImageView(with: configuration.imageConfiguration)
+        configureImageView(with: configuration.imageViewConfiguration)
         titleLabel.configure(with: configuration.labelConfiguration)
         configureInsets(configuration.insets)
         backgroundColor = configuration.backgroundColor
     }
 
-    private func configureImageView(with configuration: BadgeViewConfiguration.ImageConfiguration?) {
+    private func configureImageView(with configuration: ImageViewConfiguration?) {
         if let configuration, let image = configuration.image {
+            imageView.configure(with: configuration)
             imageView.isHidden = false
-            imageView.image = image
-            imageView.tintColor = configuration.tintColor
         } else {
             imageView.isHidden = true
         }

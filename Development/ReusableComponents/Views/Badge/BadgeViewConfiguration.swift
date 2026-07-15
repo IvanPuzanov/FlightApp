@@ -8,17 +8,7 @@
 import UIKit
 
 struct BadgeViewConfiguration: Equatable {
-
-    // MARK: - Nested Types
-
-    struct ImageConfiguration: Equatable {
-        let image: UIImage?
-        let tintColor: UIColor
-    }
-
-    // MARK: - Properties
-
-    let imageConfiguration: ImageConfiguration?
+    let imageViewConfiguration: ImageViewConfiguration?
     let labelConfiguration: LabelConfiguration
     let insets: Insets
     let backgroundColor: UIColor
