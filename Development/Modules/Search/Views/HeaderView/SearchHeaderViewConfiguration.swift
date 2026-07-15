@@ -30,7 +30,7 @@ extension SearchHeaderViewConfiguration {
         let leadingIcon: UIImage
         let text: String?
         let placeholderText: String
-        let trailingIcon: UIImage
+        let trailingIcon: UIImage?
         @Equated var onTrailingIconTap: (() -> Void)?
     }
 }

@@ -68,20 +68,19 @@ final class SearchReducer: SearchReducerProtocol {
         case .onBackTap:
             let searchText = state.headerState.searchText
             state.headerState.mode = .search(text: searchText)
+            state.flightListState.bottomSheetState.currentDetent = state.flightListState.bottomSheetState.lastDetent
+
             return [.navigation(.closeFlightDetails)]
-        case .onFilterTap:
-            return []
-        case .onMoreTap:
-            return []
         case .onSearchStartEditing:
             updateFlightListCurrentDetent(id: .large, state: &state.flightListState)
+
             return []
         case let .onSearchTextEnter(text):
             state.headerState.searchText = text
             updateFlightListContentStateIfNeeded(state: &state)
+
             return []
         case .onSearchTextEndEditing:
-            state.headerState.mode = .search(text: state.headerState.searchText)
             return []
         }
     }
@@ -101,7 +100,8 @@ final class SearchReducer: SearchReducerProtocol {
             )
             state.flightListState.bottomSheetState = SearchState.FlightListState.BottomSheetState(
                 detents: detents,
-                currentDetent: currentDetent
+                currentDetent: currentDetent,
+                lastDetent: currentDetent
             )
             return []
         case let .onBottomSheetHeightChange(progress):
@@ -111,7 +111,12 @@ final class SearchReducer: SearchReducerProtocol {
             updateFlightListCurrentDetent(height: height, state: &state.flightListState)
             return []
         case let .onFlightTap(id, from, to):
-            state.headerState.mode = .flightInfo(number: id, description: "From \(from) to \(to)")
+            state.headerState.mode = .flightInfo(
+                number: id,
+                description: "From \(from) to \(to)"
+            )
+            state.flightListState.bottomSheetState.lastDetent = state.flightListState.bottomSheetState.currentDetent
+
             return handleOnFlightTap(id: id, state: &state.flightListState)
         case .onRetryButtonTap:
             state.flightListState.contentState = .loading

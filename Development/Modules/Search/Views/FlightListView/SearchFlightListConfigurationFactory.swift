@@ -9,6 +9,17 @@ import UIKit
 
 private enum Constants {
     static let shimmerHeight: CGFloat = 169
+
+    static let emptyStatusImage = UIImage(systemName: "tray.fill")
+    static let errorStatusImage = UIImage(systemName: "airplane.departure")
+    static let mapButtonImage = UIImage(systemName: "map.fill")
+
+    static let recommendedPriceBadgeImage = UIImage(systemName: "checkmark.seal.fill")
+    static let fastestPriceBadgeImage = UIImage(systemName: "hare.fill")
+    static let bestPriceBadgeImage = UIImage(systemName: "flame.fill")
+
+    static let carryOnImage = UIImage(systemName: "handbag.fill")
+    static let baggageImage = UIImage(systemName: "suitcase.fill")
 }
 
 protocol SearchFlightListConfigurationFactoryDelegate: AnyObject {
@@ -18,10 +29,14 @@ protocol SearchFlightListConfigurationFactoryDelegate: AnyObject {
 }
 
 protocol SearchFlightListConfigurationFactoryProtocol: AnyObject {
-    func createFlightListCellTypes(from state: SearchState.FlightListState.ContentState) -> [SearchFlightListCellType]
+    func createFlightListCellTypes(
+        from state: SearchState.FlightListState.ContentState
+    ) -> [SearchFlightListCellType]
+
     func createStatusViewConfiguration(
         from status: SearchState.FlightListState.Status
     ) -> StatusViewConfiguration
+
     func createMapButtonConfiguration() -> SearchFlightListMapButtonConfiguration
 }
 
@@ -56,11 +71,11 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
 
         switch status {
         case .error:
-            image = UIImage(systemName: "airplane.departure")
+            image = Constants.errorStatusImage
             title = Strings.Status.LoadError.title
             subtitle = Strings.Status.LoadError.subtitle
         case .empty:
-            image = UIImage(systemName: "tray.fill")
+            image = Constants.emptyStatusImage
             title = Strings.Status.Empty.title
             subtitle = Strings.Status.Empty.subtitle
         }
@@ -82,20 +97,18 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
                 textAlignment: .center,
                 font: .systemFont(ofSize: 16)
             ),
-            actionButtonConfiguration: StatusViewConfiguration.ButtonConfiguration(
-                text: Strings.retry,
-                onTap: { [weak self] in
-                    self?.delegate?.retryButtonDidTap()
-                }
-            )
+            actionButtonConfiguration: createRetryButtonConfigurationIfNeeded(for: status)
         )
     }
 
     func createMapButtonConfiguration() -> SearchFlightListMapButtonConfiguration {
         SearchFlightListMapButtonConfiguration(
-            image: UIImage(systemName: "map.fill"),
+            image: Constants.mapButtonImage,
             imageTintColor: .white,
-            labelConfiguration: LabelConfiguration(text: Strings.Map.button, textColor: .white),
+            labelConfiguration: LabelConfiguration(
+                text: Strings.Map.button,
+                textColor: .white
+            ),
             backgroundColor: .black,
             onTap: { [weak self] in
                 self?.delegate?.mapButtonDidTap()
@@ -121,6 +134,22 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
         }
     }
 
+    private func createRetryButtonConfigurationIfNeeded(
+        for status: SearchState.FlightListState.Status
+    ) -> StatusViewConfiguration.ButtonConfiguration? {
+        switch status {
+        case .error:
+            return StatusViewConfiguration.ButtonConfiguration(
+                text: Strings.retry,
+                onTap: { [weak self] in
+                    self?.delegate?.retryButtonDidTap()
+                }
+            )
+        case .empty:
+            return nil
+        }
+    }
+
     private func createFlightItemCellTypes(from flights: [Flight]) -> [SearchFlightListCellType] {
         flights.map {
             .flight(
@@ -137,23 +166,11 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
     private func createSearchFlightListItemViewConfiguration(
         from flight: Flight
     ) -> SearchFlightListItemViewConfiguration {
-        let priceBadgeContent = createPriceBadgeContent(from: flight.status)
-
-        return SearchFlightListItemViewConfiguration(
+        SearchFlightListItemViewConfiguration(
             id: flight.id,
-            priceBadgeViewConfiguration: BadgeViewConfiguration(
-                imageViewConfiguration: ImageViewConfiguration(
-                    image: priceBadgeContent.icon,
-                    tintColor: .white,
-                    contentMode: .scaleAspectFill
-                ),
-                labelConfiguration: LabelConfiguration(
-                    text: formatPriceText(for: flight),
-                    textColor: createPriceTextColor(from: flight.status),
-                    font: .boldSystemFont(ofSize: 18)
-                ),
-                insets: .custom(top: 5, bottom: 4, left: 10, right: 10),
-                backgroundColor: priceBadgeContent.color
+            priceBadgeViewConfiguration: createPriceBadgeViewConfiguration(
+                status: flight.status,
+                price: formatPriceText(price: flight.price, currency: flight.currency)
             ),
             airlineImageUrl: URL(string: flight.airline.logo ?? ""),
             baggageBadgeViewConfiguration: createBaggageBageViewConfiguration(
@@ -188,8 +205,8 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
         )
     }
 
-    private func formatPriceText(for flight: Flight) -> String {
-        flight.price.formatted(.currency(code: flight.currency))
+    private func formatPriceText(price: Decimal, currency: String) -> String {
+        price.formatted(.currency(code: currency))
     }
 
     private func createPriceTextColor(from flightStatus: Flight.Status?) -> UIColor {
@@ -201,18 +218,58 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
         }
     }
 
-    private func createPriceBadgeContent(
-        from flightStatus: Flight.Status?
-    ) -> (icon: UIImage?, color: UIColor) {
-        switch flightStatus {
+    private func createPriceBadgeViewConfiguration(
+        status: Flight.Status?,
+        price: String
+    ) -> BadgeViewConfiguration {
+        let backgroundColor = createPriceBadgeBackgroundColor(from: status)
+
+        return BadgeViewConfiguration(
+            imageViewConfiguration: createPriceBadgeImageViewConfiguration(from: status),
+            labelConfiguration: LabelConfiguration(
+                text: price,
+                font: .systemFont(ofSize: 16)
+            ),
+            insets: .custom(top: 5, bottom: 4, left: 10, right: 10),
+            backgroundColor: backgroundColor
+        )
+    }
+
+    private func createPriceBadgeImageViewConfiguration(
+        from status: Flight.Status?
+    ) -> ImageViewConfiguration? {
+        let image: UIImage?
+
+        switch status {
         case .regular, .none:
-            return (icon: nil, color: .secondarySystemFill)
+            return nil
         case .recommended:
-            return (icon: UIImage(systemName: "checkmark.seal.fill"), color: .systemBlue)
+            image = Constants.recommendedPriceBadgeImage
         case .bestPrice:
-            return (icon: UIImage(systemName: "flame.fill"), color: .systemRed)
+            image = Constants.bestPriceBadgeImage
         case .fastest:
-            return (icon: UIImage(systemName: "hare.fill"), color: .systemOrange)
+            image = Constants.fastestPriceBadgeImage
+        }
+
+        return ImageViewConfiguration(
+            image: image,
+            tintColor: .white,
+            contentMode: .scaleAspectFit
+        )
+    }
+
+    private func createPriceBadgeBackgroundColor(
+        from status: Flight.Status?
+    ) -> UIColor {
+        switch status {
+        case .regular, .none:
+            return .secondarySystemFill
+        case .recommended:
+            return .systemBlue
+        case .bestPrice:
+            return .systemRed
+        case .fastest:
+            return .systemOrange
         }
     }
 
@@ -230,9 +287,7 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
 
         return BadgeViewConfiguration(
             imageViewConfiguration: ImageViewConfiguration(
-                image: isCarryOn
-                    ? UIImage(systemName: "handbag.fill")
-                    : UIImage(systemName: "suitcase.fill"),
+                image: isCarryOn ? Constants.carryOnImage : Constants.baggageImage,
                 tintColor: .label,
                 contentMode: .scaleAspectFill
             ),

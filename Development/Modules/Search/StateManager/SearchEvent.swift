@@ -41,8 +41,6 @@ extension SearchEvent.UIEvent {
 
     enum HeaderEvent {
         case onBackTap
-        case onFilterTap
-        case onMoreTap
         case onSearchStartEditing
         case onSearchTextEnter(text: String?)
         case onSearchTextEndEditing

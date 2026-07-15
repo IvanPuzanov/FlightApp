@@ -17,12 +17,11 @@ private enum Constants {
 
 protocol SearchHeaderViewConfigurationFactoryDelegate: AnyObject {
     func leadingIconButtonDidTap(mode: SearchState.HeaderState.Mode)
-    func trailingIconButtonDidTap(mode: SearchState.HeaderState.Mode)
 }
 
 protocol SearchHeaderViewConfigurationFactoryProtocol: AnyObject {
     func makeHeaderViewConfiguration(
-        from state: SearchState.HeaderState
+        from mode: SearchState.HeaderState.Mode
     ) -> SearchHeaderViewConfiguration
 }
 
@@ -35,30 +34,23 @@ final class SearchHeaderConfigurationFactory: SearchHeaderViewConfigurationFacto
     // MARK: - Public
 
     func makeHeaderViewConfiguration(
-        from state: SearchState.HeaderState
+        from mode: SearchState.HeaderState.Mode
     ) -> SearchHeaderViewConfiguration {
-        switch state.mode {
+        switch mode {
         case let .flightInfo(number, description):
             return SearchHeaderViewConfiguration(
                 mode: createHeaderViewFlightInfoMode(
                     number: number,
                     description: description,
                     onLeadingIconTap: { [weak self] in
-                        self?.delegate?.leadingIconButtonDidTap(mode: state.mode)
+                        self?.delegate?.leadingIconButtonDidTap(mode: mode)
                     },
-                    onTrailingIconTap: { [weak self] in
-                        self?.delegate?.trailingIconButtonDidTap(mode: state.mode)
-                    }
+                    onTrailingIconTap: nil
                 )
             )
         case let .search(text):
             return SearchHeaderViewConfiguration(
-                mode: createHeaderViewSearchMode(
-                    text: text,
-                    onTrailingIconTap: { [weak self] in
-                        self?.delegate?.trailingIconButtonDidTap(mode: state.mode)
-                    }
-                )
+                mode: createHeaderViewSearchMode(text: text)
             )
         }
     }
@@ -82,16 +74,13 @@ final class SearchHeaderConfigurationFactory: SearchHeaderViewConfigurationFacto
         )
     }
 
-    private func createHeaderViewSearchMode(
-        text: String?,
-        onTrailingIconTap: (() -> Void)?
-    ) -> SearchHeaderViewConfiguration.Mode {
+    private func createHeaderViewSearchMode(text: String?) -> SearchHeaderViewConfiguration.Mode {
         .search(
             SearchHeaderViewConfiguration.SearchModel(
                 leadingIcon: Constants.searchLeadingIcon,
                 text: text,
                 placeholderText: Strings.Search.placeholder,
-                trailingIcon: Constants.searchTrailingIcon
+                trailingIcon: nil
             )
         )
     }

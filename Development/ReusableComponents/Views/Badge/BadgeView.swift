@@ -77,7 +77,7 @@ extension BadgeView: ConfigurableView {
     }
 
     private func configureImageView(with configuration: ImageViewConfiguration?) {
-        if let configuration, let image = configuration.image {
+        if let configuration {
             imageView.configure(with: configuration)
             imageView.isHidden = false
         } else {
