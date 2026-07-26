@@ -14,6 +14,6 @@ enum FlightDetailsEvent {
 extension FlightDetailsEvent {
 
     enum UIEvent {
-        case onCloseButtonTap
+        case onViewDidLoad
     }
 }

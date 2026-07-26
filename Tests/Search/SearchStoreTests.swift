@@ -27,7 +27,7 @@ final class SearchStoreTests: XCTestCase {
         moduleOutput = SearchModuleOutputMock()
         sut = SearchStore(
             reducer: SearchReducer(),
-            dataEffectHandler: DataEffectHandler(service: service),
+            dataEffectHandler: SearchDataEffectHandler(service: service),
             navigationEffectHandler: NavigationEffectHandler(moduleOutput: moduleOutput)
         )
     }

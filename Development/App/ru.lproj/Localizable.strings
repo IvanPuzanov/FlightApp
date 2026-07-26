@@ -6,6 +6,9 @@
 "status.empty.title" = "Нет рейсов";
 "status.empty.subtitle" = "Рейсы не найдены";
 
+"baggage.nobaggage" = "Без багажа";
+"baggage.weight" = "%d кг";
+
 "map.button" = "Карта";
 
 "retry" = "Повторить";

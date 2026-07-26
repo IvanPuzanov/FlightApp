@@ -55,7 +55,7 @@ final class AirportMarkerView: MKAnnotationView {
 
     private func setupImageView() {
         imageView.contentMode = .scaleAspectFit
-        imageView.tintColor = .label
+        imageView.tintColor = .Text.primary
 
         imageView.snp.makeConstraints {
             $0.leading.equalToSuperview().inset(14)

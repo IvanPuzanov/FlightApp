@@ -174,11 +174,11 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
             ),
             airlineImageUrl: URL(string: flight.airline.logo ?? ""),
             baggageBadgeViewConfiguration: createBaggageBageViewConfiguration(
-                kilos: flight.baggage.checkedBaggageKg,
+                weight: flight.baggage.checkedBaggageKg,
                 isCarryOn: false
             ),
             carryOnBadgeViewConfiguration: createBaggageBageViewConfiguration(
-                kilos: flight.baggage.cabinBaggageKg,
+                weight: flight.baggage.cabinBaggageKg,
                 isCarryOn: true
             ),
             originIataLabelConfiguration: LabelConfiguration(
@@ -209,15 +209,6 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
         price.formatted(.currency(code: currency))
     }
 
-    private func createPriceTextColor(from flightStatus: Flight.Status?) -> UIColor {
-        switch flightStatus {
-        case .regular, .none:
-            return .Text.primary
-        case .bestPrice, .fastest, .recommended:
-            return .white
-        }
-    }
-
     private func createPriceBadgeViewConfiguration(
         status: Flight.Status?,
         price: String
@@ -228,7 +219,8 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
             imageViewConfiguration: createPriceBadgeImageViewConfiguration(from: status),
             labelConfiguration: LabelConfiguration(
                 text: price,
-                font: .systemFont(ofSize: 16)
+                textColor: createPriceTextColor(from: status),
+                font: .boldSystemFont(ofSize: 16)
             ),
             insets: .custom(top: 5, bottom: 4, left: 10, right: 10),
             backgroundColor: backgroundColor
@@ -258,6 +250,15 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
         )
     }
 
+    private func createPriceTextColor(from flightStatus: Flight.Status?) -> UIColor {
+        switch flightStatus {
+        case .regular, .none:
+            return .Text.primary
+        case .bestPrice, .fastest, .recommended:
+            return .white
+        }
+    }
+
     private func createPriceBadgeBackgroundColor(
         from status: Flight.Status?
     ) -> UIColor {
@@ -274,21 +275,17 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
     }
 
     private func createBaggageBageViewConfiguration(
-        kilos: Int,
+        weight: Int,
         isCarryOn: Bool
     ) -> BadgeViewConfiguration? {
-        let text: String
-
-        if kilos > 0 {
-            text = "\(kilos) Kg"
-        } else {
-            text = "No baggage"
-        }
+        let text = weight == .zero
+            ? Strings.Baggage.nobaggage
+            : Strings.Baggage.weight(weight)
 
         return BadgeViewConfiguration(
             imageViewConfiguration: ImageViewConfiguration(
                 image: isCarryOn ? Constants.carryOnImage : Constants.baggageImage,
-                tintColor: .label,
+                tintColor: .Text.primary,
                 contentMode: .scaleAspectFill
             ),
             labelConfiguration: LabelConfiguration(

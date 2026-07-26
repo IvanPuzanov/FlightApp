@@ -7,8 +7,29 @@
 
 import Foundation
 
-enum FlightDetailsState {
-    case loading
-    case content
-    case error
+struct FlightDetailsState: Equatable {
+    @Equated var flight: Flight
+    var headerState: HeaderState
+}
+
+extension FlightDetailsState {
+
+    struct HeaderState: Equatable {
+        var originIata: String
+        var originCity: String
+        var destinationIata: String
+        var destinationCity: String
+    }
+}
+
+extension FlightDetailsState.HeaderState {
+
+    static var initial: FlightDetailsState.HeaderState {
+        FlightDetailsState.HeaderState(
+            originIata: String(),
+            originCity: String(),
+            destinationIata: String(),
+            destinationCity: String()
+        )
+    }
 }

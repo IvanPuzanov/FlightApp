@@ -14,7 +14,7 @@ final class DataEffectHandlerTests: XCTestCase {
     // MARK: - Properties
 
     private var service: SearchServiceMock!
-    private var sut: DataEffectHandler!
+    private var sut: SearchDataEffectHandler!
 
     // MARK: - Test setup
 
@@ -22,7 +22,7 @@ final class DataEffectHandlerTests: XCTestCase {
         super.setUp()
 
         service = SearchServiceMock()
-        sut = DataEffectHandler(service: service)
+        sut = SearchDataEffectHandler(service: service)
     }
 
     // MARK: - Load flights

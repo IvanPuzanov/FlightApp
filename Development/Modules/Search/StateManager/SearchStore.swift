@@ -20,7 +20,7 @@ final class SearchStore {
     // MARK: - Dependencies
 
     private let reducer: any SearchReducerProtocol
-    private let dataEffectHandler: DataEffectHandlerProtocol
+    private let dataEffectHandler: SearchDataEffectHandlerProtocol
     private let navigationEffectHandler: NavigationEffectHandlerProtocol
 
     // MARK: - Public properties
@@ -37,7 +37,7 @@ final class SearchStore {
 
     init(
         reducer: any SearchReducerProtocol,
-        dataEffectHandler: DataEffectHandlerProtocol,
+        dataEffectHandler: SearchDataEffectHandlerProtocol,
         navigationEffectHandler: NavigationEffectHandlerProtocol
     ) {
         self.reducer = reducer

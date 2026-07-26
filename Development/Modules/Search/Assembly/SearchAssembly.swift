@@ -29,7 +29,7 @@ final class SearchAssembly: SearchAssemblyProtocol {
             locationService: locationService
         )
         let service = SearchService(repository: repository)
-        let dataEffectHandler = DataEffectHandler(service: service)
+        let dataEffectHandler = SearchDataEffectHandler(service: service)
         let navigationEffectHandler = NavigationEffectHandler(moduleOutput: output)
         let reducer = SearchReducer()
         let store = SearchStore(

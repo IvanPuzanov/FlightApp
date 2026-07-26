@@ -1,5 +1,5 @@
 //
-//  DataEffectHandler.swift
+//  SearchDataEffectHandler.swift
 //  flight-demo
 //
 //  Created by Ivan Puzanov on 06.07.2026.
@@ -8,14 +8,14 @@
 import Combine
 import Foundation
 
-protocol DataEffectHandlerProtocol: AnyObject {
+protocol SearchDataEffectHandlerProtocol: AnyObject {
     func handle(
         _ effect: SearchEffect.DataEffect,
         completion: @escaping (SearchEvent) -> Void
     ) async
 }
 
-final class DataEffectHandler: DataEffectHandlerProtocol {
+final class SearchDataEffectHandler: SearchDataEffectHandlerProtocol {
 
     // MARK: - Dependencies
 

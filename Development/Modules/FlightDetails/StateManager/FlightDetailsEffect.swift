@@ -8,10 +8,15 @@
 import Foundation
 
 enum FlightDetailsEffect {
+    case data(DataEffect)
     case navigation(Navigation)
 }
 
 extension FlightDetailsEffect {
+
+    enum DataEffect {
+        case loadDetails(flightId: String)
+    }
 
     enum Navigation {
         case closeFlightDetailsModule
