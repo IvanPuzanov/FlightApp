@@ -17,7 +17,6 @@ struct FlightResponseModel: Decodable {
     let price: Decimal
     let currency: String
     let baggage: BaggageResponseModel
-    let layovers: [LayoverResponseModel]
     let status: StatusResponseModel?
 }
 
@@ -39,12 +38,6 @@ extension FlightResponseModel {
         let cabinBaggagePieces: Int
         let checkedBaggageKg: Int
         let checkedBaggagePieces: Int
-    }
-
-    struct LayoverResponseModel: Decodable {
-        let airport: FlightResponseModel.AirportResponseModel
-        let airline: FlightResponseModel.AirlineResponseModel
-        let departureDateTime: String
     }
 
     enum StatusResponseModel: String, Decodable {

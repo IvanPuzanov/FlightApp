@@ -27,10 +27,8 @@ final class SearchStoreTests: XCTestCase {
         moduleOutput = SearchModuleOutputMock()
         sut = SearchStore(
             reducer: SearchReducer(),
-            effectHandlers: [
-                DataEffectHandler(service: service),
-                NavigationEffectHandler(moduleOutput: moduleOutput)
-            ]
+            dataEffectHandler: SearchDataEffectHandler(service: service),
+            navigationEffectHandler: NavigationEffectHandler(moduleOutput: moduleOutput)
         )
     }
 
@@ -134,7 +132,7 @@ final class SearchStoreTests: XCTestCase {
         sut.state.flightListState.bottomSheetState.currentDetent = detents[1]
 
         // Act
-        sut.dispatch(event: .ui(.flightList(.onFlightTap(id: "flight-1"))))
+        sut.dispatch(event: .ui(.flightList(.onFlightTap(id: "flight-1", from: "Moscow", to: "Saint Petersburg"))))
 
         let didNavigate = await Utils.waitUntil {
             self.moduleOutput.invokedModuleWantsToOpenFlightDetailsCallsCount == 1

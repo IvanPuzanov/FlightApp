@@ -17,7 +17,6 @@ struct Flight: Equatable {
     let price: Decimal
     let currency: String
     let baggage: Baggage
-    let layovers: [Layover]
     let status: Status?
 
     init(from model: FlightResponseModel) {
@@ -30,7 +29,6 @@ struct Flight: Equatable {
         self.price = model.price
         self.currency = model.currency
         self.baggage = Baggage(from: model.baggage)
-        self.layovers = model.layovers.map { Layover(from: $0) }
         self.status = model.status.flatMap { Status(from: $0) }
     }
 }
@@ -71,18 +69,6 @@ extension Flight {
             self.cabinBaggagePieces = model.cabinBaggagePieces
             self.checkedBaggageKg = model.checkedBaggageKg
             self.checkedBaggagePieces = model.checkedBaggagePieces
-        }
-    }
-
-    struct Layover: Equatable {
-        let airport: Airport
-        let airline: Airline
-        let departureDateTime: String
-
-        init(from model: FlightResponseModel.LayoverResponseModel) {
-            self.airport = Airport(from: model.airport)
-            self.airline = Airline(from: model.airline)
-            self.departureDateTime = model.departureDateTime
         }
     }
 

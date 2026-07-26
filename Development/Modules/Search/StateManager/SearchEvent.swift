@@ -40,8 +40,7 @@ extension SearchEvent.UIEvent {
     }
 
     enum HeaderEvent {
-        case onFilterTap
-        case onMoreTap
+        case onBackTap
         case onSearchStartEditing
         case onSearchTextEnter(text: String?)
         case onSearchTextEndEditing
@@ -56,7 +55,8 @@ extension SearchEvent.UIEvent {
         )
         case onBottomSheetHeightChange(progress: CGFloat)
         case onDetentSet(CGFloat)
-        case onFlightTap(id: String)
+        case onFlightTap(id: String, from: String, to: String)
+        case onRetryButtonTap
         case onMapButtonTap
     }
 

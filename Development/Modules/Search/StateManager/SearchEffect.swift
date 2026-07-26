@@ -21,5 +21,6 @@ extension SearchEffect {
 
     enum Navigation: Equatable {
         case openFlightDetails(inputData: FlightDetailsInputData)
+        case closeFlightDetails
     }
 }

@@ -7,7 +7,14 @@
 
 import Foundation
 
-final class NavigationEffectHandler: EffectHandlerProtocol {
+protocol NavigationEffectHandlerProtocol: AnyObject {
+    func handle(
+        _ effect: SearchEffect.Navigation,
+        completion: @escaping (SearchEvent) -> Void
+    )
+}
+
+final class NavigationEffectHandler: NavigationEffectHandlerProtocol {
 
     // MARK: - Dependencies
 
@@ -21,15 +28,15 @@ final class NavigationEffectHandler: EffectHandlerProtocol {
 
     // MARK: - Public
 
-    func handle(_ effect: SearchEffect, completion: @escaping (SearchEvent) -> Void) {
+    func handle(
+        _ effect: SearchEffect.Navigation,
+        completion: @escaping (SearchEvent) -> Void
+    ) {
         switch effect {
-        case let .navigation(navigationEffect):
-            switch navigationEffect {
-            case let .openFlightDetails(inputData):
-                moduleOutput?.moduleWantsToOpenFlightDetails(inputData: inputData)
-            }
-        case .data:
-            break
+        case let .openFlightDetails(inputData):
+            moduleOutput?.moduleWantsToOpenFlightDetails(inputData: inputData)
+        case .closeFlightDetails:
+            moduleOutput?.moduleWantsToCloseFlightDetails()
         }
     }
 }

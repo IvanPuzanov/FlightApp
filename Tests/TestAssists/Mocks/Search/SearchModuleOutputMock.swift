@@ -23,4 +23,14 @@ final class SearchModuleOutputMock: SearchModuleOutput {
         invokedModuleWantsToOpenFlightDetailsParameters = (inputData, ())
         invokedModuleWantsToOpenFlightDetailsParametersList.append((inputData, ()))
     }
+
+    // MARK: - moduleWantsToCloseFlightDetails
+
+    var invokedModuleWantsToCloseFlightDetails = false
+    var invokedModuleWantsToCloseFlightDetailsCallsCount = 0
+
+    func moduleWantsToCloseFlightDetails() {
+        invokedModuleWantsToCloseFlightDetails = true
+        invokedModuleWantsToCloseFlightDetailsCallsCount += 1
+    }
 }

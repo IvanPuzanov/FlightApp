@@ -29,14 +29,13 @@ final class SearchAssembly: SearchAssemblyProtocol {
             locationService: locationService
         )
         let service = SearchService(repository: repository)
-        let effectHandlers: [EffectHandlerProtocol] = [
-            DataEffectHandler(service: service),
-            NavigationEffectHandler(moduleOutput: output)
-        ]
+        let dataEffectHandler = SearchDataEffectHandler(service: service)
+        let navigationEffectHandler = NavigationEffectHandler(moduleOutput: output)
         let reducer = SearchReducer()
         let store = SearchStore(
             reducer: reducer,
-            effectHandlers: effectHandlers
+            dataEffectHandler: dataEffectHandler,
+            navigationEffectHandler: navigationEffectHandler
         )
         let searchHeaderConfigurationFactroy = SearchHeaderConfigurationFactory()
         let headerView = SearchHeaderView(

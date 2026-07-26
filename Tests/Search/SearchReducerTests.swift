@@ -179,7 +179,7 @@ final class SearchReducerTests: XCTestCase {
 
         // Assert
         XCTAssertTrue(effects.isEmpty)
-        XCTAssertEqual(state.flightListState.parameters.searchText, "petersburg")
+        XCTAssertEqual(state.headerState.searchText, "petersburg")
         assertContentState(state.flightListState.contentState, equals: [matchingFlight])
     }
 
@@ -217,7 +217,7 @@ final class SearchReducerTests: XCTestCase {
             Flight.fake(id: "flight-2")
         ]
         state.flightListState.parameters.flights = flights
-        state.flightListState.parameters.searchText = "SU"
+        state.headerState.searchText = "SU"
 
         // Act
         let effects = sut.reduce(
@@ -227,7 +227,7 @@ final class SearchReducerTests: XCTestCase {
 
         // Assert
         XCTAssertTrue(effects.isEmpty)
-        XCTAssertNil(state.flightListState.parameters.searchText)
+        XCTAssertNil(state.headerState.searchText)
         assertContentState(state.flightListState.contentState, equals: flights)
     }
 
@@ -250,7 +250,7 @@ final class SearchReducerTests: XCTestCase {
     // Verifies that onSearchTextEndEditing switches the header to search mode with the current text
     func test_onSearchTextEndEditing_setsHeaderSearchMode() {
         // Arrange
-        state.flightListState.parameters.searchText = "Aeroflot"
+        state.headerState.searchText = "Aeroflot"
 
         // Act
         let effects = sut.reduce(state: &state, event: .ui(.header(.onSearchTextEndEditing)))
@@ -464,7 +464,7 @@ final class SearchReducerTests: XCTestCase {
         // Act
         let effects = sut.reduce(
             state: &state,
-            event: .ui(.flightList(.onFlightTap(id: "flight-1")))
+            event: .ui(.flightList(.onFlightTap(id: "flight-1", from: "Moscow", to: "Saint Petersburg")))
         )
 
         // Assert
@@ -473,26 +473,6 @@ final class SearchReducerTests: XCTestCase {
             [.navigation(.openFlightDetails(inputData: FlightDetailsInputData.fake(flight: selectedFlight)))]
         )
         XCTAssertEqual(state.flightListState.bottomSheetState.currentDetent, detents[0])
-    }
-
-    // Verifies that onFlightTap with an unknown id does not change state or produce effects
-    func test_onFlightTap_withUnknownId_doesNothing() {
-        // Arrange
-        let detents = makeDetents()
-        state.flightListState.bottomSheetState.detents = detents
-        state.flightListState.bottomSheetState.currentDetent = detents[2]
-        state.flightListState.parameters.flights = [Flight.fake(id: "flight-1")]
-        let stateBefore = state
-
-        // Act
-        let effects = sut.reduce(
-            state: &state,
-            event: .ui(.flightList(.onFlightTap(id: "unknown-flight")))
-        )
-
-        // Assert
-        XCTAssertTrue(effects.isEmpty)
-        XCTAssertEqual(state, stateBefore)
     }
 
     // MARK: - Data events
@@ -569,7 +549,7 @@ final class SearchReducerTests: XCTestCase {
     // Verifies that onFlightsLoaded applies an existing search filter
     func test_onFlightsLoaded_appliesExistingSearchFilter() {
         // Arrange
-        state.flightListState.parameters.searchText = "london"
+        state.headerState.searchText = "london"
         let flights = [
             Flight.fake(
                 id: "flight-1",

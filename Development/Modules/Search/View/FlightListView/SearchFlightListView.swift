@@ -98,6 +98,7 @@ final class SearchFlightListView: UIView {
                 store?.state.flightListState
             }
             .removeDuplicates()
+            .debounce(for: 0.01, scheduler: RunLoop.main)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 self?.apply(state)
@@ -274,7 +275,11 @@ extension SearchFlightListView: SearchFlightListConfigurationFactoryDelegate {
         store.dispatch(event: .ui(.flightList(.onMapButtonTap)))
     }
 
-    func flightDidTap(id: String) {
-        store.dispatch(event: .ui(.flightList(.onFlightTap(id: id))))
+    func retryButtonDidTap() {
+        store.dispatch(event: .ui(.flightList(.onRetryButtonTap)))
+    }
+
+    func flightDidTap(id: String, from: String, to: String) {
+        store.dispatch(event: .ui(.flightList(.onFlightTap(id: id, from: from, to: to))))
     }
 }

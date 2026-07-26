@@ -21,9 +21,9 @@ final class SearchHeaderView: UIView {
     private let gradientView = GradientView()
     private let containerView = UIView()
 
-    private let leadingImageView = UIImageView()
+    private let leadingIconButton = UIButton()
     private let contentView = UIStackView()
-    private let trailingButton = UIButton()
+    private let trailingIconButton = UIButton()
 
     private let titleLabel = UILabel()
     private let subtitleLabel = UILabel()
@@ -32,7 +32,10 @@ final class SearchHeaderView: UIView {
     // MARK: - Properties
 
     private var bag: Set<AnyCancellable> = []
-    private var trailingButtonOnTap: (() -> Void)?
+    private var onLeadingIconTap: (() -> Void)?
+    private var onTrailingIconTap: (() -> Void)?
+
+    private var contentViewTrailingConstraint: Constraint!
 
     // MARK: - Initialization
 
@@ -57,23 +60,33 @@ final class SearchHeaderView: UIView {
     private func setupBindings() {
         store.stateDidChange
             .compactMap { [weak store] in
-                store?.state.headerState
+                store?.state.headerState.mode
             }
             .removeDuplicates()
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] state in
-                self?.apply(state)
+            .sink { [weak self] mode in
+                self?.configureMode(mode)
+            }.store(in: &bag)
+
+        store.stateDidChange
+            .compactMap { [weak store] in
+                store?.state.headerState.bottomSheetProgress
+            }
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] progress in
+                self?.configureBackground(progress)
             }.store(in: &bag)
     }
 
     private func setupUI() {
         addSubviews(gradientView, containerView)
-        containerView.addSubviews(leadingImageView, contentView, trailingButton)
+        containerView.addSubviews(leadingIconButton, contentView, trailingIconButton)
         contentView.addArrangedSubviews(titleLabel, subtitleLabel, searchTextField)
 
         setupContainerView()
-        setupLeadingImageView()
-        setupTrailingButton()
+        setupLeadingIconButton()
+        setupTrailingIconButton()
         setupContentView()
         setupTitleLabel()
         setupSubtitleLabel()
@@ -100,25 +113,28 @@ final class SearchHeaderView: UIView {
         }
     }
 
-    private func setupLeadingImageView() {
-        leadingImageView.tintColor = .Text.primary
-        leadingImageView.contentMode = .scaleAspectFit
+    private func setupLeadingIconButton() {
+        leadingIconButton.tintColor = .Text.primary
+        leadingIconButton.contentMode = .scaleAspectFit
+        leadingIconButton.addAction(UIAction { [weak self] _ in
+            self?.onLeadingIconTap?()
+        }, for: .touchUpInside)
 
-        leadingImageView.snp.makeConstraints {
+        leadingIconButton.snp.makeConstraints {
             $0.height.width.equalTo(24)
             $0.centerY.equalToSuperview()
             $0.leading.equalToSuperview().inset(14)
         }
     }
 
-    private func setupTrailingButton() {
-        trailingButton.tintColor = .Text.primary
-        trailingButton.contentMode = .scaleAspectFit
-        trailingButton.addAction(UIAction(handler: { [weak self] _ in
-            self?.trailingButtonOnTap?()
-        }), for: .touchUpInside)
+    private func setupTrailingIconButton() {
+        trailingIconButton.tintColor = .Text.primary
+        trailingIconButton.contentMode = .scaleAspectFit
+        trailingIconButton.addAction(UIAction { [weak self] _ in
+            self?.onTrailingIconTap?()
+        }, for: .touchUpInside)
 
-        trailingButton.snp.makeConstraints {
+        trailingIconButton.snp.makeConstraints {
             $0.height.width.equalTo(24)
             $0.centerY.equalToSuperview()
             $0.trailing.equalToSuperview().inset(14)
@@ -133,8 +149,8 @@ final class SearchHeaderView: UIView {
 
         contentView.snp.makeConstraints {
             $0.centerY.equalToSuperview()
-            $0.leading.equalTo(leadingImageView.snp.trailing).offset(14)
-            $0.trailing.equalTo(trailingButton.snp.leading).offset(-14)
+            $0.leading.equalTo(leadingIconButton.snp.trailing).offset(14)
+            $0.trailing.equalTo(trailingIconButton.snp.leading).offset(-14)
             $0.top.bottom.equalToSuperview().inset(18)
         }
     }
@@ -167,12 +183,14 @@ final class SearchHeaderView: UIView {
         store.dispatch(event: .ui(.header(.onSearchTextEnter(text: searchTextField.text))))
     }
 
-    private func apply(_ state: SearchState.HeaderState) {
-        let configuration = configurationFactory.makeHeaderViewConfiguration(from: state)
+    private func configureMode(_ mode: SearchState.HeaderState.Mode) {
+        let configuration = configurationFactory.makeHeaderViewConfiguration(from: mode)
         configure(with: configuration)
+    }
 
-        updateBackgroundColor(with: state.bottomSheetProgress)
-        gradientView.offsetStartPoint(y: state.bottomSheetProgress)
+    private func configureBackground(_ progress: CGFloat) {
+        updateBackgroundColor(with: progress)
+        gradientView.offsetStartPoint(y: progress)
     }
 }
 
@@ -199,12 +217,12 @@ extension SearchHeaderView: UITextFieldDelegate {
 
 extension SearchHeaderView: SearchHeaderViewConfigurationFactoryDelegate {
 
-    func trailingIconButtonDidTap(mode: SearchState.HeaderState.Mode) {
+    func leadingIconButtonDidTap(mode: SearchState.HeaderState.Mode) {
         switch mode {
         case .flightInfo:
-            store.dispatch(event: .ui(.header(.onFilterTap)))
+            store.dispatch(event: .ui(.header(.onBackTap)))
         case .search:
-            store.dispatch(event: .ui(.header(.onMoreTap)))
+            break
         }
     }
 }
@@ -214,15 +232,21 @@ extension SearchHeaderView: SearchHeaderViewConfigurationFactoryDelegate {
 extension SearchHeaderView {
 
     func configure(with configuration: SearchHeaderViewConfiguration) {
-        UIView.animate(withDuration: 0.3) {
+        UIView.animate(
+            withDuration: 0.3,
+            delay: 0,
+            options: [.curveEaseOut]
+        ) {
+            self.updateVisibility(for: configuration.mode)
+            
             switch configuration.mode {
             case let .flightInfo(model):
                 self.configureFlightDetails(from: model)
             case let .search(model):
                 self.configureSearch(from: model)
             }
-
-            self.updateVisibility(for: configuration.mode)
+        } completion: { _ in
+            self.setNeedsLayout()
         }
     }
 
@@ -259,18 +283,32 @@ extension SearchHeaderView {
     }
 
     private func configureFlightDetails(from model: SearchHeaderViewConfiguration.FlightDetailsModel) {
-        leadingImageView.image = model.leadingIcon
-        trailingButton.setImage(model.trailingIcon, for: .normal)
+        leadingIconButton.setImage(model.leadingIcon, for: .normal)
+        trailingIconButton.setImage(model.trailingIcon, for: .normal)
+        updateContentViewTrailingIfNeeded(hasTrailingIcon: model.trailingIcon != nil)
         titleLabel.text = model.titleLabelText
         subtitleLabel.text = model.subtitleLabelText
-        trailingButtonOnTap = model.onTrailingIconTap
+        onLeadingIconTap = model.onLeadingIconTap
+        onTrailingIconTap = model.onTrailingIconTap
     }
 
     private func configureSearch(from model: SearchHeaderViewConfiguration.SearchModel) {
-        leadingImageView.image = model.leadingIcon
-        trailingButton.setImage(model.trailingIcon, for: .normal)
+        leadingIconButton.setImage(model.leadingIcon, for: .normal)
+        trailingIconButton.setImage(model.trailingIcon, for: .normal)
+        updateContentViewTrailingIfNeeded(hasTrailingIcon: model.trailingIcon != nil)
         searchTextField.text = model.text
         searchTextField.placeholder = model.placeholderText
-        trailingButtonOnTap = model.onTrailingIconTap
+        onLeadingIconTap = nil
+        onTrailingIconTap = model.onTrailingIconTap
+    }
+
+    private func updateContentViewTrailingIfNeeded(hasTrailingIcon: Bool) {
+        contentView.snp.makeConstraints {
+            if hasTrailingIcon {
+                $0.trailing.equalTo(trailingIconButton.snp.leading).offset(-14)
+            } else {
+                $0.trailing.equalToSuperview().inset(14)
+            }
+        }
     }
 }

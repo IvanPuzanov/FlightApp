@@ -1,5 +1,5 @@
 //
-//  DataEffectHandler.swift
+//  SearchDataEffectHandler.swift
 //  flight-demo
 //
 //  Created by Ivan Puzanov on 06.07.2026.
@@ -8,7 +8,14 @@
 import Combine
 import Foundation
 
-final class DataEffectHandler: EffectHandlerProtocol {
+protocol SearchDataEffectHandlerProtocol: AnyObject {
+    func handle(
+        _ effect: SearchEffect.DataEffect,
+        completion: @escaping (SearchEvent) -> Void
+    ) async
+}
+
+final class SearchDataEffectHandler: SearchDataEffectHandlerProtocol {
 
     // MARK: - Dependencies
 
@@ -27,20 +34,6 @@ final class DataEffectHandler: EffectHandlerProtocol {
     // MARK: - Public
 
     func handle(
-        _ effect: SearchEffect,
-        completion: @escaping (SearchEvent) -> Void
-    ) async {
-        switch effect {
-        case let .data(dataEffect):
-            await handleDataEffect(dataEffect, completion: completion)
-        case .navigation:
-            break
-        }
-    }
-
-    // MARK: - Private
-
-    private func handleDataEffect(
         _ effect: SearchEffect.DataEffect,
         completion: @escaping (SearchEvent) -> Void
     ) async {
@@ -53,6 +46,8 @@ final class DataEffectHandler: EffectHandlerProtocol {
             processGetLocation(completion: completion)
         }
     }
+
+    // MARK: - Private
 
     private func processLoadAirports(completion: @escaping (SearchEvent) -> Void) async {
         let result = await service.loadAirports()

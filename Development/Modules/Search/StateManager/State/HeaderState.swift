@@ -9,6 +9,7 @@ import Foundation
 
 extension SearchState {
     struct HeaderState: Equatable {
+        @Equated var searchText: String?
         var mode: Mode
         var bottomSheetProgress: CGFloat
     }

@@ -6,4 +6,7 @@
 "status.empty.title" = "Sin vuelos";
 "status.empty.subtitle" = "No hay vuelos";
 
+"baggage.nobaggage" = "Sin equipaje";
+"baggage.weight" = "%d Kg";
+
 "map.button" = "Mapa";

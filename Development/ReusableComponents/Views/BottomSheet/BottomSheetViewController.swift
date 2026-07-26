@@ -108,8 +108,12 @@ final class BottomSheetViewController<ContentView: BottomSheetContentViewProtoco
         panGestureRecognizer.setTranslation(.zero, in: view)
     }
 
-    private func applyHeight(_ height: CGFloat, animated: Bool = false) {
-        animator = UIViewPropertyAnimator(duration: 0.4, dampingRatio: 0.9) {
+    private func applyHeight(
+        _ height: CGFloat,
+        duration: TimeInterval = 0.4,
+        animated: Bool = false
+    ) {
+        animator = UIViewPropertyAnimator(duration: duration, dampingRatio: 0.9) {
             self.heightConstraint?.update(offset: height)
             self.view.superview?.layoutIfNeeded()
             self.dispacthEventOnHeightChange()
@@ -188,6 +192,6 @@ extension BottomSheetViewController: BottomSheetProtocol {
     }
 
     func setDetent(_ detent: CGFloat) {
-        applyHeight(detent)
+        applyHeight(detent, duration: 0.6)
     }
 }

@@ -29,7 +29,6 @@ extension SearchState.FlightListState {
 
     struct Parameters: Equatable {
         var flights: [Flight]
-        var searchText: String?
     }
 
     enum ContentState: Equatable {
@@ -41,6 +40,7 @@ extension SearchState.FlightListState {
     struct BottomSheetState: Equatable {
         var detents: [BottomSheetDetent]
         var currentDetent: BottomSheetDetent
+        @Equated var lastDetent: BottomSheetDetent
     }
 
     enum BottomSheetDetentID: Equatable {
@@ -70,14 +70,12 @@ extension SearchState.FlightListState {
                 currentShadowOpacity: 0,
                 isMapButtonHidden: true
             ),
-            parameters: Parameters(
-                flights: [],
-                searchText: nil
-            ),
+            parameters: Parameters(flights: []),
             contentState: .loading,
             bottomSheetState: BottomSheetState(
                 detents: [],
-                currentDetent: BottomSheetDetent(id: .compact, height: 0)
+                currentDetent: BottomSheetDetent(id: .compact, height: 0),
+                lastDetent: BottomSheetDetent(id: .compact, height: 0)
             )
         )
     }

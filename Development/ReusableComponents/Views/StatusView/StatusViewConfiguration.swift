@@ -8,8 +8,14 @@
 import UIKit
 
 struct StatusViewConfiguration: Equatable {
-    let image: UIImage
-    let imageColor: UIColor
+
+    struct ButtonConfiguration: Equatable {
+        let text: String
+        @Equated var onTap: () -> Void
+    }
+
+    let imageViewConfiguration: ImageViewConfiguration
     let titleLabelConfiguration: LabelConfiguration
     let subtitleLabelConfiguration: LabelConfiguration
+    let actionButtonConfiguration: ButtonConfiguration?
 }

@@ -9,18 +9,34 @@ import UIKit
 
 private enum Constants {
     static let shimmerHeight: CGFloat = 169
+
+    static let emptyStatusImage = UIImage(systemName: "tray.fill")
+    static let errorStatusImage = UIImage(systemName: "airplane.departure")
+    static let mapButtonImage = UIImage(systemName: "map.fill")
+
+    static let recommendedPriceBadgeImage = UIImage(systemName: "checkmark.seal.fill")
+    static let fastestPriceBadgeImage = UIImage(systemName: "hare.fill")
+    static let bestPriceBadgeImage = UIImage(systemName: "flame.fill")
+
+    static let carryOnImage = UIImage(systemName: "handbag.fill")
+    static let baggageImage = UIImage(systemName: "suitcase.fill")
 }
 
 protocol SearchFlightListConfigurationFactoryDelegate: AnyObject {
-    func flightDidTap(id: String)
+    func flightDidTap(id: String, from: String, to: String)
+    func retryButtonDidTap()
     func mapButtonDidTap()
 }
 
 protocol SearchFlightListConfigurationFactoryProtocol: AnyObject {
-    func createFlightListCellTypes(from state: SearchState.FlightListState.ContentState) -> [SearchFlightListCellType]
+    func createFlightListCellTypes(
+        from state: SearchState.FlightListState.ContentState
+    ) -> [SearchFlightListCellType]
+
     func createStatusViewConfiguration(
         from status: SearchState.FlightListState.Status
     ) -> StatusViewConfiguration
+
     func createMapButtonConfiguration() -> SearchFlightListMapButtonConfiguration
 }
 
@@ -55,35 +71,44 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
 
         switch status {
         case .error:
-            image = UIImage(systemName: "airplane.departure")
+            image = Constants.errorStatusImage
             title = Strings.Status.LoadError.title
             subtitle = Strings.Status.LoadError.subtitle
         case .empty:
-            image = UIImage(systemName: "tray.fill")
+            image = Constants.emptyStatusImage
             title = Strings.Status.Empty.title
             subtitle = Strings.Status.Empty.subtitle
         }
 
         return StatusViewConfiguration(
-            image: image ?? UIImage(),
-            imageColor: .systemGray,
+            imageViewConfiguration: ImageViewConfiguration(
+                image: image ?? UIImage(),
+                tintColor: .systemGray,
+                contentMode: .scaleAspectFit
+            ),
             titleLabelConfiguration: LabelConfiguration(
                 text: title,
+                textAlignment: .center,
                 font: .systemFont(ofSize: 20, weight: .bold)
             ),
             subtitleLabelConfiguration: LabelConfiguration(
                 text: subtitle,
                 textColor: .secondaryLabel,
+                textAlignment: .center,
                 font: .systemFont(ofSize: 16)
-            )
+            ),
+            actionButtonConfiguration: createRetryButtonConfigurationIfNeeded(for: status)
         )
     }
 
     func createMapButtonConfiguration() -> SearchFlightListMapButtonConfiguration {
         SearchFlightListMapButtonConfiguration(
-            image: UIImage(systemName: "map.fill"),
+            image: Constants.mapButtonImage,
             imageTintColor: .white,
-            labelConfiguration: LabelConfiguration(text: Strings.Map.button, textColor: .white),
+            labelConfiguration: LabelConfiguration(
+                text: Strings.Map.button,
+                textColor: .white
+            ),
             backgroundColor: .black,
             onTap: { [weak self] in
                 self?.delegate?.mapButtonDidTap()
@@ -109,6 +134,22 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
         }
     }
 
+    private func createRetryButtonConfigurationIfNeeded(
+        for status: SearchState.FlightListState.Status
+    ) -> StatusViewConfiguration.ButtonConfiguration? {
+        switch status {
+        case .error:
+            return StatusViewConfiguration.ButtonConfiguration(
+                text: Strings.retry,
+                onTap: { [weak self] in
+                    self?.delegate?.retryButtonDidTap()
+                }
+            )
+        case .empty:
+            return nil
+        }
+    }
+
     private func createFlightItemCellTypes(from flights: [Flight]) -> [SearchFlightListCellType] {
         flights.map {
             .flight(
@@ -125,29 +166,19 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
     private func createSearchFlightListItemViewConfiguration(
         from flight: Flight
     ) -> SearchFlightListItemViewConfiguration {
-        let priceBadgeContent = createPriceBadgeContent(from: flight.status)
-
-        return SearchFlightListItemViewConfiguration(
+        SearchFlightListItemViewConfiguration(
             id: flight.id,
-            priceBadgeViewConfiguration: BadgeViewConfiguration(
-                imageConfiguration: BadgeViewConfiguration.ImageConfiguration(
-                    image: priceBadgeContent.icon, tintColor: .white
-                ),
-                labelConfiguration: LabelConfiguration(
-                    text: formatPriceText(for: flight),
-                    textColor: createPriceTextColor(from: flight.status),
-                    font: .boldSystemFont(ofSize: 18)
-                ),
-                insets: .custom(top: 5, bottom: 4, left: 10, right: 10),
-                backgroundColor: priceBadgeContent.color
+            priceBadgeViewConfiguration: createPriceBadgeViewConfiguration(
+                status: flight.status,
+                price: formatPriceText(price: flight.price, currency: flight.currency)
             ),
             airlineImageUrl: URL(string: flight.airline.logo ?? ""),
             baggageBadgeViewConfiguration: createBaggageBageViewConfiguration(
-                kilos: flight.baggage.checkedBaggageKg,
+                weight: flight.baggage.checkedBaggageKg,
                 isCarryOn: false
             ),
             carryOnBadgeViewConfiguration: createBaggageBageViewConfiguration(
-                kilos: flight.baggage.cabinBaggageKg,
+                weight: flight.baggage.cabinBaggageKg,
                 isCarryOn: true
             ),
             originIataLabelConfiguration: LabelConfiguration(
@@ -165,13 +196,58 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
                 textAlignment: .right
             ),
             onTap: { [weak self] in
-                self?.delegate?.flightDidTap(id: flight.id)
+                self?.delegate?.flightDidTap(
+                    id: flight.id,
+                    from: flight.origin.iata,
+                    to: flight.destination.iata
+                )
             }
         )
     }
 
-    private func formatPriceText(for flight: Flight) -> String {
-        flight.price.formatted(.currency(code: flight.currency))
+    private func formatPriceText(price: Decimal, currency: String) -> String {
+        price.formatted(.currency(code: currency))
+    }
+
+    private func createPriceBadgeViewConfiguration(
+        status: Flight.Status?,
+        price: String
+    ) -> BadgeViewConfiguration {
+        let backgroundColor = createPriceBadgeBackgroundColor(from: status)
+
+        return BadgeViewConfiguration(
+            imageViewConfiguration: createPriceBadgeImageViewConfiguration(from: status),
+            labelConfiguration: LabelConfiguration(
+                text: price,
+                textColor: createPriceTextColor(from: status),
+                font: .boldSystemFont(ofSize: 16)
+            ),
+            insets: .custom(top: 5, bottom: 4, left: 10, right: 10),
+            backgroundColor: backgroundColor
+        )
+    }
+
+    private func createPriceBadgeImageViewConfiguration(
+        from status: Flight.Status?
+    ) -> ImageViewConfiguration? {
+        let image: UIImage?
+
+        switch status {
+        case .regular, .none:
+            return nil
+        case .recommended:
+            image = Constants.recommendedPriceBadgeImage
+        case .bestPrice:
+            image = Constants.bestPriceBadgeImage
+        case .fastest:
+            image = Constants.fastestPriceBadgeImage
+        }
+
+        return ImageViewConfiguration(
+            image: image,
+            tintColor: .white,
+            contentMode: .scaleAspectFit
+        )
     }
 
     private func createPriceTextColor(from flightStatus: Flight.Status?) -> UIColor {
@@ -183,39 +259,34 @@ final class SearchFlightListConfigurationFactory: SearchFlightListConfigurationF
         }
     }
 
-    private func createPriceBadgeContent(
-        from flightStatus: Flight.Status?
-    ) -> (icon: UIImage?, color: UIColor) {
-        switch flightStatus {
+    private func createPriceBadgeBackgroundColor(
+        from status: Flight.Status?
+    ) -> UIColor {
+        switch status {
         case .regular, .none:
-            return (icon: nil, color: .secondarySystemFill)
+            return .secondarySystemFill
         case .recommended:
-            return (icon: UIImage(systemName: "checkmark.seal.fill"), color: .systemBlue)
+            return .systemBlue
         case .bestPrice:
-            return (icon: UIImage(systemName: "flame.fill"), color: .systemRed)
+            return .systemRed
         case .fastest:
-            return (icon: UIImage(systemName: "hare.fill"), color: .systemOrange)
+            return .systemOrange
         }
     }
 
     private func createBaggageBageViewConfiguration(
-        kilos: Int,
+        weight: Int,
         isCarryOn: Bool
     ) -> BadgeViewConfiguration? {
-        let text: String
-
-        if kilos > 0 {
-            text = "\(kilos) Kg"
-        } else {
-            text = "No baggage"
-        }
+        let text = weight == .zero
+            ? Strings.Baggage.nobaggage
+            : Strings.Baggage.weight(weight)
 
         return BadgeViewConfiguration(
-            imageConfiguration: BadgeViewConfiguration.ImageConfiguration(
-                image: isCarryOn
-                    ? UIImage(systemName: "handbag.fill")
-                    : UIImage(systemName: "suitcase.fill"),
-                tintColor: .label
+            imageViewConfiguration: ImageViewConfiguration(
+                image: isCarryOn ? Constants.carryOnImage : Constants.baggageImage,
+                tintColor: .Text.primary,
+                contentMode: .scaleAspectFill
             ),
             labelConfiguration: LabelConfiguration(
                 text: text,

@@ -65,19 +65,22 @@ final class SearchReducer: SearchReducerProtocol {
         state: inout SearchState
     ) -> [SearchEffect] {
         switch event {
-        case .onFilterTap:
-            return []
-        case .onMoreTap:
-            return []
+        case .onBackTap:
+            let searchText = state.headerState.searchText
+            state.headerState.mode = .search(text: searchText)
+            state.flightListState.bottomSheetState.currentDetent = state.flightListState.bottomSheetState.lastDetent
+
+            return [.navigation(.closeFlightDetails)]
         case .onSearchStartEditing:
             updateFlightListCurrentDetent(id: .large, state: &state.flightListState)
+
             return []
         case let .onSearchTextEnter(text):
-            state.flightListState.parameters.searchText = text
-            updateFlightListContentStateIfNeeded(state: &state.flightListState)
+            state.headerState.searchText = text
+            updateFlightListContentStateIfNeeded(state: &state)
+
             return []
         case .onSearchTextEndEditing:
-            state.headerState.mode = .search(text: state.flightListState.parameters.searchText)
             return []
         }
     }
@@ -97,7 +100,8 @@ final class SearchReducer: SearchReducerProtocol {
             )
             state.flightListState.bottomSheetState = SearchState.FlightListState.BottomSheetState(
                 detents: detents,
-                currentDetent: currentDetent
+                currentDetent: currentDetent,
+                lastDetent: currentDetent
             )
             return []
         case let .onBottomSheetHeightChange(progress):
@@ -106,8 +110,17 @@ final class SearchReducer: SearchReducerProtocol {
         case let .onDetentSet(height):
             updateFlightListCurrentDetent(height: height, state: &state.flightListState)
             return []
-        case let .onFlightTap(id):
+        case let .onFlightTap(id, from, to):
+            state.headerState.mode = .flightInfo(
+                number: id,
+                description: "From \(from) to \(to)"
+            )
+            state.flightListState.bottomSheetState.lastDetent = state.flightListState.bottomSheetState.currentDetent
+
             return handleOnFlightTap(id: id, state: &state.flightListState)
+        case .onRetryButtonTap:
+            state.flightListState.contentState = .loading
+            return [.data(.loadFlights)]
         case .onMapButtonTap:
             updateFlightListCurrentDetent(id: .compact, state: &state.flightListState)
             return []
@@ -150,7 +163,7 @@ final class SearchReducer: SearchReducerProtocol {
             return []
         case let .onFlightsLoaded(flights):
             state.flightListState.parameters.flights = flights
-            updateFlightListContentStateIfNeeded(state: &state.flightListState)
+            updateFlightListContentStateIfNeeded(state: &state)
             return []
         case .onFlightsFailed:
             state.flightListState.parameters.flights = []
@@ -175,15 +188,15 @@ final class SearchReducer: SearchReducerProtocol {
         state.flightListState.appearance.isMapButtonHidden = isMapButtonHidden
     }
 
-    private func updateFlightListContentStateIfNeeded(state: inout SearchState.FlightListState) {
-        let searchText = state.parameters.searchText?.lowercased() ?? ""
-        let flights = state.parameters.flights
+    private func updateFlightListContentStateIfNeeded(state: inout SearchState) {
+        let searchText = state.headerState.searchText?.lowercased() ?? ""
+        let flights = state.flightListState.parameters.flights
 
         let filteredFlights = searchText.isEmpty
             ? flights
             : flights.filter { $0.destination.city.lowercased().contains(searchText) }
 
-        state.contentState = filteredFlights.isEmpty
+        state.flightListState.contentState = filteredFlights.isEmpty
             ? .status(.empty)
             : .content(filteredFlights)
     }
