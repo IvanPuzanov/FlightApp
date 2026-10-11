@@ -15,6 +15,10 @@ let project = Project(
             url: "https://github.com/SnapKit/SnapKit.git",
             requirement: .upToNextMajor(from: "5.7.1")
         ),
+        .remote(
+            url: "https://github.com/IvanPuzanov/DesignSystem.git",
+            requirement: .upToNextMajor(from: "1.0.0")
+        ),
     ],
     targets: [
         .target(
@@ -29,6 +33,17 @@ let project = Project(
                         "UIColorName": "systemBackgroundColor"
                     ],
                     "UIApplicationSupportsIndirectInputEvents": true,
+                    "UIApplicationSceneManifest": [
+                        "UIApplicationSupportsMultipleScenes": false,
+                        "UISceneConfigurations": [
+                            "UIWindowSceneSessionRoleApplication": [
+                                [
+                                    "UISceneConfigurationName": "Default Configuration",
+                                    "UISceneDelegateClassName": "$(PRODUCT_MODULE_NAME).SceneDelegate"
+                                ]
+                            ]
+                        ]
+                    ],
                     "UISupportedInterfaceOrientations": [
                         "UIInterfaceOrientationPortrait"
                     ]
@@ -41,6 +56,7 @@ let project = Project(
             ],
             dependencies: [
                 .package(product: "SnapKit", type: .runtime),
+                .package(product: "DesignSystem", type: .runtime),
             ],
             settings: .settings(
                 base: ["DEVELOPMENT_TEAM": "T9GV6HD4BD"]

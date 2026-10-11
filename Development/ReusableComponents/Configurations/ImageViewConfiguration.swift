@@ -7,7 +7,7 @@
 
 import UIKit
 
-struct ImageViewConfiguration: Equatable {
+public struct ImageViewConfiguration: Equatable {
     let image: UIImage?
     let tintColor: UIColor
     let contentMode: UIImageView.ContentMode

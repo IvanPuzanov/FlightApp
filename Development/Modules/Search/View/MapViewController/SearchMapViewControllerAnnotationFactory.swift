@@ -11,6 +11,7 @@ private enum Constants {
     static let airplaneImage = UIImage(systemName: "airplane")
 }
 
+@MainActor
 protocol SearchMapViewControllerFactoryProtocol {
     func createAnnotations(from airports: [Airport]) -> [AirportAnnotation]
     func createAnnotationView(mapView: MKMapView, annotation: AirportAnnotation) -> MKAnnotationView?

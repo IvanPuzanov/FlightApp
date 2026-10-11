@@ -7,7 +7,7 @@
 
 import UIKit
 
-struct LabelConfiguration: Equatable {
+public struct LabelConfiguration: Equatable {
     let text: String
     let textColor: UIColor
     let textAlignment: NSTextAlignment
